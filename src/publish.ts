@@ -1,6 +1,6 @@
-import { publishExtension } from 'publish-browser-extension'
+import { submit } from 'publish-browser-extension'
 
-publishExtension({
+submit({
   dryRun: true,
   chrome: {
     zip: 'artifacts/chrome.zip',
@@ -12,5 +12,5 @@ publishExtension({
     skipSubmitReview: false,
   },
 })
-  .then((results) => console.log(results))
-  .catch((err) => console.error(err))
+  .then((results: any) => console.log(results))
+  .catch((err: any) => console.error(err))
