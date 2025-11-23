@@ -47,34 +47,34 @@ export const EditPromptButton = ({
           className="cdx-flex cdx-items-center cdx-gap-2 cdx-rounded-sm cdx-px-1 cdx-bg-blue-300/50 dark:cdx-bg-blue-500/50"
           type="button"
         >
-          <HiPencilAlt /> Edit
+          <HiPencilAlt /> 编辑
         </button>
       </Dialog.Trigger>
       <DialogPortal
-        title={isLeafNode ? 'Edit Prompt' : 'Edit Category'}
+        title={isLeafNode ? '编辑提示词' : '编辑分类'}
         primaryAction={handleEdit}
         secondaryAction={() => setOpen(false)}
-        primaryText="Save"
-        secondaryText="Cancel"
+        primaryText="保存"
+        secondaryText="取消"
       >
         <form className="cdx-flex cdx-flex-col cdx-gap-2" ref={formRef}>
-          <label htmlFor="promptName">Name</label>
+          <label htmlFor="promptName">名称</label>
           <input
             name="promptName"
             className="input"
             type="text"
             required
             defaultValue={item.name}
-            placeholder="Enter Name"
+            placeholder="输入名称"
           />
           {isLeafNode && (
             <>
-              <label htmlFor="prompt">Prompt</label>
+              <label htmlFor="prompt">提示词</label>
               <TextareaAutosize
                 name="prompt"
                 className="input"
                 required
-                placeholder="Enter Prompt"
+                placeholder="输入提示词"
                 minRows={2}
                 maxRows={15}
                 defaultValue={item.prompt}

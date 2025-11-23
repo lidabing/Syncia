@@ -65,10 +65,10 @@ const ChatSettings = () => {
 
   return (
     <div className="cdx-w-full cdx-flex-shrink-0 cdx-rounded-md">
-      <SectionHeading title="Chat" />
+      <SectionHeading title="聊天设置" />
       <FieldWrapper
-        title="Open AI Key"
-        description="You can get your Open AI key from https://platform.openai.com/api-keys"
+        title="OpenAI API 密钥"
+        description="你可以从 https://platform.openai.com/api-keys 获取你的 OpenAI API 密钥"
         onSubmit={handleOpenAiKeySubmit}
       >
         <div className="cdx-flex cdx-gap-2 cdx-items-center">
@@ -95,13 +95,13 @@ const ChatSettings = () => {
             </button>
           </div>
           <button type="submit" className="btn">
-            Update
+            更新
           </button>
         </div>
       </FieldWrapper>
       <FieldWrapper
         title="OpenAI Base URL"
-        description="Enter your custom OpenAI API base URL (optional)"
+        description="输入你的自定义 OpenAI API 基础 URL（可选）"
         onSubmit={handleOpenAiKeySubmit}
       >
         <div className="cdx-flex cdx-gap-2 cdx-items-center">
@@ -109,17 +109,17 @@ const ChatSettings = () => {
             ref={OpenAiBaseUrlInputRef}
             name="openAiBaseUrl"
             defaultValue={chatSettings.openAiBaseUrl || ''}
-            placeholder="Enter your OpenAI Base URL"
+            placeholder="输入你的 OpenAI Base URL"
             className="input cdx-w-full"
           />
           <button type="submit" className="btn">
-            Update
+            更新
           </button>
         </div>
       </FieldWrapper>
       <FieldWrapper
-        title="Model"
-        description="Choose between available chat models"
+        title="模型"
+        description="在可用的聊天模型中选择"
         row={true}
       >
         <select
@@ -135,8 +135,8 @@ const ChatSettings = () => {
         </select>
       </FieldWrapper>
       <FieldWrapper
-        title="Mode"
-        description="Tweak temperature of response. Creative will generate more non deterministic responses, Precise will generate more deterministic responses."
+        title="模式"
+        description="调整回复的温度。创意模式将生成更多非确定性的回复，精确模式将生成更多确定性的回复。"
         row={true}
       >
         <select

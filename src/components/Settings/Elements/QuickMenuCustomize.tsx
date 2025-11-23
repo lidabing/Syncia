@@ -40,9 +40,7 @@ const QuickMenuCustomize = () => {
           <AddItemButton isCategory={false} />
         </div>
         <div className="cdx-text-sm cdx-text-neutral-400 cdx-text-center cdx-mt-3">
-          Categories are used to organize your prompts. Once you create a new
-          category or prompt, they will go at last in the list. You can drag and
-          drop them to reorder them as you wish.
+          分类用于组织你的提示词。创建新分类或提示词后，它们将出现在列表末尾。你可以拖放它们以按你的意愿重新排序。
         </div>
       </div>
     </div>

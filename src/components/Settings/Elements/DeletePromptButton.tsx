@@ -33,15 +33,15 @@ export const DeletePromptButton = ({ id }: { id: string }) => {
         </button>
       </Dialog.Trigger>
       <DialogPortal
-        title="Delete Prompt ?"
+        title="删除提示词？"
         primaryAction={() => {
           handleDelete()
           setOpen(false)
         }}
         secondaryAction={() => setOpen(false)}
-        primaryText="Delete"
+        primaryText="删除"
       >
-        You are about to delete this prompt. This action cannot be undone.
+        你即将删除此提示词。此操作无法撤销。
       </DialogPortal>
     </Dialog.Root>
   )

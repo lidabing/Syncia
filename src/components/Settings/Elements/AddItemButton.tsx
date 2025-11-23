@@ -42,39 +42,39 @@ export const AddItemButton = ({ isCategory }: { isCategory: boolean }) => {
             type="button"
           >
             <HiFolder />
-            <span>Add Category</span>
+            <span>添加分类</span>
           </button>
         ) : (
           <button className="btn !cdx-py-1 cdx-text-sm" type="button">
             <HiDocumentText />
-            <span>Add Prompt</span>
+            <span>添加提示词</span>
           </button>
         )}
       </Dialog.Trigger>
       <DialogPortal
-        title={isCategory ? 'Add New Category' : 'Add New Prompt'}
+        title={isCategory ? '添加新分类' : '添加新提示词'}
         primaryAction={handleAdd}
         secondaryAction={() => setOpen(false)}
-        primaryText="Save"
-        secondaryText="Cancel"
+        primaryText="保存"
+        secondaryText="取消"
       >
         <form className="cdx-flex cdx-flex-col cdx-gap-2" ref={formRef}>
-          <label htmlFor="promptName">Name</label>
+          <label htmlFor="promptName">名称</label>
           <input
             name="promptName"
             className="input"
             type="text"
             required
-            placeholder="Enter Name"
+            placeholder="输入名称"
           />
           {!isCategory && (
             <>
-              <label htmlFor="prompt">Prompt</label>
+              <label htmlFor="prompt">提示词</label>
               <TextareaAutosize
                 name="prompt"
                 className="input"
                 required
-                placeholder="Enter Prompt"
+                placeholder="输入提示词"
                 minRows={2}
                 maxRows={15}
               />

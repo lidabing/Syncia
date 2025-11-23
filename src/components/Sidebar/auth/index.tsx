@@ -43,7 +43,7 @@ const Auth = () => {
         }))
         await fetchAvailableModels()
       } else {
-        setError('Invalid API key. Please try with a valid one.')
+        setError('无效的 API 密钥。请使用有效的密钥。')
       }
     } finally {
       setIsLoadingModels(false)
@@ -53,7 +53,7 @@ const Auth = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.apiKey || !formData.baseUrl) {
-      setError('Please fill in all required fields')
+      setError('请填写所有必填字段')
       return
     }
     validateAndUpdateSettings(formData.apiKey, formData.baseUrl)
@@ -64,17 +64,18 @@ const Auth = () => {
       className="cdx-flex cdx-flex-col cdx-p-6 cdx-justify-center cdx-items-center cdx-h-full"
       onSubmit={(e) => e.preventDefault()}
     >
-      <div className="cdx-text-2xl cdx-mt-48">Enter your OpenAI API key</div>
+      <div className="cdx-text-2xl cdx-mt-48">输入你的 OpenAI API 密钥</div>
       <div className="cdx-text-sm cdx-text-gray-400 cdx-mt-2">
-        You can get one{' '}
+        你可以在{' '}
         <a
           href="https://platform.openai.com/api-keys"
           target="_blank"
           rel="noreferrer"
           className="cdx-text-blue-400"
         >
-          here
+          这里
         </a>
+        {' '}获取
       </div>
 
       <div className="cdx-w-full cdx-mt-6">
@@ -104,7 +105,7 @@ const Auth = () => {
           className="cdx-p-2 cdx-w-full cdx-rounded-md cdx-border dark:cdx-border-neutral-600 cdx-border-neutral-200 dark:cdx-bg-neutral-800/90 cdx-bg-neutral-200/90 disabled:cdx-opacity-50"
         >
           {isLoadingModels ? (
-            <option>Loading models...</option>
+            <option>加载模型中...</option>
           ) : models.length ? (
             models.map((model) => (
               <option key={model.id} value={model.id}>
@@ -112,7 +113,7 @@ const Auth = () => {
               </option>
             ))
           ) : (
-            <option>Add API key to load models</option>
+            <option>添加 API 密钥以加载模型</option>
           )}
         </select>
       </div>
@@ -127,19 +128,18 @@ const Auth = () => {
         onClick={handleSubmit}
         className="cdx-mt-4 cdx-p-2 cdx-w-full cdx-rounded-md cdx-border dark:cdx-border-neutral-600 cdx-border-neutral-200 dark:cdx-bg-neutral-800/90 cdx-bg-neutral-200/90 disabled:cdx-opacity-50"
       >
-        {isLoadingModels ? 'Loading...' : 'Submit'}
+        {isLoadingModels ? '加载中...' : '提交'}
       </button>
 
       <div className="cdx-text-sm cdx-text-gray-400 cdx-mt-4">
-        Note: we only store your key locally. We do not send it anywhere. You
-        can check the{' '}
+        注意：我们只在本地存储你的密钥。我们不会将其发送到任何地方。你可以查看{' '}
         <a
           href="https://github.com/Royal-lobster/Syncia"
           className="cdx-text-blue-400"
         >
-          source code
-        </a>{' '}
-        and inspect network tab to verify this.
+          源代码
+        </a>
+        {' '}并检查网络选项卡以验证这一点。
       </div>
     </form>
   )

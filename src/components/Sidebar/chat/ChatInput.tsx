@@ -81,7 +81,7 @@ export function SidebarInput({
       onClick={handleSubmit}
       className="cdx-flex cdx-gap-2 disabled:cdx-bg-slate-500 disabled:cdx-text-slate-400 cdx-items-center cdx-bg-blue-500 hover:cdx-bg-blue-700 cdx-text-white cdx-py-2 cdx-px-4 cdx-rounded"
     >
-      <span>Send</span> <IoSend size={10} />
+      <span>发送</span> <IoSend size={10} />
     </button>
   )
 
@@ -91,7 +91,7 @@ export function SidebarInput({
       onClick={cancelRequest}
       className="cdx-flex cdx-gap-2 disabled:cdx-bg-slate-500 disabled:cdx-text-slate-400 cdx-items-center cdx-bg-red-500 hover:cdx-bg-red-700 cdx-text-white cdx-py-2 cdx-px-4 cdx-rounded"
     >
-      <HiHand size={18} /> <span>Stop</span>
+      <HiHand size={18} /> <span>停止</span>
     </button>
   )
 
@@ -125,7 +125,7 @@ export function SidebarInput({
         <TextareaAutosize
           minRows={2}
           maxLength={MAX_MESSAGE_LENGTH}
-          placeholder="Type your message here..."
+          placeholder="在此输入你的消息..."
           value={messageDraft.text}
           disabled={loading}
           className="cdx-p-3 cdx-w-full focus:!cdx-outline-none placeholder:cdx-text-neutral-500 cdx-text-sm cdx-resize-none cdx-max-h-96 cdx-pb-0 cdx-bg-transparent !cdx-border-none"

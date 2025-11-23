@@ -38,14 +38,14 @@ const QuickMenuSettings = () => {
 
   return (
     <div className="cdx-w-full cdx-flex-shrink-0 cdx-rounded-md">
-      <SectionHeading title="Quick Menu" />
+      <SectionHeading title="快捷菜单" />
 
       {/* =========================
         Enable Visible Quick Menu
       ===========================*/}
       <FieldWrapper
-        title="Enable Quick Menu"
-        description="This will enable the quick menu which appears bellow text selection on any webpage. I recommend disabling it if you feel it intrusive, you can still use your prompts on selected text by right clicking and selecting the prompt from the context menu."
+        title="启用快捷菜单"
+        description="这将启用在任何网页上选中文本后出现的快捷菜单。如果你觉得它有干扰，我建议禁用它，你仍然可以通过右键点击并从上下文菜单中选择提示词来在选中的文本上使用你的提示词。"
         row={true}
       >
         <Switch.Root
@@ -61,12 +61,12 @@ const QuickMenuSettings = () => {
               Exclude Sites
       ===========================*/}
       <FieldWrapper
-        title="Exclude Sites"
-        description="You can exclude sites from the quick menu by adding them here. (separated by comma) supports wildcards."
+        title="排除网站"
+        description="你可以在此添加要从快捷菜单中排除的网站。（用逗号分隔）支持通配符。"
       >
         <TextareaAutosize
           className="input"
-          placeholder="Eg: google.com, youtube.com, twitter.com"
+          placeholder="例如：google.com, youtube.com, twitter.com"
           minRows={2}
           value={quickMenuSettings.excludedSites.join(', ')}
           onChange={handleExcludeSitesChange}

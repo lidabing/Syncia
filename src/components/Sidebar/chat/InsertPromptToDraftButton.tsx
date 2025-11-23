@@ -49,7 +49,7 @@ const InsertPromptToDraftButton = ({
 
             {noCategoryPrompts.length > 0 && (
               <DropdownMenu.Label className="cdx-text-[10px] cdx-m-1 cdx-text-neutral-500 cdx-uppercase">
-                Uncategorized
+                未分类
               </DropdownMenu.Label>
             )}
             {noCategoryPrompts.map((item) => (

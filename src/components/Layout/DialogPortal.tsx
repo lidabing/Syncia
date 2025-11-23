@@ -50,7 +50,7 @@ const DialogPortal = ({
         <button
           type="button"
           className="cdx-text-neutral-500 hover:cdx-text-neutral-400 cdx-absolute cdx-top-7 cdx-right-7 cdx-inline-flex cdx-h-[25px] cdx-w-[25px] cdx-appearance-none cdx-items-center cdx-justify-center focus:cdx-outline-none"
-          aria-label="Close"
+          aria-label="关闭"
         >
           <HiX size={18} />
         </button>

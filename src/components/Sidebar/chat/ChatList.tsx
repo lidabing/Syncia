@@ -67,10 +67,10 @@ const ChatList = ({
             width={300}
           />
           <h1 className="cdx-text-xl cdx-text-gray-500 dark:cdx-text-gray-400">
-            Start a new conversation 🎉
+            开始新对话 🎉
           </h1>
           <p className="cdx-text-gray-500 dark:cdx-text-gray-400 cdx-mt-1 cdx-leading-tight cdx-font-light">
-            Type your message at the bottom <br /> and press send button
+            在底部输入你的消息 <br /> 然后点击发送按钮
           </p>
         </div>
       ) : (
@@ -119,7 +119,7 @@ const ChatList = ({
           {generating && !error && (
             <div className="cdx-animate-pulse cdx-mt-4 cdx-flex cdx-justify-center cdx-items-center cdx-gap-2">
               <RiLoader4Line className="cdx-animate-spin" />
-              <span>Generating</span>
+              <span>生成中</span>
             </div>
           )}
           {error && (

@@ -10,14 +10,14 @@ const PromptSettings = () => {
 
   return (
     <div className="cdx-w-full cdx-flex-shrink-0 cdx-flex-1 cdx-rounded-md">
-      <SectionHeading title="Prompts" />
+      <SectionHeading title="提示词" />
 
       {/* =========================
             Customize Prompts
       ===========================*/}
       <FieldWrapper
-        title="Customize Prompts"
-        description="You can organize the prompts in the quick menu by dragging these items around. You can also edit the prompts by clicking on the edit button and adding new prompts by clicking on the add button."
+        title="自定义提示词"
+        description="你可以通过拖动这些项目来组织快捷菜单中的提示词。你还可以通过点击编辑按钮来编辑提示词，并通过点击添加按钮来添加新的提示词。"
       >
         <QuickMenuCustomize />
       </FieldWrapper>
@@ -26,8 +26,8 @@ const PromptSettings = () => {
           Restore Default Prompts
       ===========================*/}
       <FieldWrapper
-        title="Restore Default Prompts"
-        description="This will restore the default prompts. Be careful, this action cannot be undone. And any custom prompts you have added will be lost."
+        title="恢复默认提示词"
+        description="这将恢复默认提示词。请注意，此操作无法撤销。你添加的任何自定义提示词都将丢失。"
         row
       >
         <button
@@ -37,7 +37,7 @@ const PromptSettings = () => {
             setPrompts(defaultPrompts)
           }}
         >
-          <HiRefresh /> Restore
+          <HiRefresh /> 恢复
         </button>
       </FieldWrapper>
     </div>

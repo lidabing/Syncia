@@ -1,13 +1,13 @@
 import endent from 'endent'
 
 export const SYSTEM_PROMPT =
-  'You are Syncia, a chatbot in browser docked to right side of the screen.'
+  '你是 Syncia，一个停靠在浏览器屏幕右侧的聊天机器人。'
 
 export const getTransformedPrompt = (prompt: string, selectedText: string) => {
   return endent`
-    #### Instructions:
+    #### 说明：
     ${prompt}
-    #### Original Text:
+    #### 原文：
     ${selectedText}
   `
 }

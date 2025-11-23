@@ -8,102 +8,102 @@ type PromptWithoutId = Omit<Prompt, 'id' | 'children'> & {
 
 const prompts: PromptWithoutId[] = [
   {
-    name: 'Review Selection',
+    name: '审阅选中内容',
     children: [
       {
-        name: 'Summarize',
+        name: '总结',
         prompt: endent`
-          Read the following text and summarize it in less than half the original length.
+          阅读以下文本并用不到原文一半的篇幅进行总结。
         `,
       },
       {
-        name: 'key takeaways',
+        name: '关键要点',
         prompt: endent`
-          Read the following text and identify the key takeaways in list format.
+          阅读以下文本并以列表形式列出关键要点。
         `,
       },
       {
-        name: 'Questions',
+        name: '关键问题',
         prompt: endent`
-          Read the following text and identify the key questions that it raises.
+          阅读以下文本并找出其中提出的关键问题。
         `,
       },
     ],
   },
   {
-    name: 'Edit Selection',
+    name: '编辑选中内容',
     children: [
       {
-        name: 'Fix Grammar and Spelling',
+        name: '修正语法和拼写',
         prompt: endent`
-          Read the following text and fix any grammar and spelling mistakes.
+          阅读以下文本并修正其中的语法和拼写错误。
         `,
       },
       {
-        name: 'Change Tone',
+        name: '改变语气',
         children: [
           {
-            name: 'Formal',
+            name: '正式',
             prompt: endent`
-              Read the following text and make it more formal.
+              阅读以下文本并使其更加正式。
             `,
           },
           {
-            name: 'Informal',
+            name: '非正式',
             prompt: endent`
-              Read the following text and make it more informal.
+              阅读以下文本并使其更加非正式。
             `,
           },
           {
-            name: 'Neutral',
+            name: '中性',
             prompt: endent`
-              Read the following text and make it more neutral.
+              阅读以下文本并使其更加中性。
             `,
           },
           {
-            name: 'Strong',
+            name: '强烈',
             prompt: endent`
-              Read the following text and make it more strong and assertive.
+              阅读以下文本并使其更加强烈和果断。
             `,
           },
         ],
       },
       {
-        name: 'Change Length',
+        name: '改变长度',
         children: [
           {
-            name: 'Shorter',
+            name: '缩短',
             prompt: endent`
-              Read the following text and make it shorter.
+              阅读以下文本并将其缩短。
             `,
           },
           {
-            name: 'Longer',
+            name: '加长',
             prompt: endent`
-              Read the following text and make it longer.
+              阅读以下文本并将其加长。
             `,
           },
         ],
       },
       {
-        name: 'Change Structure',
+        name: '改变结构',
         children: [
           {
-            name: 'Add Details',
+            name: '添加细节',
             prompt: endent`
-              Read the following text and add details to make it more informative.
+              阅读以下文本并添加细节使其更有信息量。
             `,
           },
           {
-            name: 'Add Examples',
+            name: '添加示例',
             prompt: endent`
-              Read the following text and add examples to make it more informative.
+              阅读以下文本并添加示例使其更有信息量。
             `,
           },
           {
-            name: 'Add Emphasis',
+            name: '添加重点',
             prompt: endent`
-              Read the following text and add emphasis to make it more impactful.
+              阅读以下文本并添加重点使其更有影响力。
             `,
           },
         ],
@@ -111,18 +111,18 @@ const prompts: PromptWithoutId[] = [
     ],
   },
   {
-    name: 'Reply',
+    name: '回复',
     children: [
       {
-        name: 'Positive',
+        name: '积极',
         prompt: endent`
-          Read the following text and reply to it in a positive way.
+          阅读以下文本并以积极的方式回复。
         `,
       },
       {
-        name: 'Negative',
+        name: '消极',
         prompt: endent`
-          Read the following text and reply to it in a negative way.
+          阅读以下文本并以消极的方式回复。
         `,
       },
     ],

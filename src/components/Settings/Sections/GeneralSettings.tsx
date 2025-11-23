@@ -23,11 +23,11 @@ const GeneralSettings = () => {
 
   return (
     <div>
-      <SectionHeading title="General Settings" />
+      <SectionHeading title="通用设置" />
 
       <FieldWrapper
-        title="Theme"
-        description="Change theme of the sidebar and quick menu"
+        title="主题"
+        description="更改侧边栏和快捷菜单的主题"
         row
       >
         <select
@@ -43,8 +43,8 @@ const GeneralSettings = () => {
         </select>
       </FieldWrapper>
       <FieldWrapper
-        title="Webpage Context"
-        description="Enable Syncia to answer questions based on the current webpage content"
+        title="网页上下文"
+        description="启用 Syncia 根据当前网页内容回答问题"
         row
       >
         <Switch.Root
