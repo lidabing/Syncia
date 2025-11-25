@@ -9,14 +9,14 @@ const [major, minor, patch, label = '0'] = version
 export default defineManifest(async (env) => ({
   name:
     env.mode === 'staging'
-      ? '[INTERNAL] Syncia'
-      : 'Syncia - Power of ChatGPT on any website',
+      ? '[INTERNAL] 千域浏览器'
+      : '千域浏览器 - 在任何网站上使用大模型的力量',
   description:
-    "Syncia is a browser extension that allows you to use Open AI's GPT in any website.",
+    "千域浏览器 是一个浏览器扩展，允许你在任何网站上使用大模型。",
   version: `${major}.${minor}.${patch}.${label}`,
   version_name: version,
   action: {
-    default_title: 'Syncia - Open Sidebar',
+    default_title: '千域浏览器 - 打开侧边栏',
   },
   commands: {
     'open-sidebar': {
@@ -24,7 +24,7 @@ export default defineManifest(async (env) => ({
         default: 'Ctrl+Shift+X',
         mac: 'Command+Shift+X',
       },
-      description: 'Open the sidebar',
+      description: '打开侧边栏',
     },
   },
   externally_connectable: { ids: ['*'] },

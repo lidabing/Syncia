@@ -53,6 +53,17 @@ export const QuickMenu = ({ selectedText, setMenuOpen }: QuickMenuProps) => {
     if (highlightMenu) highlightMenu.style.zIndex = '2147483647'
   }, [])
 
+  // 阻止下拉菜单打开时的页面滚动
+  useEffect(() => {
+    if (dropdownOpen) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow
+      }
+    }
+  }, [dropdownOpen])
+
   const handleGenerate = (prompt: string) => {
     generatePromptInSidebar(prompt, selectedText)
     setMenuOpen(false)
@@ -106,12 +117,13 @@ export const QuickMenu = ({ selectedText, setMenuOpen }: QuickMenuProps) => {
       <div className="cdx-w-px cdx-h-6 cdx-bg-neutral-300 dark:cdx-bg-neutral-600 cdx-mx-0.5" />
 
       {/* 更多功能下拉菜单 */}
-      <DropdownMenu.Root open={dropdownOpen} onOpenChange={setDropdownOpen}>
+      <DropdownMenu.Root open={dropdownOpen} onOpenChange={setDropdownOpen} modal={false}>
         <DropdownMenu.Trigger asChild>
           <button
             type="button"
             className="cdx-flex cdx-items-center cdx-gap-1.5 cdx-px-3 cdx-py-1.5 cdx-rounded-md cdx-text-sm !cdx-font-sans cdx-cursor-pointer cdx-transition-all cdx-border-none cdx-bg-transparent hover:cdx-bg-neutral-100 dark:hover:cdx-bg-neutral-700 cdx-text-neutral-700 dark:cdx-text-neutral-200"
             title="更多功能"
+            onMouseDown={(e) => e.preventDefault()}
           >
             <MoreIcon size={16} className="cdx-flex-shrink-0" />
             <span className="cdx-whitespace-nowrap">更多</span>
@@ -119,13 +131,14 @@ export const QuickMenu = ({ selectedText, setMenuOpen }: QuickMenuProps) => {
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
           <DropdownMenu.Content
-            style={{ zIndex: 2147483647 }}
+            style={{ zIndex: 2147483647, position: 'fixed' }}
             className="cdx-flex cdx-flex-col cdx-min-w-[180px] cdx-max-w-[240px] cdx-gap-1 !cdx-font-sans cdx-bg-white dark:cdx-bg-neutral-800 cdx-shadow-xl cdx-p-1.5 cdx-rounded-lg cdx-border cdx-border-neutral-200 dark:cdx-border-neutral-700 cdx-text-neutral-800 dark:cdx-text-neutral-100"
-            sideOffset={8}
+            sideOffset={4}
             align="end"
             alignOffset={0}
-            avoidCollisions={true}
-            collisionPadding={8}
+            avoidCollisions={false}
+            collisionPadding={0}
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <DropdownMenu.Group>
               {prompts
