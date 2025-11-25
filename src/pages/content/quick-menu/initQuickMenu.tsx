@@ -30,6 +30,7 @@ const initQuickMenu = () => {
         borderRadius: '0',
         padding: '0',
         margin: '10px',
+        position: 'fixed',
       }}
     />,
   )
