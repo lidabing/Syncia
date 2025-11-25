@@ -9,14 +9,14 @@ const [major, minor, patch, label = '0'] = version
 export default defineManifest(async (env) => ({
   name:
     env.mode === 'staging'
-      ? '[INTERNAL] 千域浏览器'
-      : '千域浏览器 - 在任何网站上使用大模型的力量',
+      ? '[INTERNAL] 千羽助手'
+      : '千羽助手 - 在任何网站上使用大模型的力量',
   description:
-    "千域浏览器 是一个浏览器扩展，允许你在任何网站上使用大模型。",
+    "千羽助手 是一个浏览器扩展，允许你在任何网站上使用大模型。",
   version: `${major}.${minor}.${patch}.${label}`,
   version_name: version,
   action: {
-    default_title: '千域浏览器 - 打开侧边栏',
+    default_title: '千羽助手 - 打开侧边栏',
   },
   commands: {
     'open-sidebar': {
