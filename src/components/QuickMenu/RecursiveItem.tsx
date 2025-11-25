@@ -11,7 +11,7 @@ export const RecursiveItem = ({ item, handleGenerate }: RecursiveItemProps) => {
   if (item.prompt && !(item.children as [Prompt] | undefined)?.length) {
     return (
       <DropdownMenu.Item
-        className="cdx-px-2.5 cdx-py-1.5 cdx-rounded cdx-border-0 cdx-select-none cdx-outline-0 cdx-text-sm cdx-flex cdx-items-center cdx-justify-between cdx-cursor-pointer data-[highlighted]:cdx-bg-neutral-200 data-[highlighted]:dark:cdx-bg-neutral-700"
+        className="cdx-px-2.5 cdx-py-1.5 cdx-rounded-md cdx-border-0 cdx-select-none cdx-outline-0 cdx-text-xs cdx-flex cdx-items-center cdx-justify-between cdx-cursor-pointer cdx-transition-colors cdx-duration-200 data-[highlighted]:cdx-bg-neutral-100 data-[highlighted]:dark:cdx-bg-neutral-700"
         onSelect={() => handleGenerate(item.prompt)}
       >
         <span>{item.name}</span>
@@ -23,12 +23,12 @@ export const RecursiveItem = ({ item, handleGenerate }: RecursiveItemProps) => {
 
   return (
     <DropdownMenu.Sub>
-      <DropdownMenu.SubTrigger className="cdx-px-2.5 cdx-py-1.5 cdx-rounded cdx-border-0 cdx-select-none cdx-outline-0 cdx-text-sm cdx-flex cdx-items-center cdx-justify-between cdx-cursor-pointer data-[highlighted]:cdx-bg-neutral-200 data-[highlighted]:dark:cdx-bg-neutral-700">
+      <DropdownMenu.SubTrigger className="cdx-px-2.5 cdx-py-1.5 cdx-rounded-md cdx-border-0 cdx-select-none cdx-outline-0 cdx-text-xs cdx-flex cdx-items-center cdx-justify-between cdx-cursor-pointer cdx-transition-colors cdx-duration-200 data-[highlighted]:cdx-bg-neutral-100 data-[highlighted]:dark:cdx-bg-neutral-700">
         <span>{item.name}</span>
-        <HiOutlineChevronRight size={12} />
+        <HiOutlineChevronRight size={12} className="cdx-opacity-60" />
       </DropdownMenu.SubTrigger>
       <DropdownMenu.SubContent
-        className="cdx-flex cdx-flex-col cdx-min-w-[180px] cdx-gap-1 !cdx-font-sans cdx-ml-1 cdx-bg-white dark:cdx-bg-neutral-800 cdx-shadow-xl cdx-p-1.5 cdx-rounded-lg cdx-border cdx-border-neutral-200 dark:cdx-border-neutral-700 cdx-text-neutral-800 dark:cdx-text-neutral-100"
+        className="cdx-flex cdx-flex-col cdx-min-w-[180px] cdx-gap-0 !cdx-font-sans cdx-ml-1 cdx-bg-white dark:cdx-bg-neutral-800 cdx-shadow-lg cdx-p-1 cdx-rounded-lg cdx-border cdx-border-neutral-200 dark:cdx-border-neutral-700 cdx-text-neutral-800 dark:cdx-text-neutral-100"
         style={{ zIndex: 2147483647 }}
         sideOffset={2}
       >
