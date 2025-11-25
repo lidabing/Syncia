@@ -13,9 +13,7 @@ const ChatHistory = () => {
     deleteChatHistory,
   } = useChatHistory()
 
-  if (!currentChatId) return null
-
-  const currentChat = getChatHistory(currentChatId)
+  const currentChat = currentChatId ? getChatHistory(currentChatId) : null
 
   const handleCreateNewChat = async () => {
     const newId = createChatHistory('New Chat')

@@ -5,7 +5,7 @@ import {
   HumanMessage,
   SystemMessage,
 } from '@langchain/core/messages'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Mode } from '../config/settings'
 import { getMatchedContent } from '../lib/getMatchedContent'
 import { ChatRole, useCurrentChat } from './useCurrentChat'
@@ -38,6 +38,13 @@ export const useChatCompletion = ({
   } = useCurrentChat()
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+
+  console.log('[useChatCompletion] generating:', generating, 'messages:', messages.length)
+
+  // 初始化时确保状态正常
+  useEffect(() => {
+    setGenerating(false)
+  }, [])
 
   const llm = useMemo(() => {
     return new ChatOpenAI({
@@ -133,12 +140,18 @@ export const useChatCompletion = ({
     setGenerating(false)
   }
 
+  const clearMessagesAndReset = async () => {
+    setGenerating(false)
+    setError(null)
+    await clearMessages()
+  }
+
   return {
     messages,
     submitQuery,
     generating,
     cancelRequest,
-    clearMessages,
+    clearMessages: clearMessagesAndReset,
     removeMessagePair,
     error,
   }

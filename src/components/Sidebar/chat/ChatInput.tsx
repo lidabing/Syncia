@@ -111,7 +111,7 @@ export function SidebarInput({
         )}
         <div className="cdx-flex cdx-gap-2">
           <ChangeChatModel />
-          {(history.length || !chatIsEmpty) && <ChatHistory />}
+          {/* <ChatHistory /> */}
         </div>
       </div>
 
