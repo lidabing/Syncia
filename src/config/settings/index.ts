@@ -38,10 +38,10 @@ export const defaultSettings: Settings = {
     excludedSites: [],
   },
   chat: {
-    openAIKey: null,
-    model: null,
+    openAIKey: 'sk-F6h6hZge2SKNGGev3dKICElK3pLqXK09aOOkgxI5aWsx6j5n',
+    model: 'gpt-3.5-turbo',
     mode: Mode.BALANCED,
-    openAiBaseUrl: null,
+    openAiBaseUrl: 'https://api.openai-proxy.org/v1',
   },
   general: {
     theme: ThemeOptions.SYSTEM,

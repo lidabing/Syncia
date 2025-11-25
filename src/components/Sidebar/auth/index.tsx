@@ -5,13 +5,13 @@ import { useSettings } from '../../../hooks/useSettings'
 import { validateApiKey } from '../../../lib/validApiKey'
 
 const Auth = () => {
-  const [, setSettings] = useSettings()
+  const [settings, setSettings] = useSettings()
   const { models, setActiveChatModel, fetchAvailableModels } = useChatModels()
   const [isLoadingModels, setIsLoadingModels] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
-    apiKey: '',
-    baseUrl: 'https://api.openai.com/v1',
+    apiKey: settings.chat.openAIKey || '',
+    baseUrl: settings.chat.openAiBaseUrl || 'https://api.openai.com/v1',
   })
 
   useEffect(() => {
@@ -20,6 +20,13 @@ const Auth = () => {
       return () => clearTimeout(timer)
     }
   }, [error])
+
+  useEffect(() => {
+    // 自动验证默认配置
+    if (settings.chat.openAIKey && settings.chat.openAiBaseUrl && !models.length) {
+      validateAndUpdateSettings(settings.chat.openAIKey, settings.chat.openAiBaseUrl)
+    }
+  }, [])
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
