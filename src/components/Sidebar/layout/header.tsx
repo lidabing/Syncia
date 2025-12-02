@@ -3,7 +3,7 @@ import { HiOutlineCog, HiX } from 'react-icons/hi'
 import { RiAddCircleLine } from 'react-icons/ri'
 
 interface HeaderProps {
-  clearMessages: () => void
+  clearMessages?: () => void
 }
 
 const Header = ({ clearMessages }: HeaderProps) => {
@@ -20,15 +20,17 @@ const Header = ({ clearMessages }: HeaderProps) => {
         <h1 className="cdx-text-lg cdx-m-0 cdx-p-0">千羽助手</h1>
       </div>
 
-      <div className="cdx-flex cdx-text-neutral-500 cdx-gap-2 cdx-items-center">
-        <button
-          type="button"
-          onClick={clearMessages}
-          title="New Chat"
-          className="cdx-text-xl hover:cdx-text-neutral-800 dark:hover:cdx-text-white"
-        >
-          <RiAddCircleLine />
-        </button>
+      <div className="cdx-flex cdx-text-neutral-500 cdx-gap-4 cdx-items-center">
+        {clearMessages && (
+          <button
+            type="button"
+            onClick={clearMessages}
+            title="New Chat"
+            className="cdx-text-xl hover:cdx-text-neutral-800 dark:hover:cdx-text-white"
+          >
+            <RiAddCircleLine />
+          </button>
+        )}
         <a
           target="_blank"
           rel="noreferrer"

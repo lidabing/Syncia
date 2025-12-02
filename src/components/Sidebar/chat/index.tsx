@@ -47,6 +47,25 @@ const Chat = ({ settings, chatCompletion }: ChatProps) => {
     }
   }, [submitQuery])
 
+  const handleRegenerate = (timestamp: number) => {
+    // timestamp is from the AI message
+    const aiMessageIndex = messages.findIndex((m) => m.timestamp === timestamp)
+
+    if (aiMessageIndex > 0) {
+      const userMessage = messages[aiMessageIndex - 1]
+
+      // Ensure the previous message is from the user
+      if (userMessage && userMessage.role === 'user') {
+        // We use the user's message timestamp to remove the correct pair
+        removeMessagePair(userMessage.timestamp)
+        submitQuery({
+          text: userMessage.content,
+          files: userMessage.files || [],
+        })
+      }
+    }
+  }
+
   const handleSelectSuggestion = (suggestion: string) => {
     setMessageDraftText(suggestion)
   }
@@ -57,6 +76,7 @@ const Chat = ({ settings, chatCompletion }: ChatProps) => {
       <ChatList
         messages={messages}
         removeMessagePair={removeMessagePair}
+        onRegenerate={handleRegenerate}
         generating={generating}
         error={error}
       />
