@@ -9,7 +9,7 @@ import WebPageContentToggle from './WebPageContentToggle'
 import ImageCaptureButton from './ImageCaptureButton'
 import {
   type MessageDraft,
-  useMessageDraft,
+  type MessageFile,
 } from '../../../hooks/useMessageDraft'
 import FilePreviewBar from './FilePreviewBar'
 import ChangeChatModel from './ChangeChatModel'
@@ -23,6 +23,12 @@ interface SidebarInputProps {
   cancelRequest: () => void
   isWebpageContextOn: boolean
   isVisionModel: boolean
+  // Props for controlled message draft state
+  messageDraft: MessageDraft
+  setMessageDraftText: (text: string) => void
+  addMessageDraftFile: (blob: Blob) => Promise<void>
+  removeMessageDraftFile: (id: string) => void
+  resetMessageDraft: () => void
 }
 
 const MAX_MESSAGE_LENGTH = 10000
@@ -35,14 +41,13 @@ export function SidebarInput({
   cancelRequest,
   isWebpageContextOn,
   isVisionModel,
+  // Destructure the new props
+  messageDraft,
+  setMessageDraftText,
+  addMessageDraftFile,
+  removeMessageDraftFile,
+  resetMessageDraft,
 }: SidebarInputProps) {
-  const {
-    messageDraft,
-    setMessageDraftText,
-    resetMessageDraft,
-    addMessageDraftFile,
-    removeMessageDraftFile,
-  } = useMessageDraft()
   const [delayedLoading, setDelayedLoading] = useState(false)
   const { history } = useChatHistory()
 

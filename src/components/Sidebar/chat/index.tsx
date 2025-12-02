@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react'
 import ChatList from './ChatList'
 import { SidebarInput } from './ChatInput'
+import PageSuggestions from './PageSuggestions'
 import { useChatCompletion } from '../../../hooks/useChatCompletion'
 import { SYSTEM_PROMPT } from '../../../config/prompts'
 import type { Settings } from '../../../config/settings'
+import { useMessageDraft } from '../../../hooks/useMessageDraft'
 
 interface ChatProps {
   settings: Settings
@@ -25,6 +27,14 @@ const Chat = ({ settings }: ChatProps) => {
     systemPrompt: SYSTEM_PROMPT,
     baseURL: settings.chat.openAiBaseUrl || '',
   })
+  
+  const {
+    messageDraft,
+    setMessageDraftText,
+    addMessageDraftFile,
+    removeMessageDraftFile,
+    resetMessageDraft,
+  } = useMessageDraft()
 
   useEffect(() => {
     const handleWindowMessage = (event: MessageEvent) => {
@@ -43,8 +53,13 @@ const Chat = ({ settings }: ChatProps) => {
     }
   }, [submitQuery])
 
+  const handleSelectSuggestion = (suggestion: string) => {
+    setMessageDraftText(suggestion)
+  }
+
   return (
     <>
+      <PageSuggestions onSelectSuggestion={handleSelectSuggestion} />
       <ChatList
         messages={messages}
         removeMessagePair={removeMessagePair}
@@ -59,6 +74,12 @@ const Chat = ({ settings }: ChatProps) => {
         cancelRequest={cancelRequest}
         isWebpageContextOn={settings.general.webpageContext}
         isVisionModel={false}
+        // Pass down the message draft state and methods
+        messageDraft={messageDraft}
+        setMessageDraftText={setMessageDraftText}
+        addMessageDraftFile={addMessageDraftFile}
+        removeMessageDraftFile={removeMessageDraftFile}
+        resetMessageDraft={resetMessageDraft}
       />
     </>
   )
