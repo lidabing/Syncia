@@ -83,12 +83,20 @@ export const useChatCompletion = ({
     try {
       let matchedContext: string | undefined
       if (context) {
-        matchedContext = await getMatchedContent(
-          message.text,
-          context,
-          apiKey,
-          baseURL,
-        )
+        try {
+          matchedContext = await getMatchedContent(
+            message.text,
+            context,
+            apiKey,
+            baseURL,
+          )
+          console.log('[submitQuery] Matched context length:', matchedContext.length)
+        } catch (error) {
+          console.error('[submitQuery] getMatchedContent failed:', error)
+          // 如果匹配失败，使用完整上下文的前 3000 字符
+          matchedContext = context.substring(0, 3000)
+          console.log('[submitQuery] Using fallback context length:', matchedContext.length)
+        }
       }
 
       const expandedQuery = matchedContext

@@ -2,6 +2,14 @@ import { useEffect, useState } from 'react'
 import { useChatCompletion } from './useChatCompletion'
 import { useSettings } from './useSettings'
 import { useCurrentChat } from './useCurrentChat'
+import { readStorage, setStorage } from './useStorage'
+import { createSHA256Hash } from '../lib/createSHA256Hash'
+
+interface CachedSuggestions {
+  suggestions: string[]
+  timestamp: number
+  contentHash: string
+}
 
 export const usePageSuggestions = () => {
   const [settings] = useSettings()
@@ -31,9 +39,10 @@ export const usePageSuggestions = () => {
     baseURL: settings.chat.openAiBaseUrl || '',
   })
 
-  // Listen for URL changes from content script
+  // Listen for URL changes and sidebar open events from content script
   useEffect(() => {
-    const handleUrlChange = (event: MessageEvent) => {
+    const handleMessages = (event: MessageEvent) => {
+      // Handle URL change
       if (event.data.action === 'url-changed') {
         const newUrl = event.data.payload?.url
         console.log('[usePageSuggestions] URL changed to:', newUrl)
@@ -43,10 +52,19 @@ export const usePageSuggestions = () => {
         setPageUrl(newUrl)
         setUrlChangeCount(prev => prev + 1)
       }
+      
+      // Handle sidebar opened - refresh suggestions
+      if (event.data.action === 'sidebar-opened') {
+        console.log('[usePageSuggestions] Sidebar opened, refreshing suggestions')
+        // Reset generation state to trigger new suggestions
+        setHasGenerated(false)
+        setSuggestions([])
+        setUrlChangeCount(prev => prev + 1)
+      }
     }
 
-    window.addEventListener('message', handleUrlChange)
-    return () => window.removeEventListener('message', handleUrlChange)
+    window.addEventListener('message', handleMessages)
+    return () => window.removeEventListener('message', handleMessages)
   }, [])
 
   const getPageContent = (): Promise<string> => {
@@ -139,6 +157,22 @@ export const usePageSuggestions = () => {
           console.log('[usePageSuggestions] Generated suggestions:', result)
           setSuggestions(result)
           setHasGenerated(true)
+
+          // 缓存生成的建议
+          try {
+            const currentUrl = window.location.href
+            const contentHash = await createSHA256Hash(pageContent)
+            const cacheKey = `SYNCIA_PAGE_SUGGESTIONS_${currentUrl}`
+            const cached: CachedSuggestions = {
+              suggestions: result,
+              timestamp: Date.now(),
+              contentHash: contentHash,
+            }
+            await setStorage(cacheKey, cached, 'local')
+            console.log('[usePageSuggestions] Cached suggestions for:', currentUrl)
+          } catch (err) {
+            console.error('[usePageSuggestions] Failed to cache suggestions:', err)
+          }
         } else {
           console.log('[usePageSuggestions] Page content too short, skipping')
           setSuggestions([])

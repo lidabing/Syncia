@@ -18,8 +18,35 @@ const ChatView = ({ settings }: { settings: Settings }) => {
     baseURL: settings.chat.openAiBaseUrl || '',
   })
 
-  const handleSelectSuggestion = (suggestion: string) => {
-    chatCompletion.submitQuery({ text: suggestion, files: [] })
+  const handleSelectSuggestion = async (suggestion: string) => {
+    // 获取当前页面内容作为上下文
+    let context: string | undefined
+    if (settings.general.webpageContext) {
+      try {
+        context = await new Promise<string>((resolve) => {
+          const handleResponse = (event: MessageEvent) => {
+            if (event.data.action === 'get-page-content' && event.data.payload) {
+              window.removeEventListener('message', handleResponse)
+              resolve(event.data.payload)
+            }
+          }
+
+          window.addEventListener('message', handleResponse)
+          window.parent.postMessage({ action: 'get-page-content' }, '*')
+
+          // 超时处理
+          setTimeout(() => {
+            window.removeEventListener('message', handleResponse)
+            resolve('')
+          }, 3000)
+        })
+      } catch (err) {
+        console.error('[handleSelectSuggestion] Failed to get page content:', err)
+        context = undefined
+      }
+    }
+
+    chatCompletion.submitQuery({ text: suggestion, files: [] }, context)
   }
 
   return (

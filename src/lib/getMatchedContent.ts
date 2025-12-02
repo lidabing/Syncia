@@ -10,10 +10,16 @@ export const getMatchedContent = async (
   apiKey: string,
   baseURL: string,
 ) => {
-  const vectorStore = await getContextVectorStore(context, apiKey, baseURL)
-  const retriever = vectorStore.asRetriever()
-  const relevantDocs = await retriever.getRelevantDocuments(query)
-  return relevantDocs.map((doc) => doc.pageContent).join('\n')
+  try {
+    const vectorStore = await getContextVectorStore(context, apiKey, baseURL)
+    const retriever = vectorStore.asRetriever()
+    const relevantDocs = await retriever.getRelevantDocuments(query)
+    return relevantDocs.map((doc) => doc.pageContent).join('\n')
+  } catch (error) {
+    console.warn('[getMatchedContent] Embeddings API failed, using fallback:', error)
+    // 降级方案：使用简单的文本截取（前 3000 字符）
+    return context.substring(0, 3000)
+  }
 }
 
 const getContextVectorStore = async (

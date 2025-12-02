@@ -91,6 +91,13 @@ floatingButton.addEventListener('click', () => {
     wrapper.style.display = 'flex'
     // 添加淡入动画
     wrapper.style.animation = 'syncia-fadeIn 0.3s ease-out'
+    // 通知 iframe 侧边栏已打开，需要刷新建议
+    setTimeout(() => {
+      iframe.contentWindow?.postMessage(
+        { action: 'sidebar-opened' },
+        '*',
+      )
+    }, 100)
   } else {
     wrapper.style.display = 'none'
   }
@@ -178,6 +185,13 @@ chrome.runtime.onMessage.addListener((msg) => {
   if (msg.action === 'open-sidebar') {
     if (wrapper.style.display === 'none') {
       wrapper.style.display = 'flex'
+      // 通知 iframe 侧边栏已打开，需要刷新建议
+      setTimeout(() => {
+        iframe.contentWindow?.postMessage(
+          { action: 'sidebar-opened' },
+          '*',
+        )
+      }, 100)
     } else {
       wrapper.style.display = 'none'
     }
