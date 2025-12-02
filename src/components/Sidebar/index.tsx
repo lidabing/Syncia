@@ -38,7 +38,7 @@ function Sidebar() {
   useThemeSync()
 
   return (
-    <div className="cdx-flex cdx-backdrop-blur-md cdx-flex-col cdx-h-screen cdx-shadow-2xl cdx-border-l dark:!cdx-text-white dark:cdx-border-neutral-700/50 cdx-border-neutral-200/80 cdx-top-0 cdx-right-0 cdx-w-[400px] dark:cdx-bg-neutral-900/95 cdx-bg-white/95">
+    <div className="cdx-flex cdx-backdrop-blur-md cdx-flex-col cdx-h-screen cdx-w-full cdx-shadow-2xl cdx-border-l dark:!cdx-text-white dark:cdx-border-neutral-700/50 cdx-border-neutral-200/80 cdx-top-0 cdx-right-0 dark:cdx-bg-neutral-900/95 cdx-bg-white/95">
       {settings.chat.openAIKey && settings.chat.model ? (
         <ChatView settings={settings} />
       ) : (
