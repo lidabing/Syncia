@@ -14,18 +14,7 @@ const PageSuggestions = ({ onSelectSuggestion }: PageSuggestionsProps) => {
   }
 
   return (
-    <div className="cdx-px-3 cdx-py-3.5 cdx-border-b dark:cdx-border-neutral-700/50 cdx-border-neutral-200 cdx-bg-gradient-to-br cdx-from-blue-50/50 cdx-via-purple-50/30 cdx-to-transparent dark:cdx-from-blue-900/15 dark:cdx-via-purple-900/10 dark:cdx-to-transparent cdx-shadow-sm">
-      <div className="cdx-flex cdx-items-center cdx-gap-2 cdx-mb-2.5">
-        <div className="cdx-p-1.5 cdx-rounded-lg cdx-bg-gradient-to-br cdx-from-blue-500 cdx-to-purple-600 cdx-shadow-md">
-          <span className="cdx-text-sm">💡</span>
-        </div>
-        <div>
-          <h3 className="cdx-text-sm cdx-font-bold dark:cdx-text-white cdx-text-neutral-800">
-            智能建议
-          </h3>
-        </div>
-      </div>
-      
+    <div className="cdx-px-3 cdx-py-3 cdx-border-b dark:cdx-border-neutral-700/50 cdx-border-neutral-200 cdx-bg-gradient-to-br cdx-from-blue-50/50 cdx-via-purple-50/30 cdx-to-transparent dark:cdx-from-blue-900/15 dark:cdx-via-purple-900/10 dark:cdx-to-transparent cdx-shadow-sm">
       {isLoading ? (
         <div className="cdx-space-y-1.5">
           {[1, 2, 3].map((i) => (
