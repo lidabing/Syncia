@@ -28,10 +28,10 @@ const Header = ({ clearMessages, onSelectSuggestion }: HeaderProps) => {
             <button
               type="button"
               onClick={clearMessages}
-              title="新建对话"
-              className="cdx-p-1.5 cdx-rounded-md cdx-text-neutral-500 dark:cdx-text-neutral-500 hover:cdx-bg-neutral-200 dark:hover:cdx-bg-neutral-700 hover:cdx-text-neutral-700 dark:hover:cdx-text-neutral-300 cdx-transition-all cdx-duration-200"
+              title="清空对话"
+              className="cdx-p-1.5 cdx-rounded-md cdx-text-blue-500 dark:cdx-text-blue-400 hover:cdx-bg-blue-50 dark:hover:cdx-bg-blue-900/20 hover:cdx-text-blue-600 dark:hover:cdx-text-blue-300 cdx-transition-all cdx-duration-200"
             >
-              <RiAddCircleLine className="cdx-text-sm" />
+              <RiAddCircleLine className="cdx-text-base" />
             </button>
           )}
           <a
