@@ -14,9 +14,9 @@ const PageSuggestions = ({ onSelectSuggestion }: PageSuggestionsProps) => {
   }
 
   return (
-    <div className="cdx-px-3 cdx-py-3 cdx-border-b dark:cdx-border-neutral-700/50 cdx-border-neutral-200 cdx-bg-gradient-to-br cdx-from-blue-50/40 cdx-via-transparent cdx-to-purple-50/20 dark:cdx-from-blue-900/10 dark:cdx-via-transparent dark:cdx-to-purple-900/10 cdx-shadow-sm">
+    <div className="cdx-px-3 cdx-py-3.5 cdx-border-b dark:cdx-border-neutral-700/50 cdx-border-neutral-200 cdx-bg-gradient-to-br cdx-from-blue-50/50 cdx-via-purple-50/30 cdx-to-transparent dark:cdx-from-blue-900/15 dark:cdx-via-purple-900/10 dark:cdx-to-transparent cdx-shadow-sm">
       <div className="cdx-flex cdx-items-center cdx-gap-2 cdx-mb-2.5">
-        <div className="cdx-p-1 cdx-rounded-md cdx-bg-gradient-to-br cdx-from-blue-400 cdx-to-purple-500 cdx-shadow-sm">
+        <div className="cdx-p-1.5 cdx-rounded-lg cdx-bg-gradient-to-br cdx-from-blue-500 cdx-to-purple-600 cdx-shadow-md">
           <span className="cdx-text-sm">💡</span>
         </div>
         <div>

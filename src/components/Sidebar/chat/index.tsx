@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback } from 'react'
 import ChatList from './ChatList'
 import { SidebarInput } from './ChatInput'
-import PageSuggestions from './PageSuggestions'
 import { useMessageDraft } from '../../../hooks/useMessageDraft'
 import type { Settings } from '../../../config/settings'
 import type { UseChatCompletion } from '../../../hooks/useChatCompletion'
@@ -81,7 +80,6 @@ const Chat = ({ settings, chatCompletion }: ChatProps) => {
 
   return (
     <>
-      <PageSuggestions onSelectSuggestion={handleSelectSuggestion} />
       <ChatList
         messages={messages}
         removeMessagePair={removeMessagePair}

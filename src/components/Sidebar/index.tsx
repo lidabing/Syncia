@@ -18,9 +18,16 @@ const ChatView = ({ settings }: { settings: Settings }) => {
     baseURL: settings.chat.openAiBaseUrl || '',
   })
 
+  const handleSelectSuggestion = (suggestion: string) => {
+    chatCompletion.submitQuery({ text: suggestion, files: [] })
+  }
+
   return (
     <>
-      <Header clearMessages={chatCompletion.clearMessages} />
+      <Header 
+        clearMessages={chatCompletion.clearMessages} 
+        onSelectSuggestion={handleSelectSuggestion}
+      />
       <Chat settings={settings} chatCompletion={chatCompletion} />
     </>
   )
