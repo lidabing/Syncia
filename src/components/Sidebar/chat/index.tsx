@@ -34,8 +34,11 @@ const Chat = ({ settings, chatCompletion }: ChatProps) => {
   } = useMessageDraft()
 
   const handleSubmitQuery = useCallback(
-    (query: Parameters<UseChatCompletion['submitQuery']>[0]) => {
-      if (!isInputVisible) {
+    (
+      query: Parameters<UseChatCompletion['submitQuery']>[0],
+      openInput = true,
+    ) => {
+      if (!isInputVisible && openInput) {
         setInputVisible(true)
       }
       submitQuery(query)
@@ -87,7 +90,7 @@ const Chat = ({ settings, chatCompletion }: ChatProps) => {
   }
 
   const handleSelectSuggestion = (suggestion: string) => {
-    handleSubmitQuery({ text: suggestion, files: [] })
+    handleSubmitQuery({ text: suggestion, files: [] }, false)
   }
 
   const ShowInputButton = () => (
