@@ -4,33 +4,102 @@ import { contentScriptLog } from '../../logs'
 
 contentScriptLog('Sidebar')
 
+// 创建外层容器包装器
+const wrapper = document.createElement('div')
+wrapper.id = 'syncia_sidebar_wrapper'
+wrapper.style.position = 'fixed'
+wrapper.style.top = '80px'
+wrapper.style.right = '50px'
+wrapper.style.width = '450px'
+wrapper.style.height = '650px'
+wrapper.style.minWidth = '350px'
+wrapper.style.minHeight = '500px'
+wrapper.style.zIndex = '9000000000000000000'
+wrapper.style.display = 'none'
+wrapper.style.flexDirection = 'column'
+wrapper.style.boxShadow = '0 10px 40px rgba(0,0,0,0.3)'
+wrapper.style.borderRadius = '12px'
+wrapper.style.overflow = 'hidden'
+wrapper.style.background = '#f5f5f5'
+wrapper.style.resize = 'both'
+
+// 创建拖动头部
+const dragBar = document.createElement('div')
+dragBar.id = 'syncia_drag_bar'
+dragBar.style.width = '100%'
+dragBar.style.height = '10px'
+dragBar.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+dragBar.style.cursor = 'move'
+dragBar.style.flexShrink = '0'
+dragBar.style.userSelect = 'none'
+
 const iframe = document.createElement('iframe')
-iframe.style.background = '#0000002a'
+iframe.style.background = 'white'
+iframe.style.width = '100%'
 iframe.style.height = '100%'
-iframe.style.width = '0px'
-iframe.style.position = 'fixed'
-iframe.style.top = '0px'
-iframe.style.right = '0px'
-iframe.style.zIndex = '9000000000000000000'
 iframe.style.border = '0px'
+iframe.style.display = 'block'
 iframe.style.colorScheme = 'auto'
 iframe.src = chrome.runtime.getURL('/src/pages/sidebar/index.html')
 iframe.id = 'syncia_sidebar'
 
-document.body.appendChild(iframe)
+wrapper.appendChild(dragBar)
+wrapper.appendChild(iframe)
+document.body.appendChild(wrapper)
+
+// 拖动功能实现
+let isDragging = false
+let startX = 0
+let startY = 0
+let startLeft = 0
+let startTop = 0
+
+dragBar.addEventListener('mousedown', (e) => {
+  isDragging = true
+  startX = e.clientX
+  startY = e.clientY
+  const rect = wrapper.getBoundingClientRect()
+  startLeft = rect.left
+  startTop = rect.top
+  dragBar.style.cursor = 'grabbing'
+  e.preventDefault()
+})
+
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return
+  
+  const deltaX = e.clientX - startX
+  const deltaY = e.clientY - startY
+  
+  let newLeft = startLeft + deltaX
+  let newTop = startTop + deltaY
+  
+  // 限制在窗口内
+  newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - wrapper.offsetWidth))
+  newTop = Math.max(0, Math.min(newTop, window.innerHeight - wrapper.offsetHeight))
+  
+  wrapper.style.left = newLeft + 'px'
+  wrapper.style.top = newTop + 'px'
+  wrapper.style.right = 'auto'
+})
+
+document.addEventListener('mouseup', () => {
+  if (isDragging) {
+    isDragging = false
+    dragBar.style.cursor = 'move'
+  }
+})
 
 /**
  * BG SCRIPT <-> CONTENT SCRIPT
  * Event listener for messages from the background script.
- * To open the sidebar, the background script sends a message with the action 'open-sidebar'.
- * The sidebar is opened by setting the width of the iframe to 400px.
  */
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg.action === 'open-sidebar') {
-    if (iframe.style.width === '0px') {
-      iframe.style.width = '400px'
+    if (wrapper.style.display === 'none') {
+      wrapper.style.display = 'flex'
     } else {
-      iframe.style.width = '0px'
+      wrapper.style.display = 'none'
     }
   }
 })
@@ -66,9 +135,15 @@ window.addEventListener('message', async (event) => {
 
   // ACTION: get-screenshot-image ===========================
   if (action === 'get-screenshot-image') {
-    iframe.style.width = '0px'
+    const wasVisible = wrapper.style.display !== 'none'
+    wrapper.style.display = 'none'
+    
     const image = await getScreenshotImage()
-    iframe.style.width = '400px'
+    
+    if (wasVisible) {
+      wrapper.style.display = 'flex'
+    }
+    
     iframe.contentWindow?.postMessage(
       {
         action: 'get-screenshot-image',
