@@ -49,7 +49,7 @@ export function SidebarInput({
   removeMessageDraftFile,
   resetMessageDraft,
 }: SidebarInputProps) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
   const [delayedLoading, setDelayedLoading] = useState(false)
   const { history } = useChatHistory()
 
@@ -106,15 +106,15 @@ export function SidebarInput({
 
   if (!isExpanded) {
     return (
-      <div className="cdx-fixed cdx-bottom-4 cdx-right-4 cdx-z-50">
+      <div className="cdx-fixed cdx-bottom-3 cdx-right-3 cdx-z-50">
         <button
           type="button"
           onClick={() => setIsExpanded(true)}
-          title="展开输入框"
-          className="cdx-flex cdx-items-center cdx-justify-center cdx-gap-1.5 cdx-bg-blue-500 hover:cdx-bg-blue-600 active:cdx-bg-blue-700 cdx-text-white cdx-py-2 cdx-px-3 cdx-rounded-full cdx-shadow-lg hover:cdx-shadow-xl cdx-transition-all cdx-duration-200"
+          title="自定义提问"
+          className="cdx-flex cdx-items-center cdx-justify-center cdx-gap-1.5 cdx-bg-neutral-600 hover:cdx-bg-neutral-700 dark:cdx-bg-neutral-700 dark:hover:cdx-bg-neutral-600 cdx-text-white cdx-py-1.5 cdx-px-2.5 cdx-rounded-full cdx-shadow-md hover:cdx-shadow-lg cdx-transition-all cdx-duration-200 cdx-text-xs cdx-opacity-60 hover:cdx-opacity-100"
         >
-          <FiChevronUp size={16} />
-          <span className="cdx-text-sm cdx-font-medium">提问</span>
+          <FiChevronUp size={14} />
+          <span>自定义</span>
         </button>
       </div>
     )
@@ -122,7 +122,7 @@ export function SidebarInput({
 
   return (
     <div className="cdx-fixed cdx-bottom-0 cdx-left-0 cdx-right-0 cdx-flex cdx-flex-col ">
-      <div className="cdx-m-2 cdx-rounded-md cdx-border dark:cdx-border-neutral-800 cdx-border-neutral-300 dark:cdx-bg-neutral-900/90 cdx-bg-neutral-200/90 focus:cdx-outline-none focus:cdx-ring-2 focus:cdx-ring-blue-900 focus:cdx-ring-opacity-50">
+      <div className="cdx-m-2 cdx-rounded-lg cdx-border dark:cdx-border-neutral-700/30 cdx-border-neutral-300/50 dark:cdx-bg-neutral-900/70 cdx-bg-neutral-100/70 cdx-backdrop-blur-sm focus:cdx-outline-none focus:cdx-ring-1 focus:cdx-ring-blue-500/30 focus:cdx-ring-opacity-50">
         <div className="cdx-flex cdx-justify-end cdx-items-center cdx-p-1 cdx-pt-2 cdx-pr-3">
           <div className="cdx-flex cdx-items-center cdx-gap-4">
             <ChangeChatModel />

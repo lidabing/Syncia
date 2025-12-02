@@ -89,9 +89,9 @@ export const usePageSuggestions = () => {
       }
 
       // Only generate for new chats (no messages yet, or only system message)
-      if (messages.length > 1) {
-        console.log('[usePageSuggestions] Chat has messages, hiding suggestions')
-        setSuggestions([])
+      // Keep showing suggestions even after messages are sent
+      if (messages.length > 1 && hasGenerated) {
+        console.log('[usePageSuggestions] Chat has messages, keeping existing suggestions')
         return
       }
 
