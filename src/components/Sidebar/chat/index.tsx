@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useCallback } from 'react'
 import ChatList from './ChatList'
 import { SidebarInput } from './ChatInput'
 import PageSuggestions from './PageSuggestions'
 import { useMessageDraft } from '../../../hooks/useMessageDraft'
 import type { Settings } from '../../../config/settings'
 import type { UseChatCompletion } from '../../../hooks/useChatCompletion'
-import { RiAddLine } from 'react-icons/ri'
 
 interface ChatProps {
   settings: Settings
@@ -23,8 +22,6 @@ const Chat = ({ settings, chatCompletion }: ChatProps) => {
     error,
   } = chatCompletion
 
-  const [isInputVisible, setInputVisible] = useState(false)
-
   const {
     messageDraft,
     setMessageDraftText,
@@ -36,22 +33,11 @@ const Chat = ({ settings, chatCompletion }: ChatProps) => {
   const handleSubmitQuery = useCallback(
     (
       query: Parameters<UseChatCompletion['submitQuery']>[0],
-      openInput = true,
     ) => {
-      if (!isInputVisible && openInput) {
-        setInputVisible(true)
-      }
       submitQuery(query)
     },
-    [isInputVisible, submitQuery],
+    [submitQuery],
   )
-
-  useEffect(() => {
-    // If chat is cleared, hide the input again
-    if (messages.length <= 1 && isInputVisible) {
-      setInputVisible(false)
-    }
-  }, [messages, isInputVisible])
 
   useEffect(() => {
     const handleWindowMessage = (event: MessageEvent) => {
@@ -90,21 +76,8 @@ const Chat = ({ settings, chatCompletion }: ChatProps) => {
   }
 
   const handleSelectSuggestion = (suggestion: string) => {
-    handleSubmitQuery({ text: suggestion, files: [] }, false)
+    handleSubmitQuery({ text: suggestion, files: [] })
   }
-
-  const ShowInputButton = () => (
-    <div className="cdx-p-4">
-      <button
-        type="button"
-        onClick={() => setInputVisible(true)}
-        className="cdx-w-full cdx-flex cdx-items-center cdx-justify-center cdx-gap-2 cdx-p-3 cdx-rounded-md cdx-border-2 cdx-border-dashed dark:cdx-border-neutral-700 dark:hover:cdx-border-neutral-600 dark:hover:cdx-bg-neutral-800/50 cdx-border-neutral-300 hover:cdx-border-neutral-400 hover:cdx-bg-neutral-200/50 cdx-transition-colors"
-      >
-        <RiAddLine />
-        发送新消息
-      </button>
-    </div>
-  )
 
   return (
     <>
@@ -117,25 +90,21 @@ const Chat = ({ settings, chatCompletion }: ChatProps) => {
         error={error}
       />
 
-      {isInputVisible ? (
-        <SidebarInput
-          loading={generating}
-          submitMessage={handleSubmitQuery}
-          chatIsEmpty={messages.length <= 1}
-          clearMessages={clearMessages}
-          cancelRequest={cancelRequest}
-          isWebpageContextOn={settings.general.webpageContext}
-          isVisionModel={false}
-          // Pass down the message draft state and methods
-          messageDraft={messageDraft}
-          setMessageDraftText={setMessageDraftText}
-          addMessageDraftFile={addMessageDraftFile}
-          removeMessageDraftFile={removeMessageDraftFile}
-          resetMessageDraft={resetMessageDraft}
-        />
-      ) : (
-        <ShowInputButton />
-      )}
+      <SidebarInput
+        loading={generating}
+        submitMessage={handleSubmitQuery}
+        chatIsEmpty={messages.length <= 1}
+        clearMessages={clearMessages}
+        cancelRequest={cancelRequest}
+        isWebpageContextOn={settings.general.webpageContext}
+        isVisionModel={false}
+        // Pass down the message draft state and methods
+        messageDraft={messageDraft}
+        setMessageDraftText={setMessageDraftText}
+        addMessageDraftFile={addMessageDraftFile}
+        removeMessageDraftFile={removeMessageDraftFile}
+        resetMessageDraft={resetMessageDraft}
+      />
     </>
   )
 }

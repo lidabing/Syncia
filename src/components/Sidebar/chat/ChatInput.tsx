@@ -86,9 +86,10 @@ export function SidebarInput({
       type="button"
       disabled={loading}
       onClick={handleSubmit}
-      className="cdx-flex cdx-gap-2 disabled:cdx-bg-slate-500 disabled:cdx-text-slate-400 cdx-items-center cdx-bg-blue-500 hover:cdx-bg-blue-700 cdx-text-white cdx-py-2 cdx-px-4 cdx-rounded"
+      title="发送 (Enter)"
+      className="cdx-flex cdx-items-center cdx-justify-center disabled:cdx-opacity-40 disabled:cdx-cursor-not-allowed cdx-bg-blue-500 hover:cdx-bg-blue-600 active:cdx-bg-blue-700 cdx-text-white cdx-w-8 cdx-h-8 cdx-rounded-lg cdx-transition-all cdx-duration-200"
     >
-      <span>发送</span> <IoSend size={10} />
+      <IoSend size={16} />
     </button>
   )
 
@@ -96,21 +97,24 @@ export function SidebarInput({
     <button
       type="button"
       onClick={cancelRequest}
-      className="cdx-flex cdx-gap-2 disabled:cdx-bg-slate-500 disabled:cdx-text-slate-400 cdx-items-center cdx-bg-red-500 hover:cdx-bg-red-700 cdx-text-white cdx-py-2 cdx-px-4 cdx-rounded"
+      title="停止生成"
+      className="cdx-flex cdx-items-center cdx-justify-center cdx-bg-red-500 hover:cdx-bg-red-600 active:cdx-bg-red-700 cdx-text-white cdx-w-8 cdx-h-8 cdx-rounded-lg cdx-transition-all cdx-duration-200"
     >
-      <HiHand size={18} /> <span>停止</span>
+      <HiHand size={16} />
     </button>
   )
 
   if (!isExpanded) {
     return (
-      <div className="cdx-fixed cdx-bottom-0 cdx-left-0 cdx-right-0 cdx-flex cdx-flex-col cdx-m-2">
+      <div className="cdx-fixed cdx-bottom-4 cdx-right-4 cdx-z-50">
         <button
           type="button"
           onClick={() => setIsExpanded(true)}
-          className="cdx-flex cdx-gap-2 cdx-items-center cdx-justify-center cdx-bg-blue-500 hover:cdx-bg-blue-700 cdx-text-white cdx-py-2 cdx-px-4 cdx-rounded"
+          title="展开输入框"
+          className="cdx-flex cdx-items-center cdx-justify-center cdx-gap-1.5 cdx-bg-blue-500 hover:cdx-bg-blue-600 active:cdx-bg-blue-700 cdx-text-white cdx-py-2 cdx-px-3 cdx-rounded-full cdx-shadow-lg hover:cdx-shadow-xl cdx-transition-all cdx-duration-200"
         >
-          <FiChevronUp size={18} /> <span>提问</span>
+          <FiChevronUp size={16} />
+          <span className="cdx-text-sm cdx-font-medium">提问</span>
         </button>
       </div>
     )
@@ -162,10 +166,10 @@ export function SidebarInput({
             <button
               type="button"
               onClick={() => setIsExpanded(false)}
-              className="cdx-p-2 hover:cdx-bg-neutral-300 dark:hover:cdx-bg-neutral-700 cdx-rounded"
-              title="收起"
+              title="收起输入框"
+              className="cdx-flex cdx-items-center cdx-justify-center cdx-w-8 cdx-h-8 hover:cdx-bg-neutral-300 dark:hover:cdx-bg-neutral-700 cdx-rounded-lg cdx-transition-colors cdx-duration-200"
             >
-              <FiChevronDown size={18} />
+              <FiChevronDown size={16} />
             </button>
             {!delayedLoading ? sendButton : stopButton}
           </div>
