@@ -36,6 +36,7 @@ const ChatList = ({
 }: ChatListProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(true)
+  const lastMessageCountRef = useRef(0)
 
   useEffect(() => {
     if (containerRef.current) {
@@ -43,27 +44,29 @@ const ChatList = ({
     }
   }, [messages])
 
+  // 当消息数量变化时，重置折叠状态为true（添加新消息时自动折叠历史）
+  useEffect(() => {
+    const currentCount = messages.length
+    if (currentCount > lastMessageCountRef.current) {
+      setIsHistoryCollapsed(true)
+    }
+    lastMessageCountRef.current = currentCount
+  }, [messages.length])
+
   const filteredMsgs = messages.filter((msg) => msg.role !== ChatRole.SYSTEM)
 
-  // 检查是否正在进行对话（用户刚提问，AI正在生成回答，或者最后一条是用户消息）
-  const lastMessage = filteredMsgs[filteredMsgs.length - 1]
-  const hasActiveConversation = filteredMsgs.length > 0 && 
-    (lastMessage?.role === ChatRole.USER || generating)
-
-  // 如果有活跃对话（正在提问或等待回答），显示最后的用户消息和可能的AI回复
-  // 找到最后一个用户消息的位置
-  let currentStartIndex = filteredMsgs.length
-  if (hasActiveConversation) {
-    for (let i = filteredMsgs.length - 1; i >= 0; i--) {
-      if (filteredMsgs[i].role === ChatRole.USER) {
-        currentStartIndex = i
-        break
-      }
-    }
-  }
-
-  const historyMessages = hasActiveConversation ? filteredMsgs.slice(0, currentStartIndex) : filteredMsgs
-  const currentMessages = hasActiveConversation ? filteredMsgs.slice(currentStartIndex) : []
+  // 人性化规则：
+  // 1. 如果消息少于4条（2轮对话），全部显示，不折叠
+  // 2. 如果有4条或以上，保留最近2轮对话（4条消息），其余折叠
+  const shouldShowHistory = filteredMsgs.length <= 4
+  
+  const recentConversationCount = 4 // 保留最近2轮对话
+  const historyMessages = shouldShowHistory 
+    ? [] 
+    : filteredMsgs.slice(0, -recentConversationCount)
+  const currentMessages = shouldShowHistory 
+    ? filteredMsgs 
+    : filteredMsgs.slice(-recentConversationCount)
 
   const formatContent = (content: string) => {
     return content.replace(/(?<=\n\n)(?![*-])\n/gi, '&nbsp;\n ')

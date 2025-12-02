@@ -12,6 +12,7 @@ export const usePageSuggestions = () => {
   const [pageUrl, setPageUrl] = useState('')
   const [error, setError] = useState<Error | null>(null)
   const [hasGenerated, setHasGenerated] = useState(false)
+  const [urlChangeCount, setUrlChangeCount] = useState(0)
 
   // Only initialize chat completion if we have valid credentials
   const hasValidSettings = !!(settings.chat.openAIKey && settings.chat.model)
@@ -29,6 +30,24 @@ export const usePageSuggestions = () => {
     systemPrompt: '',
     baseURL: settings.chat.openAiBaseUrl || '',
   })
+
+  // Listen for URL changes from content script
+  useEffect(() => {
+    const handleUrlChange = (event: MessageEvent) => {
+      if (event.data.action === 'url-changed') {
+        const newUrl = event.data.payload?.url
+        console.log('[usePageSuggestions] URL changed to:', newUrl)
+        // Reset generation state to trigger new suggestions
+        setHasGenerated(false)
+        setSuggestions([])
+        setPageUrl(newUrl)
+        setUrlChangeCount(prev => prev + 1)
+      }
+    }
+
+    window.addEventListener('message', handleUrlChange)
+    return () => window.removeEventListener('message', handleUrlChange)
+  }, [])
 
   const getPageContent = (): Promise<string> => {
     return new Promise((resolve) => {
@@ -134,7 +153,7 @@ export const usePageSuggestions = () => {
     }
 
     generateSuggestions()
-  }, [currentChatId, messages.length, hasValidSettings])
+  }, [currentChatId, messages.length, hasValidSettings, urlChangeCount])
 
   return { 
     suggestions, 

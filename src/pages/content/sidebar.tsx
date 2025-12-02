@@ -185,6 +185,49 @@ chrome.runtime.onMessage.addListener((msg) => {
 })
 
 /**
+ * URL Change Detection
+ * Monitor page navigation and notify sidebar to refresh suggestions
+ */
+let lastUrl = window.location.href
+const urlObserver = new MutationObserver(() => {
+  const currentUrl = window.location.href
+  if (currentUrl !== lastUrl) {
+    console.log('[Syncia] URL changed from', lastUrl, 'to', currentUrl)
+    lastUrl = currentUrl
+    // Notify iframe about URL change
+    iframe.contentWindow?.postMessage(
+      {
+        action: 'url-changed',
+        payload: { url: currentUrl },
+      },
+      '*',
+    )
+  }
+})
+
+// Observe URL changes via DOM mutations
+urlObserver.observe(document.body, {
+  childList: true,
+  subtree: true,
+})
+
+// Also listen for popstate events (browser back/forward)
+window.addEventListener('popstate', () => {
+  const currentUrl = window.location.href
+  if (currentUrl !== lastUrl) {
+    console.log('[Syncia] URL changed via popstate to', currentUrl)
+    lastUrl = currentUrl
+    iframe.contentWindow?.postMessage(
+      {
+        action: 'url-changed',
+        payload: { url: currentUrl },
+      },
+      '*',
+    )
+  }
+})
+
+/**
  * SIDEBAR <-> CONTENT SCRIPT
  * Event listener for messages from the sidebar.
  * To get the page content, the sidebar sends a message with the action 'get-page-content'.
