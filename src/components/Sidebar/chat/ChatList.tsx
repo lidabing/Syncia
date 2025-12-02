@@ -49,7 +49,7 @@ const ChatList = ({
   return (
     <div
       ref={containerRef}
-      className="cdx-h-[calc(100vh-200px)] cdx-overflow-y-auto cdx-pb-12 cdx-break-words"
+      className="cdx-flex-grow cdx-overflow-y-auto cdx-pb-12 cdx-break-words"
     >
       {filteredMsgs.length < 1 ? (
         <div className="cdx-mt-10 cdx-text-center">

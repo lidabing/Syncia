@@ -8,16 +8,8 @@ interface PageSuggestionsProps {
 const PageSuggestions = ({ onSelectSuggestion }: PageSuggestionsProps) => {
   const { suggestions, isLoading, hasSuggestions } = usePageSuggestions()
 
-  console.log('[PageSuggestions] State:', { 
-    suggestions, 
-    isLoading, 
-    hasSuggestions,
-    suggestionsCount: suggestions.length 
-  })
-
   // Don't render if no suggestions or loading
   if (!hasSuggestions && !isLoading) {
-    console.log('[PageSuggestions] Not rendering - no suggestions and not loading')
     return null
   }
 
