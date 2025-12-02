@@ -74,6 +74,9 @@ export const usePageSuggestions = () => {
         messagesLength: messages.length,
         hasGenerated,
         currentChatId,
+        apiKey: settings.chat.openAIKey ? 'exists' : 'missing',
+        model: settings.chat.model,
+        baseURL: settings.chat.openAiBaseUrl,
       })
 
       // Reset when chat changes
@@ -83,7 +86,10 @@ export const usePageSuggestions = () => {
 
       // Only generate suggestions when conditions are met
       if (!hasValidSettings) {
-        console.log('[usePageSuggestions] No valid settings')
+        console.log('[usePageSuggestions] No valid settings - missing:', {
+          apiKey: !settings.chat.openAIKey,
+          model: !settings.chat.model,
+        })
         setSuggestions([])
         return
       }

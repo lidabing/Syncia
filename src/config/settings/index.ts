@@ -38,10 +38,10 @@ export const defaultSettings: Settings = {
     excludedSites: [],
   },
   chat: {
-    openAIKey: 'sk-F6h6hZge2SKNGGev3dKICElK3pLqXK09aOOkgxI5aWsx6j5n',
-    model: 'gpt-3.5-turbo',
+    openAIKey: 'sk-FL5ZZ3228RtJDLwcc8JDDQjuUon48Rbh6greMezkJopR9vNE',
+    model: 'deepseek-chat',
     mode: Mode.BALANCED,
-    openAiBaseUrl: 'https://api.openai-proxy.org/v1',
+    openAiBaseUrl: 'https://api.lkeap.cloud.tencent.com/v1',
   },
   general: {
     theme: ThemeOptions.SYSTEM,

@@ -147,6 +147,13 @@ export const useChatCompletion = ({
   }
 
   const analyzePage = async (pageContent: string): Promise<string[]> => {
+    console.log('[analyzePage] Starting analysis with:', {
+      model,
+      apiKey: apiKey ? 'exists' : 'missing',
+      baseURL,
+      contentLength: pageContent.length,
+    })
+    
     try {
       // Extract more content for better context (8000 chars for deeper analysis)
       const contentToAnalyze = pageContent.slice(0, 8000)
@@ -194,6 +201,8 @@ ${contentToAnalyze}
       let fullResponse = ''
       const tempController = new AbortController()
       
+      console.log('[analyzePage] Invoking LLM...')
+      
       await llm.invoke(messages, {
         signal: tempController.signal,
         callbacks: [{
@@ -203,16 +212,24 @@ ${contentToAnalyze}
         }]
       })
 
+      console.log('[analyzePage] Full response:', fullResponse)
+
       // Parse JSON response
       const jsonMatch = fullResponse.match(/\[[\s\S]*\]/)
       if (jsonMatch) {
         const suggestions = JSON.parse(jsonMatch[0])
+        console.log('[analyzePage] Parsed suggestions:', suggestions)
         return Array.isArray(suggestions) ? suggestions.slice(0, 3) : []
       }
       
+      console.log('[analyzePage] No JSON match found in response')
       return []
     } catch (e) {
-      console.error('Failed to analyze page:', e)
+      console.error('[analyzePage] Failed to analyze page:', e)
+      console.error('[analyzePage] Error details:', {
+        message: (e as Error).message,
+        stack: (e as Error).stack,
+      })
       return []
     }
   }
