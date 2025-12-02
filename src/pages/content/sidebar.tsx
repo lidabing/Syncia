@@ -47,6 +47,86 @@ wrapper.appendChild(dragBar)
 wrapper.appendChild(iframe)
 document.body.appendChild(wrapper)
 
+// 创建浮动按钮
+const floatingButton = document.createElement('div')
+floatingButton.id = 'syncia_floating_button'
+floatingButton.style.position = 'fixed'
+floatingButton.style.bottom = '20px'
+floatingButton.style.right = '20px'
+floatingButton.style.width = '32px'
+floatingButton.style.height = '32px'
+floatingButton.style.borderRadius = '50%'
+floatingButton.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+floatingButton.style.boxShadow = '0 2px 8px rgba(102, 126, 234, 0.3)'
+floatingButton.style.cursor = 'pointer'
+floatingButton.style.zIndex = '9000000000000000001'
+floatingButton.style.display = 'flex'
+floatingButton.style.alignItems = 'center'
+floatingButton.style.justifyContent = 'center'
+floatingButton.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+floatingButton.style.userSelect = 'none'
+floatingButton.style.opacity = '0.7'
+floatingButton.innerHTML = `
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V11H13V17ZM13 9H11V7H13V9Z" fill="white"/>
+  </svg>
+`
+
+// 浮动按钮动画效果
+floatingButton.addEventListener('mouseenter', () => {
+  floatingButton.style.transform = 'scale(1.15)'
+  floatingButton.style.opacity = '1'
+  floatingButton.style.boxShadow = '0 3px 12px rgba(102, 126, 234, 0.5)'
+})
+
+floatingButton.addEventListener('mouseleave', () => {
+  floatingButton.style.transform = 'scale(1)'
+  floatingButton.style.opacity = '0.7'
+  floatingButton.style.boxShadow = '0 2px 8px rgba(102, 126, 234, 0.3)'
+})
+
+// 点击浮动按钮切换侧边栏
+floatingButton.addEventListener('click', () => {
+  if (wrapper.style.display === 'none') {
+    wrapper.style.display = 'flex'
+    // 添加淡入动画
+    wrapper.style.animation = 'syncia-fadeIn 0.3s ease-out'
+  } else {
+    wrapper.style.display = 'none'
+  }
+})
+
+document.body.appendChild(floatingButton)
+
+// 添加CSS动画
+const style = document.createElement('style')
+style.textContent = `
+  @keyframes syncia-fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  @keyframes syncia-pulse {
+    0%, 100% {
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+    50% {
+      box-shadow: 0 2px 12px rgba(102, 126, 234, 0.4);
+    }
+  }
+  
+  #syncia_floating_button {
+    animation: syncia-pulse 2s ease-in-out infinite;
+  }
+`
+document.head.appendChild(style)
+
 // 拖动功能实现
 let isDragging = false
 let startX = 0
@@ -112,6 +192,40 @@ chrome.runtime.onMessage.addListener((msg) => {
  */
 window.addEventListener('message', async (event) => {
   const { action, _payload } = event.data as { action: string; _payload: any }
+
+  // ACTION: start-drag ====================================
+  if (action === 'start-drag') {
+    const { x, y } = event.data
+    isDragging = true
+    startX = x
+    startY = y
+    const rect = wrapper.getBoundingClientRect()
+    startLeft = rect.left
+    startTop = rect.top
+  }
+
+  // ACTION: dragging ======================================
+  if (action === 'dragging') {
+    if (!isDragging) return
+    
+    const { deltaX, deltaY } = event.data
+    
+    let newLeft = startLeft + deltaX
+    let newTop = startTop + deltaY
+    
+    // 限制在窗口内
+    newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - wrapper.offsetWidth))
+    newTop = Math.max(0, Math.min(newTop, window.innerHeight - wrapper.offsetHeight))
+    
+    wrapper.style.left = `${newLeft}px`
+    wrapper.style.top = `${newTop}px`
+    wrapper.style.right = 'auto'
+  }
+
+  // ACTION: end-drag ======================================
+  if (action === 'end-drag') {
+    isDragging = false
+  }
 
   // ACTION: get-page-content ==============================
   if (action === 'get-page-content') {
