@@ -101,25 +101,13 @@ export function SidebarInput({
   )
 
   return (
-    <div className="cdx-fixed cdx-bottom-0 cdx-left-0 cdx-right-0 cdx-flex cdx-flex-col ">
-      <div className="cdx-flex cdx-mx-3 cdx-items-center cdx-justify-between">
-        {!chatIsEmpty ? (
-          <button
-            type="button"
-            onClick={clearMessages}
-            className="cdx-rounded-full cdx-h-8 cdx-w-8 cdx-grid cdx-place-items-center cdx-text-center cdx-bg-blue-500 hover:cdx-bg-blue-700 cdx-text-white"
-          >
-            <GiMagicBroom size={16} className="mx-auto" />
-          </button>
-        ) : (
-          <div />
-        )}
-        <div className="cdx-flex cdx-gap-2">
-          <ChangeChatModel />
-          {/* <ChatHistory /> */}
-        </div>
-      </div>
-
+          <div className="cdx-fixed cdx-bottom-0 cdx-left-0 cdx-right-0 cdx-flex cdx-flex-col ">
+          <div className="cdx-flex cdx-mx-3 cdx-items-center cdx-justify-end">
+            <div className="cdx-flex cdx-gap-2">
+              <ChangeChatModel />
+              {/* <ChatHistory /> */}
+            </div>
+          </div>
       <div className="cdx-m-2 cdx-rounded-md cdx-border dark:cdx-border-neutral-800 cdx-border-neutral-300 dark:cdx-bg-neutral-900/90 cdx-bg-neutral-200/90 focus:cdx-outline-none focus:cdx-ring-2 focus:cdx-ring-blue-900 focus:cdx-ring-opacity-50">
         {messageDraft.files.length > 0 && (
           <FilePreviewBar

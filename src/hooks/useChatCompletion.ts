@@ -212,3 +212,5 @@ ${contentToAnalyze}
     analyzePage,
   }
 }
+
+export type UseChatCompletion = ReturnType<typeof useChatCompletion>

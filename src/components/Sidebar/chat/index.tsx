@@ -2,16 +2,16 @@ import React, { useEffect } from 'react'
 import ChatList from './ChatList'
 import { SidebarInput } from './ChatInput'
 import PageSuggestions from './PageSuggestions'
-import { useChatCompletion } from '../../../hooks/useChatCompletion'
-import { SYSTEM_PROMPT } from '../../../config/prompts'
-import type { Settings } from '../../../config/settings'
 import { useMessageDraft } from '../../../hooks/useMessageDraft'
+import type { Settings } from '../../../config/settings'
+import type { UseChatCompletion } from '../../../hooks/useChatCompletion'
 
 interface ChatProps {
   settings: Settings
+  chatCompletion: UseChatCompletion
 }
 
-const Chat = ({ settings }: ChatProps) => {
+const Chat = ({ settings, chatCompletion }: ChatProps) => {
   const {
     messages,
     submitQuery,
@@ -20,14 +20,8 @@ const Chat = ({ settings }: ChatProps) => {
     cancelRequest,
     removeMessagePair,
     error,
-  } = useChatCompletion({
-    model: settings.chat.model!,
-    apiKey: settings.chat.openAIKey!,
-    mode: settings.chat.mode,
-    systemPrompt: SYSTEM_PROMPT,
-    baseURL: settings.chat.openAiBaseUrl || '',
-  })
-  
+  } = chatCompletion
+
   const {
     messageDraft,
     setMessageDraftText,

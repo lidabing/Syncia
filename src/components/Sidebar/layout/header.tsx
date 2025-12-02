@@ -1,55 +1,50 @@
-import { useEffect, useState } from 'react'
 import { BsRobot } from 'react-icons/bs'
 import { HiOutlineCog, HiX } from 'react-icons/hi'
+import { RiAddCircleLine } from 'react-icons/ri'
 
-const Header = () => {
-  const [shortcut, setShortcut] = useState<string | null>(null)
+interface HeaderProps {
+  clearMessages: () => void
+}
+
+const Header = ({ clearMessages }: HeaderProps) => {
   const onToggle = () => {
     chrome.runtime.sendMessage({ action: 'close-sidebar' })
   }
 
   const settingsPage = chrome.runtime.getURL('/src/pages/settings/index.html')
 
-  const handleModifyShortcut = () => {
-    chrome.tabs.update({ url: 'chrome://extensions/shortcuts' })
-  }
-
-  useEffect(() => {
-    chrome.commands.getAll((commands) => {
-      const command = commands.find(
-        (command) => command.name === 'open-sidebar',
-      )
-      if (command) setShortcut(command.shortcut || null)
-    })
-  }, [])
-
   return (
-    <div className="cdx-flex cdx-justify-between cdx-p-3.5 cdx-border-b dark:cdx-border-neutral-700/50 cdx-border-neutral-300">
-      <h1 className="cdx-text-2xl cdx-flex cdx-items-center cdx-gap-2 cdx-m-0 cdx-p-0">
-        <BsRobot className="cdx-text-blue-400" />
-        千羽助手
-      </h1>
+    <div className="cdx-flex cdx-justify-between cdx-items-center cdx-p-3.5 cdx-border-b dark:cdx-border-neutral-700/50 cdx-border-neutral-300">
+      <div className="cdx-flex cdx-items-center cdx-gap-2">
+        <BsRobot className="cdx-text-blue-400 cdx-text-2xl" />
+        <h1 className="cdx-text-lg cdx-m-0 cdx-p-0">千羽助手</h1>
+      </div>
 
       <div className="cdx-flex cdx-text-neutral-500 cdx-gap-2 cdx-items-center">
         <button
           type="button"
-          onClick={handleModifyShortcut}
-          className="cdx-flex cdx-items-center cdx-gap-2"
+          onClick={clearMessages}
+          title="New Chat"
+          className="cdx-text-xl hover:cdx-text-neutral-800 dark:hover:cdx-text-white"
         >
-          <span className="cdx-text-xs cdx-text-neutral-500  dark:cdx-bg-black/20 cdx-bg-black/10 cdx-border cdx-rounded-full cdx-border-neutral-400/30 dark:cdx-border-neutral-500/50 cdx-px-2 cdx-py-0.5">
-            {shortcut ? `快捷键: ${shortcut}` : '无快捷键'}
-          </span>
+          <RiAddCircleLine />
         </button>
         <a
           target="_blank"
           rel="noreferrer"
           tabIndex={0}
-          className="cdx-text-xl"
+          title="Settings"
+          className="cdx-text-xl hover:cdx-text-neutral-800 dark:hover:cdx-text-white"
           href={settingsPage}
         >
           <HiOutlineCog />
         </a>
-        <button type="button" className="cdx-text-xl" onClick={onToggle}>
+        <button
+          type="button"
+          title="Close Sidebar"
+          className="cdx-text-xl hover:cdx-text-neutral-800 dark:hover:cdx-text-white"
+          onClick={onToggle}
+        >
           <HiX />
         </button>
       </div>
