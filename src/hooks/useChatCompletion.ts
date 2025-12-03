@@ -50,11 +50,12 @@ export const useChatCompletion = ({
     return new ChatOpenAI({
       streaming: true,
       openAIApiKey: apiKey,
-      modelName: model,
+      modelName: model, // 保持原始模型名称
       configuration: {
         baseURL: baseURL,
       },
       temperature: Number(mode),
+      verbose: false,
     })
   }, [apiKey, model, mode, baseURL])
 
