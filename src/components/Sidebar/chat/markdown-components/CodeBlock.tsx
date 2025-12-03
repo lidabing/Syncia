@@ -28,7 +28,7 @@ const CodeBlock = (props: CodeProps) => {
     </SyntaxHighlighter>
   ) : (
     <code
-      className={`${modClass} cdx-bg-gray-200 dark:cdx-bg-gray-700 cdx-outline-gray-200 dark:cdx-outline-gray-700 cdx-rounded cdx-outline cdx-break-words`}
+      className={`${modClass} cdx-bg-neutral-100 dark:cdx-bg-neutral-800 cdx-px-1.5 cdx-py-0.5 cdx-rounded-md cdx-text-[0.9em] cdx-break-words`}
     >
       {children}
     </code>

@@ -41,10 +41,8 @@ async function handleFetchPreview(url: string): Promise<LinkPreviewData | null> 
     const settings = await chrome.storage.sync.get('SETTINGS')
     if (settings.SETTINGS?.smartLens?.enableAISummary && settings.SETTINGS?.chat?.openAIKey) {
       try {
-        // Extract text content for summary
-        const parser = new DOMParser()
-        const doc = parser.parseFromString(html, 'text/html')
-        const textContent = doc.body?.textContent || ''
+        // Extract text content using regex (DOMParser not available in Service Worker)
+        const textContent = extractTextFromHtml(html)
 
         if (textContent.length > 500) {
           const summary = await generateAISummary(
@@ -65,4 +63,30 @@ async function handleFetchPreview(url: string): Promise<LinkPreviewData | null> 
     console.error('Failed to fetch preview:', error)
     return null
   }
+}
+
+/**
+ * Extract text content from HTML without DOMParser (for Service Worker)
+ */
+function extractTextFromHtml(html: string): string {
+  // Remove script and style tags with their content
+  let text = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+  text = text.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+  
+  // Remove HTML tags
+  text = text.replace(/<[^>]+>/g, ' ')
+  
+  // Decode common HTML entities
+  text = text.replace(/&nbsp;/g, ' ')
+  text = text.replace(/&amp;/g, '&')
+  text = text.replace(/&lt;/g, '<')
+  text = text.replace(/&gt;/g, '>')
+  text = text.replace(/&quot;/g, '"')
+  text = text.replace(/&#39;/g, "'")
+  
+  // Collapse whitespace
+  text = text.replace(/\s+/g, ' ').trim()
+  
+  // Limit length for AI processing
+  return text.slice(0, 5000)
 }

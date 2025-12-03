@@ -106,15 +106,14 @@ export function SidebarInput({
 
   if (!isExpanded) {
     return (
-      <div className="cdx-fixed cdx-bottom-5 cdx-right-5 cdx-z-50">
+      <div className="cdx-fixed cdx-bottom-4 cdx-right-3 cdx-z-50">
         <button
           type="button"
           onClick={() => setIsExpanded(true)}
-          title="展开输入框"
-          className="cdx-flex cdx-items-center cdx-justify-center cdx-gap-2 cdx-bg-gradient-to-r cdx-from-blue-500 cdx-to-indigo-600 hover:cdx-from-blue-600 hover:cdx-to-indigo-700 cdx-text-white cdx-py-2.5 cdx-px-5 cdx-rounded-full cdx-shadow-lg cdx-transition-all cdx-text-sm cdx-font-medium"
+          title="输入问题"
+          className="cdx-flex cdx-items-center cdx-justify-center cdx-w-10 cdx-h-10 cdx-bg-blue-500 hover:cdx-bg-blue-600 cdx-text-white cdx-rounded-full cdx-shadow-lg cdx-transition-all hover:cdx-scale-105 cdx-opacity-80 hover:cdx-opacity-100"
         >
-          <FiChevronUp size={16} />
-          <span>输入问题</span>
+          <FiChevronUp size={20} />
         </button>
       </div>
     )

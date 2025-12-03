@@ -130,24 +130,21 @@ export const QuickMenu = ({ selectedText, setMenuOpen }: QuickMenuProps) => {
     <div 
       ref={menuRef}
       style={{ zIndex: 2147483647 }}
-      className="cdx-flex cdx-items-center cdx-gap-0.5 cdx-bg-white dark:cdx-bg-neutral-800 cdx-shadow-lg cdx-rounded-lg cdx-p-1.5 cdx-border cdx-border-neutral-200 dark:cdx-border-neutral-700"
+      className="cdx-flex cdx-items-center cdx-gap-1 cdx-bg-white dark:cdx-bg-neutral-900 cdx-shadow-xl cdx-rounded-xl cdx-p-1 cdx-border cdx-border-neutral-200/80 dark:cdx-border-neutral-700/80"
       onMouseDown={(e) => e.preventDefault()}
     >
-      {/* 拖动手柄 - 竖线 */}
+      {/* 拖动手柄 */}
       <div 
-        className="cdx-flex cdx-items-center cdx-justify-center cdx-gap-0.5 cdx-px-2 cdx-py-1.5 cdx-transition-opacity hover:cdx-opacity-60 cdx-cursor-grab active:cdx-cursor-grabbing"
+        className="cdx-flex cdx-items-center cdx-justify-center cdx-gap-0.5 cdx-px-1.5 cdx-py-2 cdx-transition-opacity hover:cdx-opacity-60 cdx-cursor-grab active:cdx-cursor-grabbing cdx-rounded-lg"
         onMouseDown={handleDragStart}
       >
-        <div className="cdx-w-0.5 cdx-h-4 cdx-bg-neutral-400 dark:cdx-bg-neutral-500 cdx-rounded-full" />
-        <div className="cdx-w-0.5 cdx-h-4 cdx-bg-neutral-400 dark:cdx-bg-neutral-500 cdx-rounded-full" />
+        <div className="cdx-w-0.5 cdx-h-3.5 cdx-bg-neutral-300 dark:cdx-bg-neutral-600 cdx-rounded-full" />
+        <div className="cdx-w-0.5 cdx-h-3.5 cdx-bg-neutral-300 dark:cdx-bg-neutral-600 cdx-rounded-full" />
       </div>
 
-      {/* AI 图标 - 清新的星星设计 */}
+      {/* AI 图标 */}
       <div
-        className="cdx-flex cdx-items-center cdx-justify-center cdx-w-7 cdx-h-7 cdx-rounded-md cdx-flex-shrink-0 cdx-mr-1"
-        style={{ 
-          background: 'linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%)',
-        }}
+        className="cdx-flex cdx-items-center cdx-justify-center cdx-w-7 cdx-h-7 cdx-rounded-lg cdx-flex-shrink-0 cdx-bg-gradient-to-br cdx-from-blue-500 cdx-to-indigo-600 cdx-shadow-sm"
       >
         <svg
           width="14"
@@ -175,35 +172,35 @@ export const QuickMenu = ({ selectedText, setMenuOpen }: QuickMenuProps) => {
             key={action.id}
             type="button"
             onClick={() => handleQuickAction(action.prompt)}
-            className="cdx-flex cdx-items-center cdx-gap-1.5 cdx-px-2.5 cdx-py-1.5 cdx-rounded-md cdx-text-sm !cdx-font-sans cdx-cursor-pointer cdx-transition-colors cdx-duration-200 cdx-border-none cdx-bg-transparent hover:cdx-bg-neutral-100 dark:hover:cdx-bg-neutral-700 cdx-text-neutral-700 dark:cdx-text-neutral-300"
+            className="cdx-flex cdx-items-center cdx-gap-1.5 cdx-px-3 cdx-py-1.5 cdx-rounded-lg cdx-text-[13px] !cdx-font-sans cdx-cursor-pointer cdx-transition-colors cdx-border-none cdx-bg-transparent hover:cdx-bg-neutral-100 dark:hover:cdx-bg-neutral-800 cdx-text-neutral-600 dark:cdx-text-neutral-300"
             title={action.name}
           >
-            <Icon size={14} className="cdx-flex-shrink-0" />
-            <span className="cdx-whitespace-nowrap cdx-font-normal">{action.name}</span>
+            <Icon size={14} className="cdx-flex-shrink-0 cdx-opacity-70" />
+            <span className="cdx-whitespace-nowrap cdx-font-medium">{action.name}</span>
           </button>
         )
       })}
 
       {/* 分隔线 */}
-      <div className="cdx-w-px cdx-h-5 cdx-bg-neutral-300 dark:cdx-bg-neutral-600 cdx-mx-1" />
+      <div className="cdx-w-px cdx-h-5 cdx-bg-neutral-200 dark:cdx-bg-neutral-700 cdx-mx-0.5" />
 
       {/* 更多功能下拉菜单 */}
       <DropdownMenu.Root open={dropdownOpen} onOpenChange={setDropdownOpen} modal={false}>
         <DropdownMenu.Trigger asChild>
           <button
             type="button"
-            className="cdx-flex cdx-items-center cdx-gap-1.5 cdx-px-2.5 cdx-py-1.5 cdx-rounded-md cdx-text-sm !cdx-font-sans cdx-cursor-pointer cdx-transition-colors cdx-duration-200 cdx-border-none cdx-bg-transparent hover:cdx-bg-neutral-100 dark:hover:cdx-bg-neutral-700 cdx-text-neutral-700 dark:cdx-text-neutral-300"
+            className="cdx-flex cdx-items-center cdx-gap-1.5 cdx-px-3 cdx-py-1.5 cdx-rounded-lg cdx-text-[13px] !cdx-font-sans cdx-cursor-pointer cdx-transition-colors cdx-border-none cdx-bg-transparent hover:cdx-bg-neutral-100 dark:hover:cdx-bg-neutral-800 cdx-text-neutral-600 dark:cdx-text-neutral-300"
             title="更多功能"
             onMouseDown={(e) => e.preventDefault()}
           >
-            <MoreIcon size={14} className="cdx-flex-shrink-0" />
-            <span className="cdx-whitespace-nowrap cdx-font-normal">更多</span>
+            <MoreIcon size={14} className="cdx-flex-shrink-0 cdx-opacity-70" />
+            <span className="cdx-whitespace-nowrap cdx-font-medium">更多</span>
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
           <DropdownMenu.Content
             style={{ zIndex: 2147483647, position: 'fixed' }}
-            className="cdx-flex cdx-flex-col cdx-min-w-[180px] cdx-max-w-[240px] cdx-gap-0 !cdx-font-sans cdx-bg-white dark:cdx-bg-neutral-800 cdx-shadow-lg cdx-p-1 cdx-rounded-lg cdx-border cdx-border-neutral-200 dark:cdx-border-neutral-700 cdx-text-neutral-800 dark:cdx-text-neutral-100"
+            className="cdx-flex cdx-flex-col cdx-min-w-[180px] cdx-max-w-[240px] !cdx-font-sans cdx-bg-white dark:cdx-bg-neutral-900 cdx-shadow-xl cdx-p-1.5 cdx-rounded-xl cdx-border cdx-border-neutral-200/80 dark:cdx-border-neutral-700/80 cdx-text-neutral-800 dark:cdx-text-neutral-100"
             sideOffset={6}
             align="end"
             alignOffset={0}
@@ -216,7 +213,7 @@ export const QuickMenu = ({ selectedText, setMenuOpen }: QuickMenuProps) => {
                 .filter((i) => !i.prompt)
                 .map((item) => (
                   <React.Fragment key={item.id}>
-                    <DropdownMenu.Label className="cdx-text-[11px] cdx-px-2.5 cdx-py-1.5 cdx-text-neutral-500 dark:cdx-text-neutral-400 cdx-font-medium">
+                    <DropdownMenu.Label className="cdx-text-[11px] cdx-px-2.5 cdx-py-2 cdx-text-neutral-400 dark:cdx-text-neutral-500 cdx-font-semibold cdx-uppercase cdx-tracking-wide">
                       {item.name}
                     </DropdownMenu.Label>
                     {item.children?.map((item) => (
@@ -231,7 +228,7 @@ export const QuickMenu = ({ selectedText, setMenuOpen }: QuickMenuProps) => {
 
               {noCategoryPrompts.length > 0 && (
                 <>
-                  <DropdownMenu.Label className="cdx-text-[11px] cdx-px-2.5 cdx-py-1.5 cdx-text-neutral-500 dark:cdx-text-neutral-400 cdx-font-medium">
+                  <DropdownMenu.Label className="cdx-text-[11px] cdx-px-2.5 cdx-py-2 cdx-text-neutral-400 dark:cdx-text-neutral-500 cdx-font-semibold cdx-uppercase cdx-tracking-wide">
                     其他
                   </DropdownMenu.Label>
                   {noCategoryPrompts.map((item) => (

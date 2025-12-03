@@ -50,10 +50,17 @@ const SmartLens: React.FC = () => {
           return
         }
         if (result.SETTINGS?.smartLens) {
+          // 合并设置，但确保 enabled 默认为 true（除非用户明确设置为 false）
+          const storedSettings = result.SETTINGS.smartLens
           setSettings({
             ...DEFAULT_SMART_LENS_SETTINGS,
-            ...result.SETTINGS.smartLens,
+            ...storedSettings,
+            // 如果用户没有明确禁用，默认启用
+            enabled: storedSettings.enabled !== false,
           })
+          console.log('[Smart Lens] Settings loaded:', storedSettings.enabled !== false ? 'enabled' : 'disabled')
+        } else {
+          console.log('[Smart Lens] No stored settings, using defaults with enabled=true')
         }
       })
     } catch (error) {
@@ -158,24 +165,41 @@ const SmartLens: React.FC = () => {
 
   // Handle Space key and Shift key - 直接在按键事件中触发预览
   useEffect(() => {
-    if (!settings.enabled) return
+    if (!settings.enabled) {
+      console.log('[Smart Lens] Disabled, skipping key listener setup')
+      return
+    }
+
+    console.log('[Smart Lens] Setting up key listeners, enabled:', settings.enabled)
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // 忽略键盘重复事件，防止连续触发
       if (e.repeat) return
       
-      console.log('[Smart Lens] Key down:', e.code, 'hoveredLink:', hoveredLinkRef.current?.href)
+      const link = hoveredLinkRef.current
+      console.log('[Smart Lens] Key down:', e.code, 'hoveredLink:', link?.href || 'none')
       
       if (e.code === 'Space') {
         // 如果在输入框中，不触发
         const activeElement = document.activeElement
         if (activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA' || (activeElement as HTMLElement)?.isContentEditable) {
+          console.log('[Smart Lens] In input field, ignoring Space')
           return
         }
+        
+        if (!link) {
+          console.log('[Smart Lens] No link hovered, ignoring Space')
+          return
+        }
+        
         e.preventDefault() // 阻止页面滚动
         triggerPreview()
       }
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+        if (!link) {
+          console.log('[Smart Lens] No link hovered, ignoring Shift')
+          return
+        }
         triggerPreview()
       }
     }

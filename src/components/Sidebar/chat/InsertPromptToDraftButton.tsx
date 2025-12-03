@@ -23,7 +23,7 @@ const InsertPromptToDraftButton = ({
         <button
           type="button"
           title="插入快捷提示词"
-          className="cdx-flex cdx-items-center cdx-justify-center cdx-bg-neutral-200 hover:cdx-bg-neutral-300 cdx-text-neutral-600 dark:cdx-text-neutral-300 dark:cdx-bg-neutral-800 dark:hover:cdx-bg-neutral-700 cdx-w-8 cdx-h-8 cdx-rounded-lg cdx-transition-all cdx-duration-200 hover:cdx-scale-105"
+          className="cdx-flex cdx-items-center cdx-justify-center cdx-text-neutral-400 dark:cdx-text-neutral-500 hover:cdx-text-neutral-600 dark:hover:cdx-text-neutral-300 hover:cdx-bg-neutral-200 dark:hover:cdx-bg-neutral-700 cdx-w-8 cdx-h-8 cdx-rounded-lg cdx-transition-colors"
         >
           <RiFileCopy2Line size={18} />
         </button>
@@ -31,7 +31,7 @@ const InsertPromptToDraftButton = ({
       <DropdownMenu.Portal>
         <DropdownMenu.Content
           style={{ zIndex: 2147483647 }}
-          className="cdx-flex cdx-flex-col cdx-min-w-[150px] cdx-gap-2 cdx-backdrop-blur-sm !cdx-font-sans cdx-m-2 cdx-bg-neutral-50 cdx-shadow-md cdx-p-2 cdx-rounded dark:cdx-bg-neutral-800 cdx-text-neutral-800 dark:cdx-text-neutral-100"
+          className="cdx-flex cdx-flex-col cdx-min-w-[180px] cdx-gap-1 !cdx-font-sans cdx-m-2 cdx-bg-white dark:cdx-bg-neutral-800 cdx-shadow-lg cdx-border cdx-border-neutral-200 dark:cdx-border-neutral-700 cdx-p-1.5 cdx-rounded-xl cdx-text-neutral-800 dark:cdx-text-neutral-100"
         >
           <DropdownMenu.Group>
             {promptsArray
