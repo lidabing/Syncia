@@ -2,6 +2,7 @@ import React, { useEffect, useCallback } from 'react'
 import ChatList from './ChatList'
 import { SidebarInput } from './ChatInput'
 import { useMessageDraft } from '../../../hooks/useMessageDraft'
+import { ChatRole } from '../../../hooks/useCurrentChat'
 import type { Settings } from '../../../config/settings'
 import type { UseChatCompletion } from '../../../hooks/useChatCompletion'
 
@@ -64,7 +65,7 @@ const Chat = ({ settings, chatCompletion }: ChatProps) => {
       const userMessage = messages[aiMessageIndex - 1]
 
       // Ensure the previous message is from the user
-      if (userMessage && userMessage.role === 'user') {
+      if (userMessage && userMessage.role === ChatRole.USER) {
         // We use the user's message timestamp to remove the correct pair
         removeMessagePair(userMessage.timestamp)
         handleSubmitQuery({
