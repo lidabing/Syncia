@@ -12,7 +12,10 @@ const InsertPromptToDraftButton = ({
   setMessageDraftText,
 }: InsertPromptToDraftButtonProps) => {
   const [prompts] = usePrompts()
-  const noCategoryPrompts = prompts.filter((i) => !!i.prompt)
+  
+  // 确保 prompts 是数组，防止存储数据损坏导致崩溃
+  const promptsArray = Array.isArray(prompts) ? prompts : []
+  const noCategoryPrompts = promptsArray.filter((i) => !!i.prompt)
 
   return (
     <DropdownMenu.Root>
@@ -31,7 +34,7 @@ const InsertPromptToDraftButton = ({
           className="cdx-flex cdx-flex-col cdx-min-w-[150px] cdx-gap-2 cdx-backdrop-blur-sm !cdx-font-sans cdx-m-2 cdx-bg-neutral-50 cdx-shadow-md cdx-p-2 cdx-rounded dark:cdx-bg-neutral-800 cdx-text-neutral-800 dark:cdx-text-neutral-100"
         >
           <DropdownMenu.Group>
-            {prompts
+            {promptsArray
               .filter((i) => !i.prompt)
               .map((item) => (
                 <React.Fragment key={item.id}>

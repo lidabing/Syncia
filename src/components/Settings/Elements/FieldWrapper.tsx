@@ -18,20 +18,20 @@ const FieldWrapper = ({
   return (
     <form
       data-row={row || undefined}
-      className="cdx-flex cdx-flex-col cdx-gap-1 data-[row]:cdx-items-center cdx-my-4 data-[row]:cdx-flex-row data-[row]:cdx-justify-between data-[row]:cdx-gap-2"
+      className="cdx-group cdx-flex cdx-flex-col cdx-gap-2 data-[row]:cdx-items-center cdx-py-4 cdx-border-b cdx-border-neutral-100 dark:cdx-border-neutral-800 last:cdx-border-b-0 data-[row]:cdx-flex-row data-[row]:cdx-justify-between data-[row]:cdx-gap-4"
       onSubmit={onSubmit}
     >
-      <div>
-        <div className="cdx-text-xl dark:cdx-text-neutral-200 cdx-text-neutral-700">
+      <div className="cdx-flex-1">
+        <div className="cdx-text-sm cdx-font-medium cdx-text-neutral-700 dark:cdx-text-neutral-200">
           {title}
         </div>
         {description && (
-          <p className="cdx-text-sm cdx-mt-2 cdx-text-neutral-400">
+          <p className="cdx-text-xs cdx-mt-1 cdx-text-neutral-500 dark:cdx-text-neutral-400 cdx-leading-relaxed">
             {description}
           </p>
         )}
       </div>
-      <div className="cdx-mt-2">{children}</div>
+      <div className="cdx-mt-2 data-[row]:cdx-mt-0 cdx-shrink-0">{children}</div>
     </form>
   )
 }

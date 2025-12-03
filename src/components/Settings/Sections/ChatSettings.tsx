@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'
+import { HiOutlineCheck, HiOutlineKey } from 'react-icons/hi'
 import { Mode } from '../../../config/settings'
 import { useChatModels } from '../../../hooks/useChatModels'
 import { useSettings } from '../../../hooks/useSettings'
@@ -64,27 +65,34 @@ const ChatSettings = () => {
   }
 
   return (
-    <div className="cdx-w-full cdx-flex-shrink-0 cdx-rounded-md">
-      <SectionHeading title="聊天设置" />
+    <div className="settings-card">
+      <SectionHeading 
+        title="聊天设置" 
+        icon="chat"
+        description="配置 AI 模型和 API"
+      />
       <FieldWrapper
         title="OpenAI API 密钥"
-        description="你可以从 https://platform.openai.com/api-keys 获取你的 OpenAI API 密钥"
+        description="从 platform.openai.com 获取"
         onSubmit={handleOpenAiKeySubmit}
       >
         <div className="cdx-flex cdx-gap-2 cdx-items-center">
           <div className="cdx-relative cdx-w-full">
+            <div className="cdx-absolute cdx-left-3 cdx-top-1/2 cdx-transform cdx--translate-y-1/2 cdx-text-neutral-400">
+              <HiOutlineKey />
+            </div>
             <input
               required
               ref={OpenAiApiKeyInputRef}
               name="openAiApiKey"
-              placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              placeholder="sk-xxxxxxxxxxxxxxxx"
               defaultValue={chatSettings.openAIKey || ''}
               type={showPassword ? 'text' : 'password'}
-              className="input"
+              className="input cdx-pl-9 cdx-pr-10"
             />
             <button
               type="button"
-              className="cdx-absolute cdx-right-4 cdx-top-1/2 cdx-transform cdx--translate-y-1/2 cdx-text-neutral-500 dark:cdx-text-neutral-200 cdx-bg-transparent cdx-outline-none cdx-cursor-pointer"
+              className="cdx-absolute cdx-right-3 cdx-top-1/2 cdx-transform cdx--translate-y-1/2 cdx-text-neutral-400 hover:cdx-text-neutral-600 dark:hover:cdx-text-neutral-300 cdx-bg-transparent cdx-outline-none cdx-cursor-pointer cdx-transition-colors"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? (
@@ -95,13 +103,14 @@ const ChatSettings = () => {
             </button>
           </div>
           <button type="submit" className="btn">
-            更新
+            <HiOutlineCheck />
+            保存
           </button>
         </div>
       </FieldWrapper>
       <FieldWrapper
-        title="OpenAI Base URL"
-        description="输入你的自定义 OpenAI API 基础 URL（可选）"
+        title="自定义 API 地址"
+        description="用于 Ollama 或其他兼容 OpenAI 的服务"
         onSubmit={handleOpenAiKeySubmit}
       >
         <div className="cdx-flex cdx-gap-2 cdx-items-center">
@@ -109,17 +118,18 @@ const ChatSettings = () => {
             ref={OpenAiBaseUrlInputRef}
             name="openAiBaseUrl"
             defaultValue={chatSettings.openAiBaseUrl || ''}
-            placeholder="输入你的 OpenAI Base URL"
-            className="input cdx-w-full"
+            placeholder="https://api.openai.com/v1"
+            className="input cdx-w-full cdx-font-mono cdx-text-sm"
           />
           <button type="submit" className="btn">
-            更新
+            <HiOutlineCheck />
+            保存
           </button>
         </div>
       </FieldWrapper>
       <FieldWrapper
         title="模型"
-        description="在可用的聊天模型中选择"
+        description="选择 AI 模型"
         row={true}
       >
         <select
@@ -135,8 +145,8 @@ const ChatSettings = () => {
         </select>
       </FieldWrapper>
       <FieldWrapper
-        title="模式"
-        description="调整回复的温度。创意模式将生成更多非确定性的回复，精确模式将生成更多确定性的回复。"
+        title="创意度"
+        description="创意模式生成更多样化的回复"
         row={true}
       >
         <select

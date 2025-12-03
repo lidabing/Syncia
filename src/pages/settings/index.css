@@ -4,19 +4,46 @@
 
 @layer components {
   .input {
-    @apply cdx-p-2 cdx-text-base cdx-w-full cdx-rounded-md cdx-border dark:cdx-border-neutral-800 dark:cdx-bg-neutral-900/80 cdx-border-neutral-200 cdx-bg-neutral-200/90 focus:cdx-outline-none focus:cdx-ring-2 focus:cdx-ring-blue-900 focus:cdx-ring-opacity-50;
+    @apply cdx-p-3 cdx-text-sm cdx-w-full cdx-rounded-xl cdx-border dark:cdx-border-neutral-700 dark:cdx-bg-neutral-800/50 cdx-border-neutral-200 cdx-bg-white focus:cdx-outline-none focus:cdx-ring-2 focus:cdx-ring-blue-500/50 focus:cdx-border-blue-500 cdx-transition-all cdx-duration-200;
   }
   .input-success {
-    @apply cdx-border-green-500 cdx-text-green-500 cdx-bg-green-500/10;
+    @apply cdx-border-green-500 cdx-text-green-600 cdx-bg-green-50 dark:cdx-bg-green-500/10;
   }
   .input-failed {
-    @apply cdx-border-red-500 cdx-text-red-500 cdx-bg-red-500/10;
+    @apply cdx-border-red-500 cdx-text-red-600 cdx-bg-red-50 dark:cdx-bg-red-500/10;
   }
   .btn {
-    @apply cdx-flex cdx-whitespace-nowrap cdx-gap-2 cdx-text-base disabled:cdx-bg-slate-500 disabled:cdx-text-slate-400 cdx-items-center cdx-bg-blue-500 hover:cdx-bg-blue-700 cdx-text-white cdx-py-2 cdx-px-4 cdx-rounded;
+    @apply cdx-flex cdx-whitespace-nowrap cdx-gap-2 cdx-text-sm cdx-font-medium disabled:cdx-opacity-50 disabled:cdx-cursor-not-allowed cdx-items-center cdx-bg-gradient-to-r cdx-from-blue-500 cdx-to-blue-600 hover:cdx-from-blue-600 hover:cdx-to-blue-700 cdx-text-white cdx-py-2.5 cdx-px-5 cdx-rounded-xl cdx-shadow-sm hover:cdx-shadow-md cdx-transition-all cdx-duration-200;
+  }
+  .btn-secondary {
+    @apply cdx-flex cdx-whitespace-nowrap cdx-gap-2 cdx-text-sm cdx-font-medium cdx-items-center cdx-bg-neutral-100 dark:cdx-bg-neutral-800 cdx-text-neutral-700 dark:cdx-text-neutral-300 cdx-py-2.5 cdx-px-5 cdx-rounded-xl hover:cdx-bg-neutral-200 dark:hover:cdx-bg-neutral-700 cdx-transition-all cdx-duration-200;
+  }
+  .btn-danger {
+    @apply cdx-flex cdx-whitespace-nowrap cdx-gap-2 cdx-text-sm cdx-font-medium cdx-items-center cdx-bg-gradient-to-r cdx-from-red-500 cdx-to-red-600 hover:cdx-from-red-600 hover:cdx-to-red-700 cdx-text-white cdx-py-2.5 cdx-px-5 cdx-rounded-xl cdx-shadow-sm hover:cdx-shadow-md cdx-transition-all cdx-duration-200;
+  }
+  .settings-card {
+    @apply cdx-bg-white dark:cdx-bg-neutral-800/50 cdx-rounded-2xl cdx-border cdx-border-neutral-200 dark:cdx-border-neutral-700/50 cdx-p-6 cdx-backdrop-blur-sm cdx-shadow-sm;
+  }
+  .settings-section-icon {
+    @apply cdx-w-10 cdx-h-10 cdx-rounded-xl cdx-flex cdx-items-center cdx-justify-center cdx-text-lg;
   }
 }
 
 * {
   word-break: break-word;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
 }

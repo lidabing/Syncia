@@ -43,7 +43,7 @@ export const useChatHistory = () => {
 
   const createChatHistory = (name: string, newId = getUUID()) => {
     setHistory((prev) => [
-      ...prev,
+      ...(Array.isArray(prev) ? prev : []),
       {
         id: newId,
         name,
@@ -59,18 +59,24 @@ export const useChatHistory = () => {
   const deleteChatHistory = async (id: string | null) => {
     if (!id) return
     chrome.storage.local.remove(`CHAT-${id}`)
-    setHistory((prev) => prev.filter((h) => h.id !== id))
-    const newCurrentChatId = history.find((h) => h.id !== id)?.id ?? null
+    setHistory((prev) => {
+      const arr = Array.isArray(prev) ? prev : []
+      return arr.filter((h) => h.id !== id)
+    })
+    const historyArray = Array.isArray(history) ? history : []
+    const newCurrentChatId = historyArray.find((h) => h.id !== id)?.id ?? null
     setCurrentChatId(newCurrentChatId)
   }
 
   const getChatHistory = (id: string) => {
-    return history.find((h) => h.id === id)
+    const historyArray = Array.isArray(history) ? history : []
+    return historyArray.find((h) => h.id === id)
   }
 
   const updateChatHistory = (id: string, name: string) => {
-    setHistory((prev) =>
-      prev.map((h) => {
+    setHistory((prev) => {
+      const arr = Array.isArray(prev) ? prev : []
+      return arr.map((h) => {
         if (h.id === id) {
           return {
             ...h,
@@ -79,8 +85,8 @@ export const useChatHistory = () => {
           }
         }
         return h
-      }),
-    )
+      })
+    })
   }
 
   return {
@@ -90,6 +96,6 @@ export const useChatHistory = () => {
     deleteChatHistory,
     getChatHistory,
     updateChatHistory,
-    history,
+    history: Array.isArray(history) ? history : [],
   }
 }
