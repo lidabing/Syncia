@@ -121,9 +121,9 @@ export function SidebarInput({
   }
 
   return (
-    <div className="cdx-fixed cdx-bottom-0 cdx-left-0 cdx-right-0 cdx-flex cdx-flex-col cdx-border-t dark:cdx-border-neutral-800/50 cdx-border-neutral-200/50 cdx-bg-white/95 dark:cdx-bg-neutral-900/95 cdx-backdrop-blur-md cdx-shadow-2xl">
+    <div className="cdx-fixed cdx-bottom-0 cdx-left-0 cdx-right-0 cdx-flex cdx-flex-col cdx-border-t dark:cdx-border-neutral-800/50 cdx-border-neutral-200/50 cdx-bg-white dark:cdx-bg-neutral-900 cdx-shadow-2xl">
       {/* 顶部工具栏 */}
-      <div className="cdx-flex cdx-justify-between cdx-items-center cdx-px-3 cdx-py-2 cdx-border-b dark:cdx-border-neutral-800/30 cdx-border-neutral-200/30">
+      <div className="cdx-flex cdx-justify-between cdx-items-center cdx-px-2.5 cdx-py-1.5 cdx-border-b dark:cdx-border-neutral-800/30 cdx-border-neutral-200/30">
         <div className="cdx-flex cdx-items-center cdx-gap-2">
           <ChangeChatModel />
         </div>
@@ -134,7 +134,7 @@ export function SidebarInput({
 
       {/* 文件预览 */}
       {messageDraft.files.length > 0 && (
-        <div className="cdx-px-3 cdx-py-2 cdx-border-b dark:cdx-border-neutral-800/30 cdx-border-neutral-200/30">
+        <div className="cdx-px-2.5 cdx-py-1.5 cdx-border-b dark:cdx-border-neutral-800/30 cdx-border-neutral-200/30">
           <FilePreviewBar
             files={messageDraft.files}
             removeFile={removeMessageDraftFile}
@@ -146,12 +146,12 @@ export function SidebarInput({
       <div className="cdx-relative">
         <TextareaAutosize
           minRows={2}
-          maxRows={8}
+          maxRows={6}
           maxLength={MAX_MESSAGE_LENGTH}
           placeholder="输入消息，Shift+Enter 换行..."
           value={messageDraft.text}
           disabled={loading}
-          className="cdx-w-full cdx-px-3 cdx-py-3 cdx-pr-24 focus:!cdx-outline-none placeholder:cdx-text-neutral-400 dark:placeholder:cdx-text-neutral-500 cdx-text-sm cdx-resize-none cdx-bg-transparent !cdx-border-none dark:cdx-text-neutral-100 cdx-text-neutral-900"
+          className="cdx-w-full cdx-px-2.5 cdx-py-2 cdx-pr-20 focus:!cdx-outline-none placeholder:cdx-text-neutral-400 dark:placeholder:cdx-text-neutral-500 cdx-text-[13px] cdx-resize-none cdx-bg-transparent !cdx-border-none dark:cdx-text-neutral-100 cdx-text-neutral-900"
           onChange={(e) => {
             e.preventDefault()
             setMessageDraftText(e.target.value)
@@ -165,13 +165,13 @@ export function SidebarInput({
         />
         
         {/* 右下角发送按钮 */}
-        <div className="cdx-absolute cdx-bottom-3 cdx-right-3">
+        <div className="cdx-absolute cdx-bottom-2 cdx-right-2.5">
           {!delayedLoading ? sendButton : stopButton}
         </div>
       </div>
 
       {/* 底部工具栏 */}
-      <div className="cdx-flex cdx-justify-between cdx-items-center cdx-px-3 cdx-py-2 cdx-border-t dark:cdx-border-neutral-800/30 cdx-border-neutral-200/30 cdx-bg-neutral-50/50 dark:cdx-bg-neutral-800/30">
+      <div className="cdx-flex cdx-justify-between cdx-items-center cdx-px-2.5 cdx-py-1.5 cdx-border-t dark:cdx-border-neutral-800/30 cdx-border-neutral-200/30 cdx-bg-neutral-50/50 dark:cdx-bg-neutral-800/20">
         <div className="cdx-flex cdx-items-center cdx-gap-1.5">
           {isVisionModel && (
             <ImageCaptureButton addMessageDraftFile={addMessageDraftFile} />
@@ -182,16 +182,16 @@ export function SidebarInput({
         </div>
         
         <div className="cdx-flex cdx-items-center cdx-gap-2">
-          <span className="cdx-text-xs cdx-text-neutral-400 dark:cdx-text-neutral-500">
+          <span className="cdx-text-[10px] cdx-text-neutral-400 dark:cdx-text-neutral-500">
             {messageDraft.text.length}/{MAX_MESSAGE_LENGTH}
           </span>
           <button
             type="button"
             onClick={() => setIsExpanded(false)}
             title="收起输入框"
-            className="cdx-flex cdx-items-center cdx-justify-center cdx-w-7 cdx-h-7 hover:cdx-bg-neutral-200 dark:hover:cdx-bg-neutral-700 cdx-rounded-md cdx-transition-colors cdx-duration-200 cdx-text-neutral-500 dark:cdx-text-neutral-400"
+            className="cdx-flex cdx-items-center cdx-justify-center cdx-w-6 cdx-h-6 hover:cdx-bg-neutral-200 dark:hover:cdx-bg-neutral-700 cdx-rounded-md cdx-transition-colors cdx-duration-200 cdx-text-neutral-500 dark:cdx-text-neutral-400"
           >
-            <FiChevronDown size={16} />
+            <FiChevronDown size={14} />
           </button>
         </div>
       </div>

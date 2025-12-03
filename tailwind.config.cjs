@@ -18,5 +18,20 @@ module.exports = {
         },
       })
     },
+    function ({ addUtilities }) {
+      addUtilities({
+        '.animate-shimmer': {
+          'animation': 'shimmer 2s infinite linear',
+        },
+      })
+    },
+    function ({ addBase }) {
+      addBase({
+        '@keyframes shimmer': {
+          '0%': { 'background-position': '-200% 0' },
+          '100%': { 'background-position': '200% 0' },
+        },
+      })
+    },
   ],
 }

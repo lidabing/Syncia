@@ -78,11 +78,11 @@ const ChatList = ({
     if (isUser) {
       // User question - simple text with label
       return (
-        <div key={`${msg.timestamp}-${i}`} className="cdx-group cdx-px-3 cdx-py-3 cdx-bg-blue-50/30 dark:cdx-bg-blue-900/10">
-          <div className="cdx-flex cdx-items-center cdx-justify-between cdx-mb-1.5">
+        <div key={`${msg.timestamp}-${i}`} className="cdx-group cdx-px-2.5 cdx-py-2 cdx-bg-blue-50/30 dark:cdx-bg-blue-900/10">
+          <div className="cdx-flex cdx-items-center cdx-justify-between cdx-mb-1">
             <div className="cdx-inline-flex cdx-items-center cdx-gap-1.5">
-              <div className="cdx-w-1 cdx-h-3.5 cdx-bg-blue-500 cdx-rounded-full"></div>
-              <span className="cdx-text-[11px] cdx-font-bold cdx-text-blue-600 dark:cdx-text-blue-400 cdx-uppercase cdx-tracking-wide">问</span>
+              <div className="cdx-w-0.5 cdx-h-3 cdx-bg-blue-500 cdx-rounded-full"></div>
+              <span className="cdx-text-[10px] cdx-font-bold cdx-text-blue-600 dark:cdx-text-blue-400 cdx-uppercase cdx-tracking-wide">问</span>
             </div>
             <button
               type="button"
@@ -90,10 +90,10 @@ const ChatList = ({
               className="cdx-p-1 cdx-rounded-md cdx-text-neutral-400 hover:cdx-text-red-500 hover:cdx-bg-red-50 dark:hover:cdx-bg-red-900/20 cdx-opacity-0 group-hover:cdx-opacity-100 cdx-transition-all"
               title="删除"
             >
-              <RiCloseLine className="cdx-text-sm" />
+              <RiCloseLine size={14} />
             </button>
           </div>
-          <div className="cdx-text-sm cdx-text-neutral-800 dark:cdx-text-neutral-100 cdx-leading-relaxed cdx-font-medium">
+          <div className="cdx-text-[13px] cdx-text-neutral-800 dark:cdx-text-neutral-100 cdx-leading-relaxed">
             {msg.content}
           </div>
           {msg.files && <FilePreviewBar files={msg.files} />}
@@ -102,20 +102,20 @@ const ChatList = ({
     } else {
       // AI answer - with markdown support
       return (
-        <div key={`${msg.timestamp}-${i}`} className="cdx-group cdx-px-3 cdx-py-3.5 cdx-border-b dark:cdx-border-neutral-800/50 cdx-border-neutral-200/50 last:cdx-border-0">
-          <div className="cdx-flex cdx-items-center cdx-justify-between cdx-mb-2">
+        <div key={`${msg.timestamp}-${i}`} className="cdx-group cdx-px-2.5 cdx-py-2.5 cdx-border-b dark:cdx-border-neutral-800/50 cdx-border-neutral-200/50 last:cdx-border-0">
+          <div className="cdx-flex cdx-items-center cdx-justify-between cdx-mb-1.5">
             <div className="cdx-inline-flex cdx-items-center cdx-gap-1.5">
-              <div className="cdx-w-1 cdx-h-3.5 cdx-bg-neutral-400 dark:cdx-bg-neutral-500 cdx-rounded-full"></div>
-              <span className="cdx-text-[11px] cdx-font-bold cdx-text-neutral-500 dark:cdx-text-neutral-400 cdx-uppercase cdx-tracking-wide">答</span>
+              <div className="cdx-w-0.5 cdx-h-3 cdx-bg-neutral-400 dark:cdx-bg-neutral-500 cdx-rounded-full"></div>
+              <span className="cdx-text-[10px] cdx-font-bold cdx-text-neutral-500 dark:cdx-text-neutral-400 cdx-uppercase cdx-tracking-wide">答</span>
             </div>
             <div className="cdx-flex cdx-gap-0.5 cdx-opacity-0 group-hover:cdx-opacity-100 cdx-transition-opacity">
               <button
                 type="button"
                 onClick={() => onRegenerate(msg.timestamp)}
-                className="cdx-p-1.5 cdx-rounded-md cdx-text-neutral-400 hover:cdx-text-blue-600 dark:hover:cdx-text-blue-400 hover:cdx-bg-blue-50 dark:hover:cdx-bg-blue-900/20 cdx-transition-colors"
+                className="cdx-p-1 cdx-rounded-md cdx-text-neutral-400 hover:cdx-text-blue-600 dark:hover:cdx-text-blue-400 hover:cdx-bg-blue-50 dark:hover:cdx-bg-blue-900/20 cdx-transition-colors"
                 title="重新生成"
               >
-                <RiRefreshLine className="cdx-text-sm" />
+                <RiRefreshLine size={14} />
               </button>
               <button
                 type="button"
@@ -125,10 +125,10 @@ const ChatList = ({
                     _payload: { content: msg.content },
                   })
                 }
-                className="cdx-p-1.5 cdx-rounded-md cdx-text-neutral-400 hover:cdx-text-blue-600 dark:hover:cdx-text-blue-400 hover:cdx-bg-blue-50 dark:hover:cdx-bg-blue-900/20 cdx-transition-colors"
+                className="cdx-p-1 cdx-rounded-md cdx-text-neutral-400 hover:cdx-text-blue-600 dark:hover:cdx-text-blue-400 hover:cdx-bg-blue-50 dark:hover:cdx-bg-blue-900/20 cdx-transition-colors"
                 title="复制"
               >
-                <RiFileCopyLine className="cdx-text-sm" />
+                <RiFileCopyLine size={14} />
               </button>
             </div>
           </div>
@@ -152,46 +152,46 @@ const ChatList = ({
   return (
     <div
       ref={containerRef}
-      className="cdx-flex-grow cdx-overflow-y-auto cdx-pb-12 cdx-break-words scrollbar-hide"
+      className="cdx-flex-grow cdx-overflow-y-auto cdx-pb-2 cdx-break-words scrollbar-hide"
     >
       {filteredMsgs.length < 1 ? (
-        <div className="cdx-flex cdx-flex-col cdx-items-center cdx-justify-center cdx-h-full cdx-px-6">
+        <div className="cdx-flex cdx-flex-col cdx-items-center cdx-justify-center cdx-h-full cdx-px-4">
           <img
             alt="robot"
             src="/images/robot.png"
-            className="cdx-opacity-80"
-            height={240}
-            width={240}
+            className="cdx-opacity-70"
+            height={200}
+            width={200}
           />
-          <h1 className="cdx-text-base cdx-font-semibold cdx-text-neutral-600 dark:cdx-text-neutral-400 cdx-mt-2">
+          <h1 className="cdx-text-sm cdx-font-semibold cdx-text-neutral-600 dark:cdx-text-neutral-400 cdx-mt-2">
             选择上方建议开始对话
           </h1>
-          <p className="cdx-text-xs cdx-text-neutral-500 dark:cdx-text-neutral-500 cdx-mt-1">
+          <p className="cdx-text-xs cdx-text-neutral-500 dark:cdx-text-neutral-500 cdx-mt-0.5">
             或点击右下角按钮自定义提问
           </p>
         </div>
       ) : (
-        <div className="cdx-py-2">
+        <div className="cdx-py-1">
           {/* 历史消息折叠区域 */}
           {historyMessages.length > 0 && (
-            <div className="cdx-mb-2">
+            <div className="cdx-mb-1.5">
               <button
                 type="button"
                 onClick={() => setIsHistoryCollapsed(!isHistoryCollapsed)}
-                className="cdx-w-full cdx-flex cdx-items-center cdx-justify-between cdx-px-3 cdx-py-2 cdx-bg-neutral-100/50 dark:cdx-bg-neutral-800/30 hover:cdx-bg-neutral-100 dark:hover:cdx-bg-neutral-800/50 cdx-transition-colors cdx-rounded-lg cdx-mx-0"
+                className="cdx-w-full cdx-flex cdx-items-center cdx-justify-between cdx-px-2.5 cdx-py-1.5 cdx-bg-neutral-100/50 dark:cdx-bg-neutral-800/30 hover:cdx-bg-neutral-100 dark:hover:cdx-bg-neutral-800/50 cdx-transition-colors cdx-rounded-md cdx-mx-0"
               >
                 <span className="cdx-text-xs cdx-font-medium cdx-text-neutral-600 dark:cdx-text-neutral-400">
                   历史对话 ({historyMessages.filter(m => m.role === ChatRole.USER).length} 条)
                 </span>
                 {isHistoryCollapsed ? (
-                  <RiArrowDownSLine className="cdx-text-neutral-500" size={18} />
+                  <RiArrowDownSLine className="cdx-text-neutral-500" size={16} />
                 ) : (
-                  <RiArrowUpSLine className="cdx-text-neutral-500" size={18} />
+                  <RiArrowUpSLine className="cdx-text-neutral-500" size={16} />
                 )}
               </button>
               
               {!isHistoryCollapsed && (
-                <div className="cdx-mt-2 cdx-border-l-2 cdx-border-neutral-200 dark:cdx-border-neutral-700 cdx-ml-3 cdx-pl-2">
+                <div className="cdx-mt-1.5 cdx-border-l-2 cdx-border-neutral-200 dark:cdx-border-neutral-700 cdx-ml-2.5 cdx-pl-1.5">
                   {historyMessages.map((msg, i) => renderMessage(msg, i))}
                 </div>
               )}
@@ -205,18 +205,18 @@ const ChatList = ({
         </div>
       )}
       {messages[messages.length - 1]?.role === ChatRole.USER && (
-        <div className="cdx-px-3 cdx-py-3">
+        <div className="cdx-px-2.5 cdx-py-2">
           {generating && !error && (
-            <div className="cdx-flex cdx-items-center cdx-gap-2 cdx-px-3 cdx-py-2.5 cdx-rounded-lg cdx-bg-blue-50/50 dark:cdx-bg-blue-900/10 cdx-border cdx-border-blue-200/50 dark:cdx-border-blue-800/30">
-              <RiLoader4Line className="cdx-animate-spin cdx-text-blue-500" size={16} />
-              <span className="cdx-text-xs cdx-text-blue-600 dark:cdx-text-blue-400 cdx-font-medium">正在生成回答...</span>
+            <div className="cdx-flex cdx-items-center cdx-gap-2 cdx-px-2.5 cdx-py-2 cdx-rounded-md cdx-bg-blue-50/50 dark:cdx-bg-blue-900/10 cdx-border cdx-border-blue-200/50 dark:cdx-border-blue-800/30">
+              <RiLoader4Line className="cdx-animate-spin cdx-text-blue-500" size={14} />
+              <span className="cdx-text-xs cdx-text-blue-600 dark:cdx-text-blue-400">正在生成回答...</span>
             </div>
           )}
           {error && (
-            <div className="cdx-flex cdx-items-start cdx-gap-2 cdx-px-3 cdx-py-2.5 cdx-rounded-lg cdx-bg-red-50 dark:cdx-bg-red-900/20 cdx-border cdx-border-red-200 dark:cdx-border-red-800/50">
+            <div className="cdx-flex cdx-items-start cdx-gap-2 cdx-px-2.5 cdx-py-2 cdx-rounded-md cdx-bg-red-50 dark:cdx-bg-red-900/20 cdx-border cdx-border-red-200 dark:cdx-border-red-800/50">
               <RiErrorWarningLine
                 className="cdx-text-red-500 dark:cdx-text-red-400 cdx-flex-shrink-0 cdx-mt-0.5"
-                size={16}
+                size={14}
               />
               <span className="cdx-text-xs cdx-text-red-600 dark:cdx-text-red-400">{error.message}</span>
             </div>

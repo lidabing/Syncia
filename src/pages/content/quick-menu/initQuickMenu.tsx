@@ -9,8 +9,14 @@ import type { Settings } from '../../../config/settings'
  * Initializes the visual quick menu. (when the user selects text)
  * It is only initialized if the user has enabled it in the settings.
  * If the user has excluded the current site, it is not initialized.
+ * 
+ * @deprecated Temporarily disabled - Quick menu is hidden for now but code is preserved for future use
  */
 const initQuickMenu = () => {
+  // TEMPORARILY DISABLED - Quick menu feature is hidden but code preserved
+  // Uncomment the code below to re-enable the quick menu feature
+  
+  /*
   contentScriptLog('QuickMenu')
 
   document.body.classList.add('syncia_body')
@@ -34,8 +40,12 @@ const initQuickMenu = () => {
       }}
     />,
   )
+  */
 }
 
+// TEMPORARILY DISABLED - Quick menu initialization is commented out
+// Uncomment the code below to re-enable the quick menu feature
+/*
 chrome.storage.sync.get(['SETTINGS'], (result) => {
   const quickMenuSettings = result.SETTINGS?.quickMenu as Settings['quickMenu']
   if (quickMenuSettings) {
@@ -53,3 +63,4 @@ chrome.storage.sync.get(['SETTINGS'], (result) => {
     initQuickMenu()
   }
 })
+*/
