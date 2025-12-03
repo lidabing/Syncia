@@ -21,13 +21,23 @@ export function useStorage<T>(
   key: string,
   atom: PrimitiveAtom<T>,
   area: StorageArea = 'local',
+  defaultValue?: T,
 ): [T, SetValue<T>] {
   const [storedValue, setStoredValue] = useAtom(atom)
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: This works fine. i don't want to change it.
   useEffect(() => {
     readStorage<T>(key, area).then((res) => {
-      if (res) setStoredValue(res)
+      if (res) {
+        // 深度合并：确保新字段有默认值
+        const fallback = defaultValue ?? storedValue
+        if (typeof fallback === 'object' && fallback !== null && typeof res === 'object' && res !== null) {
+          const merged = { ...fallback, ...res }
+          setStoredValue(merged as T)
+        } else {
+          setStoredValue(res)
+        }
+      }
     })
 
     chrome.storage.onChanged.addListener((changes, namespace) => {

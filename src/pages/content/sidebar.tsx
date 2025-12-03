@@ -40,7 +40,26 @@ iframe.style.height = '100%'
 iframe.style.border = '0px'
 iframe.style.display = 'block'
 iframe.style.colorScheme = 'auto'
-iframe.src = chrome.runtime.getURL('/src/pages/sidebar/index.html')
+
+// Check extension context before accessing chrome.runtime
+let isExtensionValid = false
+try {
+  if (chrome.runtime?.id) {
+    iframe.src = chrome.runtime.getURL('/src/pages/sidebar/index.html')
+    isExtensionValid = true
+  } else {
+    console.warn('[Syncia] Extension context invalidated, sidebar cannot initialize')
+  }
+} catch (error) {
+  console.error('[Syncia] Failed to get sidebar URL:', error)
+}
+
+// Only proceed if extension is valid
+if (!isExtensionValid) {
+  // Don't initialize sidebar if extension context is invalid
+  throw new Error('Extension context invalid, sidebar not initialized')
+}
+
 iframe.id = 'syncia_sidebar'
 
 wrapper.appendChild(dragBar)
@@ -181,22 +200,26 @@ document.addEventListener('mouseup', () => {
  * BG SCRIPT <-> CONTENT SCRIPT
  * Event listener for messages from the background script.
  */
-chrome.runtime.onMessage.addListener((msg) => {
-  if (msg.action === 'open-sidebar') {
-    if (wrapper.style.display === 'none') {
-      wrapper.style.display = 'flex'
-      // 通知 iframe 侧边栏已打开，需要刷新建议
-      setTimeout(() => {
-        iframe.contentWindow?.postMessage(
-          { action: 'sidebar-opened' },
-          '*',
-        )
-      }, 100)
-    } else {
-      wrapper.style.display = 'none'
+try {
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.action === 'open-sidebar') {
+      if (wrapper.style.display === 'none') {
+        wrapper.style.display = 'flex'
+        // 通知 iframe 侧边栏已打开，需要刷新建议
+        setTimeout(() => {
+          iframe.contentWindow?.postMessage(
+            { action: 'sidebar-opened' },
+            '*',
+          )
+        }, 100)
+      } else {
+        wrapper.style.display = 'none'
+      }
     }
-  }
-})
+  })
+} catch (error) {
+  console.warn('[Syncia] Failed to add message listener:', error)
+}
 
 /**
  * URL Change Detection

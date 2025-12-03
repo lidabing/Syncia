@@ -3,6 +3,7 @@ import Header from '../Layout/Header'
 import GeneralSettings from './Sections/GeneralSettings'
 import QuickMenuSettings from './Sections/QuickMenuSettings'
 import ChatSettings from './Sections/ChatSettings'
+import { SmartLensSettings } from './Sections/SmartLensSettings'
 import useThemeSync from '../../hooks/useThemeSync'
 import PromptSettings from './Sections/PromptSettings'
 
@@ -15,6 +16,7 @@ const Settings = () => {
         <div className="cdx-flex cdx-flex-1 cdx-flex-col cdx-gap-4 cdx-self-end cdx-sticky cdx-bottom-0">
           <GeneralSettings />
           <QuickMenuSettings />
+          <SmartLensSettings />
           <ChatSettings />
         </div>
         <PromptSettings />

@@ -1,4 +1,6 @@
 import { defaultPrompts } from '../prompts/default'
+import type { SmartLensSettings } from './smartLens'
+import { DEFAULT_SMART_LENS_SETTINGS } from './smartLens'
 
 export enum ThemeOptions {
   LIGHT = 'light',
@@ -29,6 +31,7 @@ export type Settings = {
     theme: ThemeOptions
     webpageContext: boolean
   }
+  smartLens: SmartLensSettings
 }
 
 export const defaultSettings: Settings = {
@@ -47,4 +50,5 @@ export const defaultSettings: Settings = {
     theme: ThemeOptions.SYSTEM,
     webpageContext: false,
   },
+  smartLens: DEFAULT_SMART_LENS_SETTINGS,
 }

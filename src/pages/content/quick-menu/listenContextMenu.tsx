@@ -8,13 +8,17 @@ import { generatePromptInSidebar } from '../../../lib/generatePromptInSidebar'
  * We listen to this message and generate the prompt in the sidebar.
  */
 
-chrome.runtime.onMessage.addListener(async (request) => {
-  const { payload } = request
-  const { selectedText, id } = payload || {}
-  if (selectedText && id) {
-    const prompt = (await findPrompt(id)).prompt
-    if (prompt) {
-      generatePromptInSidebar(prompt, selectedText)
+try {
+  chrome.runtime.onMessage.addListener(async (request) => {
+    const { payload } = request
+    const { selectedText, id } = payload || {}
+    if (selectedText && id) {
+      const prompt = (await findPrompt(id)).prompt
+      if (prompt) {
+        generatePromptInSidebar(prompt, selectedText)
+      }
     }
-  }
-})
+  })
+} catch (error) {
+  console.warn('[Syncia] Failed to add context menu listener:', error)
+}

@@ -59,6 +59,11 @@ export default defineManifest(async (env) => ({
       ],
       all_frames: true,
     },
+    {
+      matches: ['http://*/*', 'https://*/*', '<all_urls>'],
+      js: ['src/pages/content/smart-lens/index.tsx'],
+      all_frames: false,
+    },
   ],
   web_accessible_resources: [
     {

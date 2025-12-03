@@ -25,11 +25,14 @@ const selectPromptItems = (items?: TreeItems<Prompt>): Prompt[] | undefined =>
 const QuickMenuCustomize = () => {
   const [prompts, setPrompts] = usePrompts()
 
+  // 确保 prompts 是数组
+  const safePrompts = Array.isArray(prompts) ? prompts : []
+
   return (
     <div>
       <SortableTree
         indentationWidth={10}
-        items={prompts}
+        items={safePrompts}
         onItemsChanged={(i) => setPrompts((p) => selectPromptItems(i) ?? p)}
         TreeItemComponent={TreeItem}
       />
