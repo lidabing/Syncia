@@ -86,10 +86,10 @@ export function SidebarInput({
       type="button"
       disabled={loading || !messageDraft.text.trim()}
       onClick={handleSubmit}
-      title="发送 (Enter)"
-      className="cdx-flex cdx-items-center cdx-justify-center disabled:cdx-opacity-40 disabled:cdx-cursor-not-allowed cdx-bg-gradient-to-r cdx-from-blue-500 cdx-to-blue-600 hover:cdx-from-blue-600 hover:cdx-to-blue-700 active:cdx-scale-95 cdx-text-white cdx-w-9 cdx-h-9 cdx-rounded-lg cdx-transition-all cdx-duration-200 cdx-shadow-md hover:cdx-shadow-lg"
+      title="发送"
+      className="cdx-flex cdx-items-center cdx-justify-center disabled:cdx-opacity-30 disabled:cdx-cursor-not-allowed cdx-bg-gradient-to-r cdx-from-blue-500 cdx-to-indigo-600 hover:cdx-from-blue-600 hover:cdx-to-indigo-700 cdx-text-white cdx-w-8 cdx-h-8 cdx-rounded-lg cdx-transition-all cdx-shadow-sm"
     >
-      <IoSend size={18} />
+      <IoSend size={16} />
     </button>
   )
 
@@ -97,33 +97,33 @@ export function SidebarInput({
     <button
       type="button"
       onClick={cancelRequest}
-      title="停止生成"
-      className="cdx-flex cdx-items-center cdx-justify-center cdx-bg-gradient-to-r cdx-from-red-500 cdx-to-red-600 hover:cdx-from-red-600 hover:cdx-to-red-700 active:cdx-scale-95 cdx-text-white cdx-w-9 cdx-h-9 cdx-rounded-lg cdx-transition-all cdx-duration-200 cdx-shadow-md hover:cdx-shadow-lg cdx-animate-pulse"
+      title="停止"
+      className="cdx-flex cdx-items-center cdx-justify-center cdx-bg-red-500 hover:cdx-bg-red-600 cdx-text-white cdx-w-8 cdx-h-8 cdx-rounded-lg cdx-transition-colors cdx-shadow-sm"
     >
-      <HiHand size={18} />
+      <HiHand size={16} />
     </button>
   )
 
   if (!isExpanded) {
     return (
-      <div className="cdx-fixed cdx-bottom-4 cdx-right-4 cdx-z-50">
+      <div className="cdx-fixed cdx-bottom-5 cdx-right-5 cdx-z-50">
         <button
           type="button"
           onClick={() => setIsExpanded(true)}
           title="展开输入框"
-          className="cdx-flex cdx-items-center cdx-justify-center cdx-gap-2 cdx-bg-gradient-to-r cdx-from-blue-500 cdx-to-blue-600 hover:cdx-from-blue-600 hover:cdx-to-blue-700 dark:cdx-from-blue-600 dark:cdx-to-blue-700 dark:hover:cdx-from-blue-700 dark:hover:cdx-to-blue-800 cdx-text-white cdx-py-2.5 cdx-px-4 cdx-rounded-full cdx-shadow-lg hover:cdx-shadow-xl cdx-transition-all cdx-duration-200 cdx-text-sm cdx-font-medium hover:cdx-scale-105"
+          className="cdx-flex cdx-items-center cdx-justify-center cdx-gap-2 cdx-bg-gradient-to-r cdx-from-blue-500 cdx-to-indigo-600 hover:cdx-from-blue-600 hover:cdx-to-indigo-700 cdx-text-white cdx-py-2.5 cdx-px-5 cdx-rounded-full cdx-shadow-lg cdx-transition-all cdx-text-sm cdx-font-medium"
         >
           <FiChevronUp size={16} />
-          <span>自定义提问</span>
+          <span>输入问题</span>
         </button>
       </div>
     )
   }
 
   return (
-    <div className="cdx-fixed cdx-bottom-0 cdx-left-0 cdx-right-0 cdx-flex cdx-flex-col cdx-border-t dark:cdx-border-neutral-800/50 cdx-border-neutral-200/50 cdx-bg-white dark:cdx-bg-neutral-900 cdx-shadow-2xl">
+    <div className="cdx-fixed cdx-bottom-0 cdx-left-0 cdx-right-0 cdx-flex cdx-flex-col cdx-bg-white dark:cdx-bg-[#1a1a1a] cdx-border-t cdx-border-neutral-200 dark:cdx-border-neutral-800">
       {/* 顶部工具栏 */}
-      <div className="cdx-flex cdx-justify-between cdx-items-center cdx-px-2.5 cdx-py-1.5 cdx-border-b dark:cdx-border-neutral-800/30 cdx-border-neutral-200/30">
+      <div className="cdx-flex cdx-justify-between cdx-items-center cdx-px-4 cdx-py-2 cdx-border-b cdx-border-neutral-100 dark:cdx-border-neutral-800">
         <div className="cdx-flex cdx-items-center cdx-gap-2">
           <ChangeChatModel />
         </div>
@@ -134,7 +134,7 @@ export function SidebarInput({
 
       {/* 文件预览 */}
       {messageDraft.files.length > 0 && (
-        <div className="cdx-px-2.5 cdx-py-1.5 cdx-border-b dark:cdx-border-neutral-800/30 cdx-border-neutral-200/30">
+        <div className="cdx-px-4 cdx-py-2 cdx-border-b cdx-border-neutral-100 dark:cdx-border-neutral-800">
           <FilePreviewBar
             files={messageDraft.files}
             removeFile={removeMessageDraftFile}
@@ -148,10 +148,10 @@ export function SidebarInput({
           minRows={2}
           maxRows={6}
           maxLength={MAX_MESSAGE_LENGTH}
-          placeholder="输入消息，Shift+Enter 换行..."
+          placeholder="输入你的问题..."
           value={messageDraft.text}
           disabled={loading}
-          className="cdx-w-full cdx-px-2.5 cdx-py-2 cdx-pr-20 focus:!cdx-outline-none placeholder:cdx-text-neutral-400 dark:placeholder:cdx-text-neutral-500 cdx-text-[13px] cdx-resize-none cdx-bg-transparent !cdx-border-none dark:cdx-text-neutral-100 cdx-text-neutral-900"
+          className="cdx-w-full cdx-px-4 cdx-py-3 cdx-pr-14 focus:!cdx-outline-none placeholder:cdx-text-neutral-400 dark:placeholder:cdx-text-neutral-500 cdx-text-[14px] cdx-resize-none cdx-bg-transparent !cdx-border-none dark:cdx-text-neutral-100 cdx-text-neutral-900 cdx-leading-relaxed"
           onChange={(e) => {
             e.preventDefault()
             setMessageDraftText(e.target.value)
@@ -165,14 +165,14 @@ export function SidebarInput({
         />
         
         {/* 右下角发送按钮 */}
-        <div className="cdx-absolute cdx-bottom-2 cdx-right-2.5">
+        <div className="cdx-absolute cdx-bottom-3 cdx-right-4">
           {!delayedLoading ? sendButton : stopButton}
         </div>
       </div>
 
       {/* 底部工具栏 */}
-      <div className="cdx-flex cdx-justify-between cdx-items-center cdx-px-2.5 cdx-py-1.5 cdx-border-t dark:cdx-border-neutral-800/30 cdx-border-neutral-200/30 cdx-bg-neutral-50/50 dark:cdx-bg-neutral-800/20">
-        <div className="cdx-flex cdx-items-center cdx-gap-1.5">
+      <div className="cdx-flex cdx-justify-between cdx-items-center cdx-px-4 cdx-py-2 cdx-border-t cdx-border-neutral-100 dark:cdx-border-neutral-800 cdx-bg-neutral-50 dark:cdx-bg-neutral-900">
+        <div className="cdx-flex cdx-items-center cdx-gap-1">
           {isVisionModel && (
             <ImageCaptureButton addMessageDraftFile={addMessageDraftFile} />
           )}
@@ -181,17 +181,17 @@ export function SidebarInput({
           />
         </div>
         
-        <div className="cdx-flex cdx-items-center cdx-gap-2">
-          <span className="cdx-text-[10px] cdx-text-neutral-400 dark:cdx-text-neutral-500">
+        <div className="cdx-flex cdx-items-center cdx-gap-3">
+          <span className="cdx-text-[11px] cdx-text-neutral-400 dark:cdx-text-neutral-500 cdx-tabular-nums">
             {messageDraft.text.length}/{MAX_MESSAGE_LENGTH}
           </span>
           <button
             type="button"
             onClick={() => setIsExpanded(false)}
-            title="收起输入框"
-            className="cdx-flex cdx-items-center cdx-justify-center cdx-w-6 cdx-h-6 hover:cdx-bg-neutral-200 dark:hover:cdx-bg-neutral-700 cdx-rounded-md cdx-transition-colors cdx-duration-200 cdx-text-neutral-500 dark:cdx-text-neutral-400"
+            title="收起"
+            className="cdx-flex cdx-items-center cdx-justify-center cdx-w-7 cdx-h-7 hover:cdx-bg-neutral-200 dark:hover:cdx-bg-neutral-700 cdx-rounded-lg cdx-transition-colors cdx-text-neutral-400 dark:cdx-text-neutral-500"
           >
-            <FiChevronDown size={14} />
+            <FiChevronDown size={16} />
           </button>
         </div>
       </div>
