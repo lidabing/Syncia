@@ -8,17 +8,20 @@ import ReactDOM from 'react-dom/client'
 import { VisualCue, useSmartLensDetection, isPreviewableLink } from '../../../components/SmartLens/VisualCue'
 import { PreviewCard } from '../../../components/SmartLens/PreviewCard'
 import type { LinkPreviewData, SmartLensSettings } from '../../../config/settings/smartLens'
+import { DEFAULT_SMART_LENS_SETTINGS } from '../../../config/settings/smartLens'
 import { fetchLinkPreview, extractYouTubeData } from '../../../lib/smartLens/contentFetcher'
 
 const SmartLens: React.FC = () => {
-  const [settings, setSettings] = useState<SmartLensSettings | null>(null)
+  // 默认启用，使用默认设置
+  const [settings, setSettings] = useState<SmartLensSettings>({
+    ...DEFAULT_SMART_LENS_SETTINGS,
+    enabled: true, // 默认启用
+  })
   const [previewData, setPreviewData] = useState<LinkPreviewData | null>(null)
   const [loading, setLoading] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 })
   const [isPinned, setIsPinned] = useState(false)
-  const [spaceKeyPressed, setSpaceKeyPressed] = useState(false)
-  const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null)
   const [isHoveringCard, setIsHoveringCard] = useState(false)
   const [extensionInvalid, setExtensionInvalid] = useState(false)
   const [currentPreviewUrl, setCurrentPreviewUrl] = useState<string | null>(null)
@@ -47,7 +50,10 @@ const SmartLens: React.FC = () => {
           return
         }
         if (result.SETTINGS?.smartLens) {
-          setSettings(result.SETTINGS.smartLens)
+          setSettings({
+            ...DEFAULT_SMART_LENS_SETTINGS,
+            ...result.SETTINGS.smartLens,
+          })
         }
       })
     } catch (error) {
@@ -63,7 +69,10 @@ const SmartLens: React.FC = () => {
         return
       }
       if (changes.SETTINGS?.newValue?.smartLens) {
-        setSettings(changes.SETTINGS.newValue.smartLens)
+        setSettings({
+          ...DEFAULT_SMART_LENS_SETTINGS,
+          ...changes.SETTINGS.newValue.smartLens,
+        })
       }
     }
     
@@ -82,95 +91,7 @@ const SmartLens: React.FC = () => {
     }
   }, [])
 
-  const { hoveredLink, cursorPosition, showCue } = useSmartLensDetection(
-    settings || ({} as SmartLensSettings)
-  )
-
-  // Handle Space key
-  useEffect(() => {
-    if (!settings?.enabled) return
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !e.repeat) {
-        setSpaceKeyPressed(true)
-      }
-    }
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
-        setSpaceKeyPressed(false)
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    document.addEventListener('keyup', handleKeyUp)
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      document.removeEventListener('keyup', handleKeyUp)
-    }
-  }, [settings?.enabled])
-
-  // Trigger preview based on mode
-  useEffect(() => {
-    if (!settings?.enabled || !hoveredLink || isPinned) return
-
-    // Clear existing timer
-    if (hoverTimer) {
-      clearTimeout(hoverTimer)
-      setHoverTimer(null)
-    }
-
-    const triggerPreview = () => {
-      const url = hoveredLink.href
-      if (!isPreviewableLink(url)) return
-
-      // 如果已经在预览同一个 URL，不重新加载
-      if (showPreview && currentPreviewUrl === url) return
-
-      setPreviewPosition({ x: cursorPosition.x, y: cursorPosition.y })
-      setShowPreview(true)
-      setCurrentPreviewUrl(url)
-      loadPreviewData(url)
-    }
-
-    if (settings.triggerMode === 'space' && spaceKeyPressed) {
-      // Space key mode: instant trigger
-      triggerPreview()
-    } else if (settings.triggerMode === 'shift-hover' && spaceKeyPressed) {
-      // Shift hover mode
-      triggerPreview()
-    } else if (settings.triggerMode === 'hover') {
-      // Hover with delay mode
-      const timer = setTimeout(() => {
-        triggerPreview()
-      }, settings.hoverDelay)
-      setHoverTimer(timer)
-    }
-
-    return () => {
-      if (hoverTimer) {
-        clearTimeout(hoverTimer)
-      }
-    }
-  }, [hoveredLink, spaceKeyPressed, settings, cursorPosition, isPinned])
-
-  // Close preview when mouse leaves link AND card (with delay)
-  useEffect(() => {
-    if (!hoveredLink && !isPinned && !isHoveringCard && showPreview) {
-      // 添加延迟，给用户时间将鼠标移到卡片上
-      const timer = setTimeout(() => {
-        setShowPreview(false)
-        setPreviewData(null)
-        setLoading(false)
-        setCurrentPreviewUrl(null)
-      }, 300) // 300ms 延迟
-      
-      return () => {
-        clearTimeout(timer)
-      }
-    }
-  }, [hoveredLink, isPinned, isHoveringCard, showPreview])
+  const { hoveredLink, cursorPosition, showCue } = useSmartLensDetection(settings)
 
   const loadPreviewData = useCallback(
     async (url: string) => {
@@ -201,6 +122,88 @@ const SmartLens: React.FC = () => {
     [settings]
   )
 
+  // 使用 ref 来存储最新的 hoveredLink，避免闭包问题
+  const hoveredLinkRef = React.useRef(hoveredLink)
+  const cursorPositionRef = React.useRef(cursorPosition)
+  const showPreviewRef = React.useRef(showPreview)
+  const currentPreviewUrlRef = React.useRef(currentPreviewUrl)
+  
+  React.useEffect(() => {
+    hoveredLinkRef.current = hoveredLink
+    cursorPositionRef.current = cursorPosition
+    showPreviewRef.current = showPreview
+    currentPreviewUrlRef.current = currentPreviewUrl
+  }, [hoveredLink, cursorPosition, showPreview, currentPreviewUrl])
+
+  // 触发预览的函数
+  const triggerPreview = useCallback(() => {
+    const link = hoveredLinkRef.current
+    if (!link || isPinned) return
+
+    const url = link.href
+    console.log('[Smart Lens] Triggering preview for:', url)
+    if (!isPreviewableLink(url)) {
+      console.log('[Smart Lens] URL not previewable')
+      return
+    }
+
+    // 如果已经在预览同一个 URL，不重新加载
+    if (showPreviewRef.current && currentPreviewUrlRef.current === url) return
+
+    setPreviewPosition({ x: cursorPositionRef.current.x, y: cursorPositionRef.current.y })
+    setShowPreview(true)
+    setCurrentPreviewUrl(url)
+    loadPreviewData(url)
+  }, [isPinned, loadPreviewData])
+
+  // Handle Space key and Shift key - 直接在按键事件中触发预览
+  useEffect(() => {
+    if (!settings.enabled) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 忽略键盘重复事件，防止连续触发
+      if (e.repeat) return
+      
+      console.log('[Smart Lens] Key down:', e.code, 'hoveredLink:', hoveredLinkRef.current?.href)
+      
+      if (e.code === 'Space') {
+        // 如果在输入框中，不触发
+        const activeElement = document.activeElement
+        if (activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA' || (activeElement as HTMLElement)?.isContentEditable) {
+          return
+        }
+        e.preventDefault() // 阻止页面滚动
+        triggerPreview()
+      }
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+        triggerPreview()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [settings.enabled, triggerPreview])
+
+  // Close preview when mouse leaves link AND card (with delay)
+  useEffect(() => {
+    if (!hoveredLink && !isPinned && !isHoveringCard && showPreview) {
+      // 添加延迟，给用户时间将鼠标移到卡片上
+      const timer = setTimeout(() => {
+        setShowPreview(false)
+        setPreviewData(null)
+        setLoading(false)
+        setCurrentPreviewUrl(null)
+      }, 300) // 300ms 延迟
+      
+      return () => {
+        clearTimeout(timer)
+      }
+    }
+  }, [hoveredLink, isPinned, isHoveringCard, showPreview])
+
   const handleClose = () => {
     setShowPreview(false)
     setPreviewData(null)
@@ -213,7 +216,7 @@ const SmartLens: React.FC = () => {
     setIsPinned(!isPinned)
   }
 
-  if (!settings?.enabled) return null
+  if (!settings.enabled) return null
   
   // Show reload prompt if extension context is invalid
   if (extensionInvalid) {
@@ -238,11 +241,7 @@ const SmartLens: React.FC = () => {
 
   return (
     <>
-      <VisualCue
-        x={cursorPosition.x}
-        y={cursorPosition.y}
-        visible={showCue && !showPreview}
-      />
+      {/* 移除视觉提示图标 */}
       {showPreview && (
         <PreviewCard
           data={previewData}

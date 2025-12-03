@@ -73,31 +73,26 @@ export const useSmartLensDetection = (settings: SmartLensSettings) => {
 
       if (link && link.href && !link.href.startsWith('javascript:')) {
         // 检查是否在排除域名列表中
-        const hostname = new URL(link.href).hostname
-        const isExcluded = settings.excludedDomains.some((domain: string) =>
-          hostname.includes(domain)
-        )
+        try {
+          const hostname = new URL(link.href).hostname
+          const excludedDomains = settings.excludedDomains || []
+          const isExcluded = excludedDomains.some((domain: string) =>
+            hostname.includes(domain)
+          )
 
-        if (!isExcluded) {
-          setHoveredLink(link)
-          if (settings.showVisualCue) {
-            setShowCue(true)
+          if (!isExcluded) {
+            setHoveredLink(link)
+            setShowCue(false)
+          } else {
+            setHoveredLink(null)
+            setShowCue(false)
           }
-          // 添加视觉标记
-          link.style.textDecoration = 'underline'
-          link.style.textDecorationStyle = 'dashed'
-          link.style.textDecorationColor = 'rgba(99, 102, 241, 0.5)'
-        } else {
+        } catch {
+          // URL 解析失败，忽略
           setHoveredLink(null)
           setShowCue(false)
         }
       } else {
-        // 恢复原始样式
-        if (hoveredLink) {
-          hoveredLink.style.textDecoration = ''
-          hoveredLink.style.textDecorationStyle = ''
-          hoveredLink.style.textDecorationColor = ''
-        }
         setHoveredLink(null)
         setShowCue(false)
       }
