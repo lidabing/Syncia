@@ -84,12 +84,12 @@ export function SidebarInput({
   const sendButton = (
     <button
       type="button"
-      disabled={loading}
+      disabled={loading || !messageDraft.text.trim()}
       onClick={handleSubmit}
       title="发送 (Enter)"
-      className="cdx-flex cdx-items-center cdx-justify-center disabled:cdx-opacity-40 disabled:cdx-cursor-not-allowed cdx-bg-blue-500 hover:cdx-bg-blue-600 active:cdx-bg-blue-700 cdx-text-white cdx-w-8 cdx-h-8 cdx-rounded-lg cdx-transition-all cdx-duration-200"
+      className="cdx-flex cdx-items-center cdx-justify-center disabled:cdx-opacity-40 disabled:cdx-cursor-not-allowed cdx-bg-gradient-to-r cdx-from-blue-500 cdx-to-blue-600 hover:cdx-from-blue-600 hover:cdx-to-blue-700 active:cdx-scale-95 cdx-text-white cdx-w-9 cdx-h-9 cdx-rounded-lg cdx-transition-all cdx-duration-200 cdx-shadow-md hover:cdx-shadow-lg"
     >
-      <IoSend size={16} />
+      <IoSend size={18} />
     </button>
   )
 
@@ -98,50 +98,60 @@ export function SidebarInput({
       type="button"
       onClick={cancelRequest}
       title="停止生成"
-      className="cdx-flex cdx-items-center cdx-justify-center cdx-bg-red-500 hover:cdx-bg-red-600 active:cdx-bg-red-700 cdx-text-white cdx-w-8 cdx-h-8 cdx-rounded-lg cdx-transition-all cdx-duration-200"
+      className="cdx-flex cdx-items-center cdx-justify-center cdx-bg-gradient-to-r cdx-from-red-500 cdx-to-red-600 hover:cdx-from-red-600 hover:cdx-to-red-700 active:cdx-scale-95 cdx-text-white cdx-w-9 cdx-h-9 cdx-rounded-lg cdx-transition-all cdx-duration-200 cdx-shadow-md hover:cdx-shadow-lg cdx-animate-pulse"
     >
-      <HiHand size={16} />
+      <HiHand size={18} />
     </button>
   )
 
   if (!isExpanded) {
     return (
-      <div className="cdx-fixed cdx-bottom-3 cdx-right-3 cdx-z-50">
+      <div className="cdx-fixed cdx-bottom-4 cdx-right-4 cdx-z-50">
         <button
           type="button"
           onClick={() => setIsExpanded(true)}
-          title="自定义提问"
-          className="cdx-flex cdx-items-center cdx-justify-center cdx-gap-1.5 cdx-bg-neutral-600 hover:cdx-bg-neutral-700 dark:cdx-bg-neutral-700 dark:hover:cdx-bg-neutral-600 cdx-text-white cdx-py-1.5 cdx-px-2.5 cdx-rounded-full cdx-shadow-md hover:cdx-shadow-lg cdx-transition-all cdx-duration-200 cdx-text-xs cdx-opacity-60 hover:cdx-opacity-100"
+          title="展开输入框"
+          className="cdx-flex cdx-items-center cdx-justify-center cdx-gap-2 cdx-bg-gradient-to-r cdx-from-blue-500 cdx-to-blue-600 hover:cdx-from-blue-600 hover:cdx-to-blue-700 dark:cdx-from-blue-600 dark:cdx-to-blue-700 dark:hover:cdx-from-blue-700 dark:hover:cdx-to-blue-800 cdx-text-white cdx-py-2.5 cdx-px-4 cdx-rounded-full cdx-shadow-lg hover:cdx-shadow-xl cdx-transition-all cdx-duration-200 cdx-text-sm cdx-font-medium hover:cdx-scale-105"
         >
-          <FiChevronUp size={14} />
-          <span>自定义</span>
+          <FiChevronUp size={16} />
+          <span>自定义提问</span>
         </button>
       </div>
     )
   }
 
   return (
-    <div className="cdx-fixed cdx-bottom-0 cdx-left-0 cdx-right-0 cdx-flex cdx-flex-col ">
-      <div className="cdx-m-2 cdx-rounded-lg cdx-border dark:cdx-border-neutral-700/30 cdx-border-neutral-300/50 dark:cdx-bg-neutral-900/70 cdx-bg-neutral-100/70 cdx-backdrop-blur-sm focus:cdx-outline-none focus:cdx-ring-1 focus:cdx-ring-blue-500/30 focus:cdx-ring-opacity-50">
-        <div className="cdx-flex cdx-justify-end cdx-items-center cdx-p-1 cdx-pt-2 cdx-pr-3">
-          <div className="cdx-flex cdx-items-center cdx-gap-4">
-            <ChangeChatModel />
-            <WebPageContentToggle />
-          </div>
+    <div className="cdx-fixed cdx-bottom-0 cdx-left-0 cdx-right-0 cdx-flex cdx-flex-col cdx-border-t dark:cdx-border-neutral-800/50 cdx-border-neutral-200/50 cdx-bg-white/95 dark:cdx-bg-neutral-900/95 cdx-backdrop-blur-md cdx-shadow-2xl">
+      {/* 顶部工具栏 */}
+      <div className="cdx-flex cdx-justify-between cdx-items-center cdx-px-3 cdx-py-2 cdx-border-b dark:cdx-border-neutral-800/30 cdx-border-neutral-200/30">
+        <div className="cdx-flex cdx-items-center cdx-gap-2">
+          <ChangeChatModel />
         </div>
-        {messageDraft.files.length > 0 && (
+        <div className="cdx-flex cdx-items-center cdx-gap-2">
+          <WebPageContentToggle />
+        </div>
+      </div>
+
+      {/* 文件预览 */}
+      {messageDraft.files.length > 0 && (
+        <div className="cdx-px-3 cdx-py-2 cdx-border-b dark:cdx-border-neutral-800/30 cdx-border-neutral-200/30">
           <FilePreviewBar
             files={messageDraft.files}
             removeFile={removeMessageDraftFile}
           />
-        )}
+        </div>
+      )}
+
+      {/* 输入区域 */}
+      <div className="cdx-relative">
         <TextareaAutosize
           minRows={2}
+          maxRows={8}
           maxLength={MAX_MESSAGE_LENGTH}
-          placeholder="在此输入你的消息..."
+          placeholder="输入消息，Shift+Enter 换行..."
           value={messageDraft.text}
           disabled={loading}
-          className="cdx-p-3 cdx-w-full focus:!cdx-outline-none placeholder:cdx-text-neutral-500 cdx-text-sm cdx-resize-none cdx-max-h-96 cdx-pb-0 cdx-bg-transparent !cdx-border-none"
+          className="cdx-w-full cdx-px-3 cdx-py-3 cdx-pr-24 focus:!cdx-outline-none placeholder:cdx-text-neutral-400 dark:placeholder:cdx-text-neutral-500 cdx-text-sm cdx-resize-none cdx-bg-transparent !cdx-border-none dark:cdx-text-neutral-100 cdx-text-neutral-900"
           onChange={(e) => {
             e.preventDefault()
             setMessageDraftText(e.target.value)
@@ -153,26 +163,36 @@ export function SidebarInput({
             }
           }}
         />
-        <div className="cdx-flex cdx-justify-between cdx-items-center cdx-p-3">
-          <div className="cdx-flex cdx-gap-2">
-            {isVisionModel && (
-              <ImageCaptureButton addMessageDraftFile={addMessageDraftFile} />
-            )}
-            <InsertPromptToDraftButton
-              setMessageDraftText={setMessageDraftText}
-            />
-          </div>
-          <div className="cdx-flex cdx-items-center cdx-justify-center cdx-gap-2">
-            <button
-              type="button"
-              onClick={() => setIsExpanded(false)}
-              title="收起输入框"
-              className="cdx-flex cdx-items-center cdx-justify-center cdx-w-8 cdx-h-8 hover:cdx-bg-neutral-300 dark:hover:cdx-bg-neutral-700 cdx-rounded-lg cdx-transition-colors cdx-duration-200"
-            >
-              <FiChevronDown size={16} />
-            </button>
-            {!delayedLoading ? sendButton : stopButton}
-          </div>
+        
+        {/* 右下角发送按钮 */}
+        <div className="cdx-absolute cdx-bottom-3 cdx-right-3">
+          {!delayedLoading ? sendButton : stopButton}
+        </div>
+      </div>
+
+      {/* 底部工具栏 */}
+      <div className="cdx-flex cdx-justify-between cdx-items-center cdx-px-3 cdx-py-2 cdx-border-t dark:cdx-border-neutral-800/30 cdx-border-neutral-200/30 cdx-bg-neutral-50/50 dark:cdx-bg-neutral-800/30">
+        <div className="cdx-flex cdx-items-center cdx-gap-1.5">
+          {isVisionModel && (
+            <ImageCaptureButton addMessageDraftFile={addMessageDraftFile} />
+          )}
+          <InsertPromptToDraftButton
+            setMessageDraftText={setMessageDraftText}
+          />
+        </div>
+        
+        <div className="cdx-flex cdx-items-center cdx-gap-2">
+          <span className="cdx-text-xs cdx-text-neutral-400 dark:cdx-text-neutral-500">
+            {messageDraft.text.length}/{MAX_MESSAGE_LENGTH}
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsExpanded(false)}
+            title="收起输入框"
+            className="cdx-flex cdx-items-center cdx-justify-center cdx-w-7 cdx-h-7 hover:cdx-bg-neutral-200 dark:hover:cdx-bg-neutral-700 cdx-rounded-md cdx-transition-colors cdx-duration-200 cdx-text-neutral-500 dark:cdx-text-neutral-400"
+          >
+            <FiChevronDown size={16} />
+          </button>
         </div>
       </div>
     </div>

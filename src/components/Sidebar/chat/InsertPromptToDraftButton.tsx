@@ -19,7 +19,8 @@ const InsertPromptToDraftButton = ({
       <DropdownMenu.Trigger asChild>
         <button
           type="button"
-          className="cdx-bg-neutral-300 cdx-text-neutral-500 dark:cdx-text-neutral-200 dark:cdx-bg-neutral-800 cdx-p-1.5 cdx-rounded"
+          title="插入快捷提示词"
+          className="cdx-flex cdx-items-center cdx-justify-center cdx-bg-neutral-200 hover:cdx-bg-neutral-300 cdx-text-neutral-600 dark:cdx-text-neutral-300 dark:cdx-bg-neutral-800 dark:hover:cdx-bg-neutral-700 cdx-w-8 cdx-h-8 cdx-rounded-lg cdx-transition-all cdx-duration-200 hover:cdx-scale-105"
         >
           <RiFileCopy2Line size={18} />
         </button>
