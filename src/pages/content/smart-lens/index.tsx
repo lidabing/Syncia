@@ -177,12 +177,16 @@ const SmartLens: React.FC = () => {
       if (e.repeat) return
       
       const link = hoveredLinkRef.current
-      console.log('[Smart Lens] Key down:', e.code, 'hoveredLink:', link?.href || 'none')
+      console.log('[Smart Lens] Key down:', e.code, 'key:', e.key, 'hoveredLink:', link?.href || 'none', 'showPreview:', showPreviewRef.current)
       
       if (e.code === 'Space') {
         // 如果在输入框中，不触发
         const activeElement = document.activeElement
-        if (activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA' || (activeElement as HTMLElement)?.isContentEditable) {
+        const tagName = activeElement?.tagName
+        const isEditable = (activeElement as HTMLElement)?.isContentEditable
+        console.log('[Smart Lens] Active element:', tagName, 'contentEditable:', isEditable)
+        
+        if (tagName === 'INPUT' || tagName === 'TEXTAREA' || isEditable) {
           console.log('[Smart Lens] In input field, ignoring Space')
           return
         }
@@ -192,7 +196,10 @@ const SmartLens: React.FC = () => {
           return
         }
         
+        console.log('[Smart Lens] Space pressed on link, preventing default and triggering preview')
         e.preventDefault() // 阻止页面滚动
+        e.stopPropagation() // 阻止事件冒泡
+        e.stopImmediatePropagation() // 阻止同一元素上的其他监听器
         triggerPreview()
       }
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
@@ -204,10 +211,11 @@ const SmartLens: React.FC = () => {
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown)
+    // 使用捕获阶段，在其他监听器之前处理事件
+    document.addEventListener('keydown', handleKeyDown, true)
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keydown', handleKeyDown, true)
     }
   }, [settings.enabled, triggerPreview])
 
