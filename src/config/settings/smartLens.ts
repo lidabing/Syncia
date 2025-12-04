@@ -19,7 +19,7 @@ export interface SmartLensSettings {
 }
 
 export const DEFAULT_SMART_LENS_SETTINGS: SmartLensSettings = {
-  enabled: false, // 默认关闭，用户手动启用
+  enabled: true, // 默认开启
   triggerMode: 'space', // 推荐方案：悬停 + Space
   hoverDelay: 1500, // 1.5 秒
   enabledDomains: [],
