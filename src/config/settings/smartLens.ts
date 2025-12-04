@@ -32,6 +32,25 @@ export const DEFAULT_SMART_LENS_SETTINGS: SmartLensSettings = {
   defaultPreviewMode: 'iframe', // 默认使用 iframe 完整预览
 }
 
+// AI 结构化分析结果
+export interface AIAnalysisResult {
+  type: 'news' | 'tutorial' | 'documentation' | 'repository' | 'product' | 'discussion' | 'video' | 'social' | 'general'
+  confidence: number // 0-1
+  summary: string // 一句话摘要
+  meta: {
+    keyPoints?: string[] // 关键要点（最多5个）
+    topic?: string // 主题分类
+    sentiment?: 'positive' | 'negative' | 'neutral' // 情感倾向
+    techStack?: string[] // 技术栈（适用于技术内容）
+    actionItems?: string[] // 可执行操作建议
+    relevance?: string // 与当前页面的关联分析
+    readingTime?: string // 预估阅读时间
+    difficulty?: 'beginner' | 'intermediate' | 'advanced' // 内容难度
+    freshness?: 'breaking' | 'recent' | 'dated' | 'evergreen' // 时效性
+  }
+  raw?: string // AI 原始响应
+}
+
 export interface LinkPreviewData {
   type: 'article' | 'video' | 'code' | 'product' | 'generic'
   url: string
@@ -44,6 +63,7 @@ export interface LinkPreviewData {
   publishDate?: string
   readTime?: string
   aiSummary?: string
+  aiAnalysis?: AIAnalysisResult // 结构化 AI 分析结果
   // Article specific - 正文内容
   textContent?: string
   // Video specific
