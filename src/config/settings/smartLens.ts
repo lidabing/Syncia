@@ -44,14 +44,19 @@ export interface LinkPreviewData {
   publishDate?: string
   readTime?: string
   aiSummary?: string
+  // Article specific - 正文内容
+  textContent?: string
   // Video specific
   thumbnailUrl?: string
   duration?: string
+  videoId?: string
+  videoPlatform?: 'youtube' | 'bilibili' | 'vimeo' | 'other'
   chapters?: { time: string; title: string }[]
   // Code specific
   stars?: number
   language?: string
   lastUpdate?: string
+  forks?: number
   // Product specific
   price?: string
   rating?: number

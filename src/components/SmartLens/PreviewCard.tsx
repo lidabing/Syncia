@@ -17,26 +17,13 @@ interface PreviewCardProps {
   onMouseLeave?: () => void
 }
 
-// 从 URL 提取 YouTube 视频 ID
-function getYouTubeVideoId(url: string): string | null {
-  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/)
-  return match?.[1] || null
-}
-
-// 从 URL 提取 Bilibili 视频 ID
-function getBilibiliVideoId(url: string): { bvid?: string; aid?: string } | null {
-  const bvMatch = url.match(/bilibili\.com\/video\/(BV[a-zA-Z0-9]+)/)
-  if (bvMatch) return { bvid: bvMatch[1] }
-  const aidMatch = url.match(/bilibili\.com\/video\/av(\d+)/)
-  if (aidMatch) return { aid: aidMatch[1] }
-  return null
-}
-
 export const PreviewCard: React.FC<PreviewCardProps> = ({
   data,
   loading,
   position,
   onClose,
+  onPin,
+  isPinned,
   onMouseEnter,
   onMouseLeave,
 }) => {
@@ -44,15 +31,17 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
 
   // 根据内容类型确定卡片尺寸
   const getCardSize = () => {
-    if (!data) return { width: 360, height: 'auto' }
+    if (!data) return { width: 380, height: 'auto' }
     
     switch (data.type) {
       case 'video':
-        return { width: 420, height: 'auto' }
+        return { width: 480, height: 'auto' }
       case 'code':
-        return { width: 380, height: 'auto' }
+        return { width: 400, height: 'auto' }
+      case 'article':
+        return { width: 420, height: 'auto' }
       default:
-        return { width: 360, height: 'auto' }
+        return { width: 380, height: 'auto' }
     }
   }
 
@@ -60,8 +49,8 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
 
   useEffect(() => {
     const calculatePosition = () => {
-      const cardWidth = typeof cardSize.width === 'number' ? cardSize.width : 360
-      const cardHeight = 400
+      const cardWidth = typeof cardSize.width === 'number' ? cardSize.width : 380
+      const cardHeight = 450
       const padding = 20
 
       let x = position.x + padding
@@ -85,57 +74,113 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
 
   if (!loading && !data) return null
 
-  // 渲染视频类型预览
+  // 渲染视频类型预览 - 直接嵌入播放器
   const renderVideoPreview = () => {
     if (!data) return null
-    
-    const youtubeId = getYouTubeVideoId(data.url)
-    const bilibiliId = getBilibiliVideoId(data.url)
 
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {/* 视频播放器区域 */}
-        <div style={{ 
-          width: '100%', 
-          aspectRatio: '16/9', 
-          backgroundColor: '#000',
-          borderRadius: '8px 8px 0 0',
-          overflow: 'hidden',
-        }}>
-          {youtubeId ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${youtubeId}?rel=0`}
-              style={{ width: '100%', height: '100%', border: 'none' }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              title="YouTube video"
-            />
-          ) : bilibiliId ? (
-            <iframe
-              src={`//player.bilibili.com/player.html?bvid=${bilibiliId.bvid || ''}&aid=${bilibiliId.aid || ''}&high_quality=1`}
-              style={{ width: '100%', height: '100%', border: 'none' }}
-              allowFullScreen
-              title="Bilibili video"
-            />
-          ) : data.thumbnailUrl || data.image ? (
+    const renderPlayer = () => {
+      if (data.videoPlatform === 'youtube' && data.videoId) {
+        return (
+          <iframe
+            src={`https://www.youtube.com/embed/${data.videoId}?rel=0&modestbranding=1&autoplay=1`}
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title="YouTube video"
+          />
+        )
+      }
+      
+      if (data.videoPlatform === 'bilibili' && data.videoId) {
+        const bvid = data.videoId.startsWith('BV') ? data.videoId : ''
+        const aid = data.videoId.startsWith('av') ? data.videoId.replace('av', '') : ''
+        const params = new URLSearchParams({
+          high_quality: '1',
+          danmaku: '0',
+          autoplay: '1',
+        })
+        if (bvid) params.set('bvid', bvid)
+        if (aid) params.set('aid', aid)
+        
+        return (
+          <iframe
+            src={`https://player.bilibili.com/player.html?${params.toString()}`}
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            allowFullScreen
+            title="Bilibili video"
+            scrolling="no"
+            sandbox="allow-scripts allow-same-origin allow-popups"
+          />
+        )
+      }
+      
+      if (data.videoPlatform === 'vimeo' && data.videoId) {
+        return (
+          <iframe
+            src={`https://player.vimeo.com/video/${data.videoId}?autoplay=1`}
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+            title="Vimeo video"
+          />
+        )
+      }
+
+      // 无法嵌入时显示缩略图
+      if (data.thumbnailUrl || data.image) {
+        return (
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <img
               src={data.thumbnailUrl || data.image}
               alt=""
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
-          ) : (
-            <div style={{ 
-              width: '100%', 
-              height: '100%', 
-              display: 'flex', 
-              alignItems: 'center', 
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '60px',
+              height: '60px',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(0,0,0,0.7)',
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               color: '#fff',
-              fontSize: '48px',
+              fontSize: '24px',
             }}>
               ▶
             </div>
-          )}
+          </div>
+        )
+      }
+
+      return (
+        <div style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#1a1a1a',
+          color: '#666',
+        }}>
+          无法加载视频
+        </div>
+      )
+    }
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {/* 视频播放器 */}
+        <div style={{
+          width: '100%',
+          aspectRatio: '16/9',
+          backgroundColor: '#000',
+          overflow: 'hidden',
+        }}>
+          {renderPlayer()}
         </div>
 
         {/* 视频信息 */}
@@ -154,31 +199,133 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
             {data.title || '视频'}
           </h3>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            {data.duration && (
-              <span style={{ fontSize: '12px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                ⏱️ {data.duration}
-              </span>
-            )}
-            {data.author && (
-              <span style={{ fontSize: '12px', color: '#6b7280' }}>
-                👤 {data.author}
-              </span>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#6b7280', fontSize: '12px' }}>
+            {data.duration && <span>⏱️ {data.duration}</span>}
+            {data.author && <span>👤 {data.author}</span>}
           </div>
         </div>
       </div>
     )
   }
 
-  // 渲染代码/GitHub 类型预览
+  // 渲染文章类型 - 阅读模式
+  const renderArticlePreview = () => {
+    if (!data) return null
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '450px' }}>
+        {/* 头图 */}
+        {data.image && (
+          <div style={{ width: '100%', height: '120px', overflow: 'hidden', flexShrink: 0 }}>
+            <img
+              src={data.image}
+              alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={(e) => (e.currentTarget.parentElement!.style.display = 'none')}
+            />
+          </div>
+        )}
+
+        {/* 内容区 */}
+        <div style={{ padding: '14px 16px', flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {/* 标题 */}
+          <h3 style={{
+            margin: '0 0 10px 0',
+            fontSize: '16px',
+            fontWeight: 600,
+            color: '#111827',
+            lineHeight: 1.4,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            flexShrink: 0,
+          }}>
+            {data.title || '无标题'}
+          </h3>
+
+          {/* AI 摘要 */}
+          {data.aiSummary && (
+            <div style={{
+              padding: '10px 12px',
+              backgroundColor: '#f0f9ff',
+              borderRadius: '8px',
+              borderLeft: '3px solid #3b82f6',
+              marginBottom: '10px',
+              flexShrink: 0,
+            }}>
+              <div style={{ fontSize: '11px', color: '#3b82f6', fontWeight: 500, marginBottom: '4px' }}>
+                ✨ AI 摘要
+              </div>
+              <p style={{ margin: 0, fontSize: '13px', color: '#1e40af', lineHeight: 1.5 }}>
+                {data.aiSummary}
+              </p>
+            </div>
+          )}
+
+          {/* 正文内容 - 可滚动 */}
+          {data.textContent && !data.aiSummary && (
+            <div style={{
+              flex: 1,
+              overflow: 'auto',
+              fontSize: '13px',
+              color: '#374151',
+              lineHeight: 1.7,
+              whiteSpace: 'pre-wrap',
+              minHeight: 0,
+            }}>
+              {data.textContent.slice(0, 800)}
+              {data.textContent.length > 800 && (
+                <span style={{ color: '#9ca3af' }}>...</span>
+              )}
+            </div>
+          )}
+
+          {/* 如果没有正文，显示描述 */}
+          {!data.textContent && data.description && (
+            <p style={{
+              margin: 0,
+              fontSize: '13px',
+              color: '#6b7280',
+              lineHeight: 1.6,
+              display: '-webkit-box',
+              WebkitLineClamp: 4,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}>
+              {data.description}
+            </p>
+          )}
+
+          {/* 元信息 */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            marginTop: 'auto',
+            paddingTop: '10px',
+            borderTop: '1px solid #f3f4f6',
+            fontSize: '12px',
+            color: '#9ca3af',
+            flexShrink: 0,
+          }}>
+            {data.readTime && <span>📖 {data.readTime}</span>}
+            {data.author && <span>✍️ {data.author}</span>}
+            {data.publishDate && <span>{formatDate(data.publishDate)}</span>}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // 渲染代码/GitHub 类型
   const renderCodePreview = () => {
     if (!data) return null
 
     return (
       <div style={{ padding: '16px' }}>
-        {/* 仓库图标和名称 */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '12px' }}>
+        {/* 仓库信息 */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '14px' }}>
           <div style={{
             width: '48px',
             height: '48px',
@@ -189,15 +336,16 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
             justifyContent: 'center',
             fontSize: '24px',
             flexShrink: 0,
+            overflow: 'hidden',
           }}>
             {data.image ? (
-              <img src={data.image} alt="" style={{ width: '100%', height: '100%', borderRadius: '8px', objectFit: 'cover' }} />
+              <img src={data.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : '📦'}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h3 style={{
               margin: 0,
-              fontSize: '15px',
+              fontSize: '16px',
               fontWeight: 600,
               color: '#111827',
               wordBreak: 'break-word',
@@ -205,7 +353,7 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
               {data.title || data.url}
             </h3>
             {data.author && (
-              <span style={{ fontSize: '12px', color: '#6b7280' }}>{data.author}</span>
+              <span style={{ fontSize: '13px', color: '#6b7280' }}>{data.author}</span>
             )}
           </div>
         </div>
@@ -213,10 +361,10 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
         {/* 描述 */}
         {data.description && (
           <p style={{
-            margin: '0 0 12px 0',
-            fontSize: '13px',
+            margin: '0 0 14px 0',
+            fontSize: '14px',
             color: '#4b5563',
-            lineHeight: 1.5,
+            lineHeight: 1.6,
             display: '-webkit-box',
             WebkitLineClamp: 3,
             WebkitBoxOrient: 'vertical',
@@ -227,155 +375,57 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
         )}
 
         {/* 统计信息 */}
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '16px',
-          padding: '10px 12px',
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '20px',
+          padding: '12px 14px',
           backgroundColor: '#f9fafb',
           borderRadius: '8px',
         }}>
           {data.stars !== undefined && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '14px' }}>⭐</span>
-              <span style={{ fontSize: '13px', fontWeight: 500, color: '#374151' }}>
-                {data.stars.toLocaleString()}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '16px' }}>⭐</span>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                {formatNumber(data.stars)}
+              </span>
+            </div>
+          )}
+          {data.forks !== undefined && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '14px' }}>🍴</span>
+              <span style={{ fontSize: '14px', color: '#374151' }}>
+                {formatNumber(data.forks)}
               </span>
             </div>
           )}
           {data.language && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ 
-                width: '10px', 
-                height: '10px', 
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{
+                width: '12px',
+                height: '12px',
                 borderRadius: '50%',
                 backgroundColor: getLanguageColor(data.language),
               }} />
               <span style={{ fontSize: '13px', color: '#374151' }}>{data.language}</span>
             </div>
           )}
-          {data.lastUpdate && (
-            <span style={{ fontSize: '12px', color: '#6b7280' }}>
-              更新于 {data.lastUpdate}
-            </span>
-          )}
         </div>
       </div>
     )
   }
 
-  // 渲染文章类型预览（带AI摘要）
-  const renderArticlePreview = () => {
-    if (!data) return null
-
-    return (
-      <>
-        {/* 图片 */}
-        {data.image && (
-          <div style={{ width: '100%', height: '140px', overflow: 'hidden', backgroundColor: '#f9fafb' }}>
-            <img
-              src={data.image}
-              alt=""
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              onError={(e) => (e.currentTarget.parentElement!.style.display = 'none')}
-            />
-          </div>
-        )}
-
-        <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {/* 标题 */}
-          <h3 style={{
-            margin: 0,
-            fontSize: '15px',
-            fontWeight: 600,
-            color: '#111827',
-            lineHeight: 1.4,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}>
-            {data.title || '无标题'}
-          </h3>
-
-          {/* AI 摘要（如果有） */}
-          {data.aiSummary ? (
-            <div style={{
-              padding: '10px 12px',
-              backgroundColor: '#f0f9ff',
-              borderRadius: '8px',
-              borderLeft: '3px solid #3b82f6',
-            }}>
-              <div style={{ 
-                fontSize: '11px', 
-                color: '#3b82f6', 
-                fontWeight: 500, 
-                marginBottom: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}>
-                ✨ AI 摘要
-              </div>
-              <p style={{
-                margin: 0,
-                fontSize: '13px',
-                color: '#1e40af',
-                lineHeight: 1.5,
-              }}>
-                {data.aiSummary}
-              </p>
-            </div>
-          ) : data.description ? (
-            <p style={{
-              margin: 0,
-              fontSize: '13px',
-              color: '#6b7280',
-              lineHeight: 1.5,
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}>
-              {data.description}
-            </p>
-          ) : null}
-
-          {/* 元信息 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            {data.readTime && (
-              <span style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                📖 {data.readTime}
-              </span>
-            )}
-            {data.author && (
-              <span style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                ✍️ {data.author}
-              </span>
-            )}
-            {data.publishDate && (
-              <span style={{ fontSize: '12px', color: '#9ca3af' }}>
-                {formatDate(data.publishDate)}
-              </span>
-            )}
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  // 渲染商品类型预览
+  // 渲染商品类型
   const renderProductPreview = () => {
     if (!data) return null
 
     return (
       <>
-        {/* 商品图片 */}
         {data.image && (
-          <div style={{ 
-            width: '100%', 
-            height: '180px', 
-            overflow: 'hidden', 
+          <div style={{
+            width: '100%',
+            height: '200px',
+            overflow: 'hidden',
             backgroundColor: '#fff',
             display: 'flex',
             alignItems: 'center',
@@ -393,11 +443,11 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
 
         <div style={{ padding: '14px 16px' }}>
           <h3 style={{
-            margin: '0 0 8px 0',
+            margin: '0 0 10px 0',
             fontSize: '14px',
             fontWeight: 500,
             color: '#111827',
-            lineHeight: 1.4,
+            lineHeight: 1.5,
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
@@ -408,7 +458,7 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             {data.price && (
-              <span style={{ fontSize: '18px', fontWeight: 600, color: '#dc2626' }}>
+              <span style={{ fontSize: '20px', fontWeight: 600, color: '#dc2626' }}>
                 {data.price}
               </span>
             )}
@@ -455,53 +505,49 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
         top: cardPosition.y,
         zIndex: 999998,
         width: cardSize.width,
+        maxHeight: '500px',
         borderRadius: '12px',
         overflow: 'hidden',
         backgroundColor: '#fff',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08)',
         display: 'flex',
         flexDirection: 'column',
       }}
     >
       {/* Loading State */}
       {loading && (
-        <div
-          style={{
-            padding: '40px 24px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '12px',
-          }}
-        >
-          <div
-            style={{
-              width: '32px',
-              height: '32px',
-              border: '3px solid #e5e7eb',
-              borderTopColor: '#6366f1',
-              borderRadius: '50%',
-              animation: 'smart-lens-spin 0.8s linear infinite',
-            }}
-          />
-          <span style={{ fontSize: '13px', color: '#6b7280' }}>加载预览...</span>
+        <div style={{
+          padding: '50px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '14px',
+        }}>
+          <div style={{
+            width: '36px',
+            height: '36px',
+            border: '3px solid #e5e7eb',
+            borderTopColor: '#6366f1',
+            borderRadius: '50%',
+            animation: 'smart-lens-spin 0.8s linear infinite',
+          }} />
+          <span style={{ fontSize: '13px', color: '#6b7280' }}>正在加载预览...</span>
         </div>
       )}
 
       {/* Content */}
       {!loading && data && (
         <>
-          {/* Header - 网站信息和关闭按钮 */}
-          <div
-            style={{
-              padding: '10px 14px',
-              borderBottom: '1px solid #f3f4f6',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '10px',
-            }}
-          >
+          {/* Header */}
+          <div style={{
+            padding: '10px 14px',
+            borderBottom: '1px solid #f3f4f6',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px',
+            flexShrink: 0,
+          }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
               {data.favicon && (
                 <img
@@ -520,7 +566,6 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
               }}>
                 {data.siteName || new URL(data.url).hostname}
               </span>
-              {/* 类型标签 */}
               <span style={{
                 fontSize: '10px',
                 padding: '2px 6px',
@@ -528,33 +573,57 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
                 backgroundColor: getTypeColor(data.type).bg,
                 color: getTypeColor(data.type).text,
                 fontWeight: 500,
+                flexShrink: 0,
               }}>
                 {getTypeLabel(data.type)}
               </span>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '14px',
-                lineHeight: 1,
-                padding: '4px',
-                color: '#9ca3af',
-                borderRadius: '4px',
-              }}
-              title="关闭"
-            >
-              ✕
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              {onPin && (
+                <button
+                  type="button"
+                  onClick={onPin}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    lineHeight: 1,
+                    padding: '4px',
+                    color: isPinned ? '#6366f1' : '#9ca3af',
+                    borderRadius: '4px',
+                  }}
+                  title={isPinned ? '取消固定' : '固定预览'}
+                >
+                  📌
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  lineHeight: 1,
+                  padding: '4px',
+                  color: '#9ca3af',
+                  borderRadius: '4px',
+                }}
+                title="关闭"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
           {/* Main Content */}
-          {renderContent()}
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            {renderContent()}
+          </div>
 
-          {/* Footer - Open Link */}
+          {/* Footer */}
           <a
             href={data.url}
             target="_blank"
@@ -570,6 +639,7 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
               color: '#6366f1',
               textDecoration: 'none',
               transition: 'background-color 0.15s',
+              flexShrink: 0,
             }}
             onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
             onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
@@ -583,7 +653,7 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
   )
 }
 
-// 辅助函数：获取编程语言对应的颜色
+// Helper functions
 function getLanguageColor(lang: string): string {
   const colors: Record<string, string> = {
     JavaScript: '#f1e05a',
@@ -606,7 +676,6 @@ function getLanguageColor(lang: string): string {
   return colors[lang] || '#6b7280'
 }
 
-// 辅助函数：获取类型对应的颜色
 function getTypeColor(type: string): { bg: string; text: string } {
   const colors: Record<string, { bg: string; text: string }> = {
     video: { bg: '#fee2e2', text: '#dc2626' },
@@ -618,7 +687,6 @@ function getTypeColor(type: string): { bg: string; text: string } {
   return colors[type] || colors.generic
 }
 
-// 辅助函数：获取类型标签文本
 function getTypeLabel(type: string): string {
   const labels: Record<string, string> = {
     video: '视频',
@@ -630,7 +698,6 @@ function getTypeLabel(type: string): string {
   return labels[type] || '链接'
 }
 
-// 辅助函数：格式化日期
 function formatDate(dateStr: string): string {
   try {
     const date = new Date(dateStr)
@@ -640,12 +707,32 @@ function formatDate(dateStr: string): string {
   }
 }
 
-// Add global styles for animation
+function formatNumber(num: number): string {
+  if (num >= 10000) {
+    return `${(num / 1000).toFixed(1)}k`
+  }
+  if (num >= 1000) {
+    return `${(num / 1000).toFixed(1)}k`
+  }
+  return num.toString()
+}
+
+// Global styles
 if (typeof document !== 'undefined') {
   const style = document.createElement('style')
   style.textContent = `
     .smart-lens-preview-card * {
       box-sizing: border-box;
+    }
+    .smart-lens-preview-card ::-webkit-scrollbar {
+      width: 4px;
+    }
+    .smart-lens-preview-card ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .smart-lens-preview-card ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 2px;
     }
     @keyframes smart-lens-spin {
       to { transform: rotate(360deg); }

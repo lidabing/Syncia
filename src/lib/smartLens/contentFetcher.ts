@@ -1,5 +1,6 @@
 /**
- * Content Fetcher - Extract Open Graph and metadata from links
+ * Content Fetcher - 智能内容提取器
+ * 根据链接类型提取不同的内容
  */
 
 import type { LinkPreviewData } from '../../config/settings/smartLens'
@@ -11,19 +12,16 @@ export async function fetchLinkPreview(
   url: string
 ): Promise<LinkPreviewData | null> {
   try {
-    // Check extension context
     if (!chrome.runtime?.id) {
       console.warn('Extension context invalidated')
       return null
     }
 
-    // 发送到 background script 处理(避免 CORS 问题)
     const response = await chrome.runtime.sendMessage({
       action: 'smart-lens-fetch-preview',
       url,
     })
     
-    // Check for runtime errors
     if (chrome.runtime.lastError) {
       console.warn('Runtime error:', chrome.runtime.lastError)
       return null
@@ -37,11 +35,140 @@ export async function fetchLinkPreview(
 }
 
 /**
- * Parse HTML and extract Open Graph metadata
- * Uses regex instead of DOMParser for Service Worker compatibility
+ * 检测视频平台和提取视频ID
+ */
+function detectVideoPlatform(url: string): { platform: LinkPreviewData['videoPlatform']; videoId?: string } | null {
+  try {
+    const urlObj = new URL(url)
+    const hostname = urlObj.hostname
+    const pathname = urlObj.pathname
+    
+    // YouTube
+    // 格式: youtube.com/watch?v=xxx, youtu.be/xxx, youtube.com/embed/xxx, youtube.com/shorts/xxx
+    if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) {
+      let videoId: string | undefined
+      
+      if (hostname.includes('youtu.be')) {
+        videoId = pathname.slice(1).split('/')[0]
+      } else {
+        const vParam = urlObj.searchParams.get('v')
+        if (vParam) {
+          videoId = vParam
+        } else {
+          const embedMatch = pathname.match(/\/(embed|shorts|v)\/([^/?]+)/)
+          if (embedMatch) {
+            videoId = embedMatch[2]
+          }
+        }
+      }
+      
+      if (videoId) {
+        return { platform: 'youtube', videoId }
+      }
+      return { platform: 'youtube' }
+    }
+    
+    // Bilibili
+    // 格式: bilibili.com/video/BVxxx, bilibili.com/video/avxxx, b23.tv/xxx
+    if (hostname.includes('bilibili.com') || hostname.includes('b23.tv')) {
+      // BV号
+      const bvMatch = pathname.match(/\/video\/(BV[a-zA-Z0-9]+)/)
+      if (bvMatch) {
+        return { platform: 'bilibili', videoId: bvMatch[1] }
+      }
+      
+      // AV号
+      const avMatch = pathname.match(/\/video\/av(\d+)/)
+      if (avMatch) {
+        return { platform: 'bilibili', videoId: `av${avMatch[1]}` }
+      }
+      
+      // 短链接 b23.tv
+      if (hostname.includes('b23.tv')) {
+        const shortId = pathname.slice(1).split('/')[0]
+        if (shortId && shortId.startsWith('BV')) {
+          return { platform: 'bilibili', videoId: shortId }
+        }
+        // b23.tv 短链需要跳转，暂时只标记为 bilibili
+        return { platform: 'bilibili' }
+      }
+      
+      return { platform: 'bilibili' }
+    }
+    
+    // Vimeo
+    if (hostname.includes('vimeo.com')) {
+      const vimeoMatch = pathname.match(/\/(\d+)/)
+      if (vimeoMatch) {
+        return { platform: 'vimeo', videoId: vimeoMatch[1] }
+      }
+      return { platform: 'vimeo' }
+    }
+    
+    return null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * 提取正文内容（阅读模式）
+ */
+function extractArticleContent(html: string): string {
+  // 移除脚本和样式
+  let text = html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+    .replace(/<nav\b[^<]*(?:(?!<\/nav>)<[^<]*)*<\/nav>/gi, '')
+    .replace(/<header\b[^<]*(?:(?!<\/header>)<[^<]*)*<\/header>/gi, '')
+    .replace(/<footer\b[^<]*(?:(?!<\/footer>)<[^<]*)*<\/footer>/gi, '')
+    .replace(/<aside\b[^<]*(?:(?!<\/aside>)<[^<]*)*<\/aside>/gi, '')
+  
+  // 尝试提取 article 或 main 内容
+  const articleMatch = text.match(/<article[^>]*>([\s\S]*?)<\/article>/i)
+  const mainMatch = text.match(/<main[^>]*>([\s\S]*?)<\/main>/i)
+  const contentMatch = text.match(/<div[^>]*class=["'][^"']*(?:content|article|post|entry)[^"']*["'][^>]*>([\s\S]*?)<\/div>/i)
+  
+  const mainContent = articleMatch?.[1] || mainMatch?.[1] || contentMatch?.[1] || text
+  
+  // 提取段落文本
+  const paragraphs: string[] = []
+  const pMatches = mainContent.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)
+  for (const match of pMatches) {
+    const pText = match[1]
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, ' ')
+      .trim()
+    
+    if (pText.length > 20) {
+      paragraphs.push(pText)
+    }
+  }
+  
+  // 如果没有提取到段落，fallback 到纯文本
+  if (paragraphs.length === 0) {
+    const plainText = mainContent
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/\s+/g, ' ')
+      .trim()
+    return plainText.slice(0, 2000)
+  }
+  
+  return paragraphs.slice(0, 10).join('\n\n').slice(0, 2000)
+}
+
+/**
+ * Parse HTML and extract content based on type
  */
 export function parseOpenGraph(html: string, url: string): LinkPreviewData {
-  // Helper to extract meta content using regex
   const getMeta = (property: string): string | undefined => {
     const patterns = [
       new RegExp(`<meta[^>]*property=["']${property}["'][^>]*content=["']([^"']+)["']`, 'i'),
@@ -51,7 +178,6 @@ export function parseOpenGraph(html: string, url: string): LinkPreviewData {
       new RegExp(`<meta[^>]*property=["']og:${property}["'][^>]*content=["']([^"']+)["']`, 'i'),
       new RegExp(`<meta[^>]*property=["']twitter:${property}["'][^>]*content=["']([^"']+)["']`, 'i'),
     ]
-
     for (const pattern of patterns) {
       const match = html.match(pattern)
       if (match?.[1]) return match[1]
@@ -59,80 +185,77 @@ export function parseOpenGraph(html: string, url: string): LinkPreviewData {
     return undefined
   }
 
-  // Extract title
   const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
   const title = getMeta('title') || getMeta('og:title') || titleMatch?.[1] || undefined
 
-  // Detect content type
-  const detectType = (url: string): LinkPreviewData['type'] => {
-    const hostname = new URL(url).hostname
-
-    if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) {
-      return 'video'
-    }
-    if (hostname.includes('github.com')) {
-      return 'code'
-    }
-    if (
-      hostname.includes('amazon.') ||
-      hostname.includes('ebay.') ||
-      hostname.includes('taobao.')
-    ) {
-      return 'product'
-    }
-
-    // Check for video tags in HTML
-    if (getMeta('video') || html.includes('<video')) {
-      return 'video'
-    }
-
-    return 'article'
+  // 检测内容类型
+  const videoInfo = detectVideoPlatform(url)
+  const hostname = new URL(url).hostname
+  
+  let type: LinkPreviewData['type'] = 'article'
+  
+  if (videoInfo) {
+    type = 'video'
+  } else if (hostname.includes('github.com')) {
+    type = 'code'
+  } else if (
+    hostname.includes('amazon.') ||
+    hostname.includes('ebay.') ||
+    hostname.includes('taobao.') ||
+    hostname.includes('jd.com') ||
+    hostname.includes('tmall.')
+  ) {
+    type = 'product'
+  } else if (getMeta('og:type') === 'video' || html.includes('<video')) {
+    type = 'video'
   }
 
-  const type = detectType(url)
-
-  // Extract description
   const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i)
   
-  // Extract common metadata
   const data: LinkPreviewData = {
     type,
     url,
     title,
-    description:
-      getMeta('description') ||
-      getMeta('og:description') ||
-      descMatch?.[1] ||
-      undefined,
+    description: getMeta('description') || getMeta('og:description') || descMatch?.[1] || undefined,
     image: getMeta('image') || getMeta('og:image') || undefined,
-    siteName: getMeta('site_name') || getMeta('og:site_name') || new URL(url).hostname,
+    siteName: getMeta('site_name') || getMeta('og:site_name') || hostname,
     author: getMeta('author') || getMeta('article:author') || undefined,
-    publishDate:
-      getMeta('published_time') || getMeta('article:published_time') || undefined,
+    publishDate: getMeta('published_time') || getMeta('article:published_time') || undefined,
   }
 
-  // Extract favicon
+  // Favicon
   const faviconMatch = html.match(/<link[^>]*rel=["'](shortcut )?icon["'][^>]*href=["']([^"']+)["']/i)
-  data.favicon =
-    faviconMatch?.[2] ||
-    `${new URL(url).origin}/favicon.ico`
-
-  // Estimate read time for articles
-  if (type === 'article') {
-    // Remove HTML tags and count words
-    const textContent = html.replace(/<[^>]+>/g, ' ')
-    const wordCount = textContent.split(/\s+/).length
-    const readTime = Math.ceil(wordCount / 200) // Average reading speed
-    data.readTime = `${readTime} min read`
+  if (faviconMatch?.[2]) {
+    const faviconUrl = faviconMatch[2]
+    data.favicon = faviconUrl.startsWith('http') ? faviconUrl : `${new URL(url).origin}${faviconUrl.startsWith('/') ? '' : '/'}${faviconUrl}`
+  } else {
+    data.favicon = `${new URL(url).origin}/favicon.ico`
   }
 
-  // Type-specific extraction
-  if (type === 'video') {
-    data.thumbnailUrl = getMeta('image') || getMeta('thumbnail')
+  // 根据类型提取特定内容
+  if (type === 'video' && videoInfo) {
+    data.videoPlatform = videoInfo.platform
+    data.videoId = videoInfo.videoId
+    data.thumbnailUrl = getMeta('image') || getMeta('og:image')
     data.duration = getMeta('duration') || getMeta('video:duration')
+    
+    // YouTube 高清缩略图
+    if (videoInfo.platform === 'youtube' && videoInfo.videoId) {
+      data.thumbnailUrl = `https://img.youtube.com/vi/${videoInfo.videoId}/maxresdefault.jpg`
+    }
   }
-
-  if (type === 'code' && url.includes('github.com')) {
+  
+  if (type === 'article') {
+    // 提取正文内容
+    data.textContent = extractArticleContent(html)
+    
+    // 计算阅读时间
+    const wordCount = (data.textContent || '').length
+    const readTime = Math.max(1, Math.ceil(wordCount / 500)) // 中文约 500 字/分钟
+    data.readTime = `${readTime} 分钟阅读`
+  }
+  
+  if (type === 'code' && hostname.includes('github.com')) {
     extractGitHubData(html, data)
   }
 
@@ -140,42 +263,48 @@ export function parseOpenGraph(html: string, url: string): LinkPreviewData {
 }
 
 /**
- * Extract GitHub-specific data from HTML
+ * Extract GitHub-specific data
  */
 function extractGitHubData(html: string, data: LinkPreviewData) {
-  // Extract stars
+  // Stars
   const starsMatch = html.match(/id=["']repo-stars-counter-star["'][^>]*>([^<]+)</i)
+    || html.match(/aria-label=["'](\d[\d,.kKmM]*)\s*stars?["']/i)
+    || html.match(/<span[^>]*class=["'][^"']*Counter[^"']*["'][^>]*>(\d[\d,.kKmM]*)<\/span>/i)
   if (starsMatch?.[1]) {
     data.stars = parseNumberWithSuffix(starsMatch[1].trim())
   }
 
-  // Extract language
+  // Forks
+  const forksMatch = html.match(/aria-label=["'](\d[\d,.kKmM]*)\s*forks?["']/i)
+  if (forksMatch?.[1]) {
+    data.forks = parseNumberWithSuffix(forksMatch[1].trim())
+  }
+
+  // Language
   const langMatch = html.match(/itemprop=["']programmingLanguage["'][^>]*>([^<]+)</i)
+    || html.match(/<span[^>]*class=["'][^"']*repo-language-color[^"']*["'][^>]*>[\s\S]*?<span[^>]*>([^<]+)<\/span>/i)
   if (langMatch?.[1]) {
     data.language = langMatch[1].trim()
   }
 
-  // Extract README first paragraph if no description
+  // README 描述
   if (!data.description) {
-    const readmeMatch = html.match(/<div[^>]*id=["']readme["'][^>]*>[\s\S]*?<p[^>]*>([^<]+)</i)
-    if (readmeMatch?.[1]) {
-      data.description = readmeMatch[1].trim().substring(0, 200)
+    const aboutMatch = html.match(/<p[^>]*class=["'][^"']*f4[^"']*["'][^>]*>([^<]+)</i)
+    if (aboutMatch?.[1]) {
+      data.description = aboutMatch[1].trim().slice(0, 200)
     }
   }
 }
 
-/**
- * Parse numbers like "1.2k", "3.5M" to actual numbers
- */
 function parseNumberWithSuffix(text: string): number {
-  const num = Number.parseFloat(text)
+  const num = Number.parseFloat(text.replace(/,/g, ''))
   if (text.toLowerCase().includes('k')) return Math.round(num * 1000)
   if (text.toLowerCase().includes('m')) return Math.round(num * 1000000)
   return Math.round(num)
 }
 
 /**
- * Generate AI summary for the content
+ * Generate AI summary
  */
 export async function generateAISummary(
   content: string,
@@ -194,15 +323,14 @@ export async function generateAISummary(
         messages: [
           {
             role: 'system',
-            content:
-              'You are a helpful assistant that creates concise 3-line summaries of web content. Be brief and informative.',
+            content: '你是一个专业的内容摘要助手。请用简洁的中文总结文章要点，不超过3句话。',
           },
           {
             role: 'user',
-            content: `Summarize this content in 3 lines or less:\n\n${content.substring(0, 3000)}`,
+            content: `请总结以下内容的核心要点：\n\n${content.substring(0, 3000)}`,
           },
         ],
-        max_tokens: 150,
+        max_tokens: 200,
         temperature: 0.3,
       }),
     })
@@ -216,20 +344,19 @@ export async function generateAISummary(
 }
 
 /**
- * Extract YouTube video data
+ * Extract YouTube video data (legacy support)
  */
 export function extractYouTubeData(url: string): Partial<LinkPreviewData> {
-  const videoIdMatch = url.match(
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/
-  )
-  if (!videoIdMatch) return {}
-
-  const videoId = videoIdMatch[1]
-
-  return {
-    type: 'video',
-    thumbnailUrl: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
-    siteName: 'YouTube',
-    favicon: 'https://www.youtube.com/favicon.ico',
+  const videoInfo = detectVideoPlatform(url)
+  if (videoInfo?.platform === 'youtube' && videoInfo.videoId) {
+    return {
+      type: 'video',
+      videoPlatform: 'youtube',
+      videoId: videoInfo.videoId,
+      thumbnailUrl: `https://img.youtube.com/vi/${videoInfo.videoId}/maxresdefault.jpg`,
+      siteName: 'YouTube',
+      favicon: 'https://www.youtube.com/favicon.ico',
+    }
   }
+  return {}
 }
