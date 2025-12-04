@@ -42,7 +42,7 @@ export const defaultSettings: Settings = {
   },
   chat: {
     openAIKey: 'sk-FL5ZZ3228RtJDLwcc8JDDQjuUon48Rbh6greMezkJopR9vNE',
-    model: 'deepseek-chat',
+    model: 'deepseek-v3.1',
     mode: Mode.BALANCED,
     openAiBaseUrl: 'https://api.lkeap.cloud.tencent.com/v1',
   },

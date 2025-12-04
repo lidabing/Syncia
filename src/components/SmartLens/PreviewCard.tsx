@@ -81,19 +81,70 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
     if (!data) return null
 
     const renderPlayer = () => {
+      // YouTube 在扩展 iframe 环境中无法嵌入播放（errorCode: embedder.identity.denied）
+      // 因此使用缩略图 + 点击跳转的方式
       if (data.videoPlatform === 'youtube' && data.videoId) {
-        // 必须包含 origin 参数以避免错误代码 4
-        const origin = typeof window !== 'undefined' ? window.location.origin : ''
+        const thumbnailUrl = `https://img.youtube.com/vi/${data.videoId}/maxresdefault.jpg`
+        const fallbackThumbnail = `https://img.youtube.com/vi/${data.videoId}/hqdefault.jpg`
         
         return (
-          <iframe
-            src={`https://www.youtube.com/embed/${data.videoId}?autoplay=1&mute=1&enablejsapi=1&origin=${encodeURIComponent(origin)}`}
-            style={{ width: '100%', height: '100%', border: 'none' }}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            title="YouTube video"
-            referrerPolicy="strict-origin-when-cross-origin"
-          />
+          <a
+            href={data.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ 
+              position: 'relative', 
+              width: '100%', 
+              height: '100%', 
+              display: 'block',
+              cursor: 'pointer',
+            }}
+          >
+            <img
+              src={thumbnailUrl}
+              alt={data.title || 'YouTube video'}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={(e) => {
+                // 尝试使用较低质量的缩略图
+                if (!e.currentTarget.src.includes('hqdefault')) {
+                  e.currentTarget.src = fallbackThumbnail
+                }
+              }}
+            />
+            {/* 播放按钮 */}
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '68px',
+              height: '48px',
+              backgroundColor: 'rgba(255, 0, 0, 0.9)',
+              borderRadius: '14px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'transform 0.2s, background-color 0.2s',
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+            {/* YouTube 标识 */}
+            <div style={{
+              position: 'absolute',
+              bottom: '8px',
+              right: '8px',
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              color: '#fff',
+              padding: '2px 6px',
+              borderRadius: '4px',
+              fontSize: '11px',
+              fontWeight: 500,
+            }}>
+              ▶ YouTube
+            </div>
+          </a>
         )
       }
       
