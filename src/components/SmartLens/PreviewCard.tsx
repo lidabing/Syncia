@@ -82,13 +82,17 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
 
     const renderPlayer = () => {
       if (data.videoPlatform === 'youtube' && data.videoId) {
+        // 必须包含 origin 参数以避免错误代码 4
+        const origin = typeof window !== 'undefined' ? window.location.origin : ''
+        
         return (
           <iframe
-            src={`https://www.youtube.com/embed/${data.videoId}?rel=0&modestbranding=1&autoplay=1`}
+            src={`https://www.youtube.com/embed/${data.videoId}?autoplay=1&mute=1&enablejsapi=1&origin=${encodeURIComponent(origin)}`}
             style={{ width: '100%', height: '100%', border: 'none' }}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
             title="YouTube video"
+            referrerPolicy="strict-origin-when-cross-origin"
           />
         )
       }

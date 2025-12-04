@@ -55,11 +55,10 @@ export const usePageSuggestions = () => {
       
       // Handle sidebar opened - refresh suggestions
       if (event.data.action === 'sidebar-opened') {
-        console.log('[usePageSuggestions] Sidebar opened, refreshing suggestions')
-        // Reset generation state to trigger new suggestions
-        setHasGenerated(false)
-        setSuggestions([])
-        setUrlChangeCount(prev => prev + 1)
+        console.log('[usePageSuggestions] Sidebar opened')
+        // Don't clear suggestions here to prevent flickering/disappearing
+        // Just update change count to trigger re-check if needed
+        // setUrlChangeCount(prev => prev + 1)
       }
     }
 
@@ -111,14 +110,35 @@ export const usePageSuggestions = () => {
         messagesLength: messages.length,
         hasGenerated,
         currentChatId,
-        apiKey: settings.chat.openAIKey ? 'exists' : 'missing',
-        model: settings.chat.model,
-        baseURL: settings.chat.openAiBaseUrl,
+        suggestionsLength: suggestions.length,
       })
+
+      // Try to load from cache first if we don't have suggestions
+      if (suggestions.length === 0 && !hasGenerated) {
+        try {
+          // We need the current tab URL, but in iframe window.location is different
+          // We rely on the pageUrl state which is updated by content script
+          // If pageUrl is empty, we might be in initial load, try to get it or wait
+          if (pageUrl) {
+            const cacheKey = `SYNCIA_PAGE_SUGGESTIONS_${pageUrl}`
+            const cached = await readStorage(cacheKey) as CachedSuggestions | null
+            if (cached && cached.suggestions && cached.suggestions.length > 0) {
+              console.log('[usePageSuggestions] Loaded from cache:', cached.suggestions)
+              setSuggestions(cached.suggestions)
+              setHasGenerated(true)
+              return
+            }
+          }
+        } catch (err) {
+          console.warn('[usePageSuggestions] Failed to load cache:', err)
+        }
+      }
 
       // Reset when chat changes
       if (currentChatId && messages.length === 0) {
-        setHasGenerated(false)
+        // Only reset if we are actually switching to a NEW chat context
+        // and not just re-rendering
+        // setHasGenerated(false) // Commented out to prevent clearing on chat switch
       }
 
       // Only generate suggestions when conditions are met
@@ -133,8 +153,8 @@ export const usePageSuggestions = () => {
 
       // Only generate for new chats (no messages yet, or only system message)
       // Keep showing suggestions even after messages are sent
-      if (messages.length > 1 && hasGenerated) {
-        console.log('[usePageSuggestions] Chat has messages, keeping existing suggestions')
+      if (messages.length > 0 && (hasGenerated || suggestions.length > 0)) {
+        console.log('[usePageSuggestions] Chat has messages or suggestions exist, keeping existing suggestions')
         return
       }
 
