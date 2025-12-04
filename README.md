@@ -13,6 +13,7 @@ Syncia is a Chrome extension that enables users to chat with ChatGPT by opening 
 - 🎨 Has both light mode and dark mode !
 - 📚 Answer questions in context with text from webpage.
 - 👁️ Screenshot any region and query GPT 4 Vision
+- 🔍 **Smart Lens**: Hover over any link and press `Space` to preview content with AI-powered summaries (Articles, GitHub repos, Products, Videos).
 - 🦙 Supports local models with Ollama
 - 🔐 Secure and fully Free and open source forever. (Please consider giving this project a star 🌟 and contributing 💖 to support the project.)
 
@@ -38,6 +39,14 @@ To use Syncia, simply press the shortcut ctrl+shift+x on any website to open the
 ### Quick Menu
 
 When you select a text, a quick menu will appear with the following options:
+
+### Smart Lens (Link Preview)
+
+Hover over any link and press `Space` (or `Shift` depending on settings) to open a preview card.
+- **Articles**: Read distraction-free with AI summaries.
+- **GitHub**: See repo stats and AI code analysis.
+- **Videos**: Watch YouTube/Bilibili videos directly in the card.
+- **Products**: View price, rating, and AI buying guides.
 
 #### REVIEW SELECTION
 

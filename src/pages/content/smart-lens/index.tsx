@@ -221,13 +221,19 @@ const SmartLens: React.FC = () => {
 
   // Close preview when mouse leaves link AND card (with delay)
   useEffect(() => {
-    if (!hoveredLink && !isPinned && !isHoveringCard && showPreview) {
+    // 如果被钉住，永远不自动关闭
+    if (isPinned) return
+
+    if (!hoveredLink && !isHoveringCard && showPreview) {
       // 添加延迟，给用户时间将鼠标移到卡片上
       const timer = setTimeout(() => {
-        setShowPreview(false)
-        setPreviewData(null)
-        setLoading(false)
-        setCurrentPreviewUrl(null)
+        // 再次检查状态，防止在延迟期间状态发生变化
+        if (!isPinned) {
+          setShowPreview(false)
+          setPreviewData(null)
+          setLoading(false)
+          setCurrentPreviewUrl(null)
+        }
       }, 300) // 300ms 延迟
       
       return () => {
@@ -244,9 +250,10 @@ const SmartLens: React.FC = () => {
     setCurrentPreviewUrl(null)
   }
 
-  const handlePin = () => {
-    setIsPinned(!isPinned)
-  }
+  const handlePin = useCallback(() => {
+    console.log('[Smart Lens] Toggling pin state')
+    setIsPinned(prev => !prev)
+  }, [])
 
   if (!settings.enabled) return null
   

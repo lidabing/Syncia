@@ -48,7 +48,8 @@ async function handleFetchPreview(url: string): Promise<LinkPreviewData | null> 
           const summary = await generateAISummary(
             textContent,
             settings.SETTINGS.chat.openAIKey,
-            settings.SETTINGS.chat.openAiBaseUrl
+            settings.SETTINGS.chat.openAiBaseUrl,
+            previewData.type
           )
           previewData.aiSummary = summary
         }

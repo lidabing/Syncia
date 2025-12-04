@@ -304,14 +304,63 @@ function parseNumberWithSuffix(text: string): number {
 }
 
 /**
- * Generate AI summary
+ * Generate AI summary based on content type
  */
 export async function generateAISummary(
   content: string,
   apiKey: string,
-  baseUrl: string | null
+  baseUrl: string | null,
+  type: LinkPreviewData['type'] = 'generic'
 ): Promise<string> {
   try {
+    let systemPrompt = '你是一个专业的内容摘要助手。请用简洁的中文总结要点。'
+    let userPrompt = `请总结以下内容的核心要点：\n\n${content.substring(0, 3000)}`
+
+    switch (type) {
+      case 'code':
+        systemPrompt = '你是一个资深的开发者助手。请分析这个代码仓库或技术文档。'
+        userPrompt = `请分析以下GitHub仓库/代码页面的内容：
+1. 这个项目是做什么的？
+2. 主要技术栈是什么？
+3. 核心功能有哪些？
+请用Markdown列表格式简洁回答。
+
+内容：
+${content.substring(0, 3000)}`
+        break
+      
+      case 'product':
+        systemPrompt = '你是一个专业的购物助手。请分析这个商品页面。'
+        userPrompt = `请分析以下商品页面的内容：
+1. 商品的主要卖点是什么？
+2. 价格信息（如果有）
+3. 用户评价总结（如果有）
+请用Markdown列表格式简洁回答。
+
+内容：
+${content.substring(0, 3000)}`
+        break
+
+      case 'article':
+        systemPrompt = '你是一个高效的阅读助手。请总结这篇文章。'
+        userPrompt = `请为这篇文章生成一份简报：
+1. 一句话总结核心观点
+2. 列出3-5个关键要点
+3. 适合什么人群阅读？
+
+内容：
+${content.substring(0, 3000)}`
+        break
+
+      case 'video':
+        systemPrompt = '你是一个视频内容分析助手。'
+        userPrompt = `请根据视频的标题和描述，总结视频的主要内容和看点。
+
+内容：
+${content.substring(0, 1000)}`
+        break
+    }
+
     const response = await fetch(`${baseUrl || 'https://api.openai.com'}/v1/chat/completions`, {
       method: 'POST',
       headers: {
@@ -323,14 +372,14 @@ export async function generateAISummary(
         messages: [
           {
             role: 'system',
-            content: '你是一个专业的内容摘要助手。请用简洁的中文总结文章要点，不超过3句话。',
+            content: systemPrompt,
           },
           {
             role: 'user',
-            content: `请总结以下内容的核心要点：\n\n${content.substring(0, 3000)}`,
+            content: userPrompt,
           },
         ],
-        max_tokens: 200,
+        max_tokens: 300,
         temperature: 0.3,
       }),
     })

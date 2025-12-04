@@ -4,6 +4,8 @@
  */
 
 import React, { useEffect, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import type { LinkPreviewData } from '../../config/settings/smartLens'
 
 interface PreviewCardProps {
@@ -253,13 +255,23 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
               borderLeft: '3px solid #3b82f6',
               marginBottom: '10px',
               flexShrink: 0,
+              fontSize: '13px',
+              color: '#1e40af',
+              lineHeight: 1.5,
             }}>
               <div style={{ fontSize: '11px', color: '#3b82f6', fontWeight: 500, marginBottom: '4px' }}>
                 ✨ AI 摘要
               </div>
-              <p style={{ margin: 0, fontSize: '13px', color: '#1e40af', lineHeight: 1.5 }}>
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  p: ({node, ...props}) => <p style={{margin: '0 0 8px 0'}} {...props} />,
+                  ul: ({node, ...props}) => <ul style={{margin: '0 0 8px 0', paddingLeft: '20px'}} {...props} />,
+                  li: ({node, ...props}) => <li style={{marginBottom: '4px'}} {...props} />,
+                }}
+              >
                 {data.aiSummary}
-              </p>
+              </ReactMarkdown>
             </div>
           )}
 
@@ -359,7 +371,7 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
         </div>
 
         {/* 描述 */}
-        {data.description && (
+        {data.description && !data.aiSummary && (
           <p style={{
             margin: '0 0 14px 0',
             fontSize: '14px',
@@ -372,6 +384,34 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
           }}>
             {data.description}
           </p>
+        )}
+
+        {/* AI 分析 */}
+        {data.aiSummary && (
+          <div style={{
+            padding: '10px 12px',
+            backgroundColor: '#f0fdf4',
+            borderRadius: '8px',
+            borderLeft: '3px solid #22c55e',
+            marginBottom: '14px',
+            fontSize: '13px',
+            color: '#15803d',
+            lineHeight: 1.5,
+          }}>
+            <div style={{ fontSize: '11px', color: '#22c55e', fontWeight: 500, marginBottom: '4px' }}>
+              🤖 代码分析
+            </div>
+            <ReactMarkdown 
+              remarkPlugins={[remarkGfm]}
+              components={{
+                p: ({node, ...props}) => <p style={{margin: '0 0 8px 0'}} {...props} />,
+                ul: ({node, ...props}) => <ul style={{margin: '0 0 8px 0', paddingLeft: '20px'}} {...props} />,
+                li: ({node, ...props}) => <li style={{marginBottom: '4px'}} {...props} />,
+              }}
+            >
+              {data.aiSummary}
+            </ReactMarkdown>
+          </div>
         )}
 
         {/* 统计信息 */}
@@ -472,6 +512,34 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
               </div>
             )}
           </div>
+
+          {/* AI 商品分析 */}
+          {data.aiSummary && (
+            <div style={{
+              marginTop: '12px',
+              padding: '10px 12px',
+              backgroundColor: '#fffbeb',
+              borderRadius: '8px',
+              borderLeft: '3px solid #f59e0b',
+              fontSize: '13px',
+              color: '#b45309',
+              lineHeight: 1.5,
+            }}>
+              <div style={{ fontSize: '11px', color: '#f59e0b', fontWeight: 500, marginBottom: '4px' }}>
+                🛍️ 商品分析
+              </div>
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  p: ({node, ...props}) => <p style={{margin: '0 0 8px 0'}} {...props} />,
+                  ul: ({node, ...props}) => <ul style={{margin: '0 0 8px 0', paddingLeft: '20px'}} {...props} />,
+                  li: ({node, ...props}) => <li style={{marginBottom: '4px'}} {...props} />,
+                }}
+              >
+                {data.aiSummary}
+              </ReactMarkdown>
+            </div>
+          )}
         </div>
       </>
     )
@@ -582,7 +650,10 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
               {onPin && (
                 <button
                   type="button"
-                  onClick={onPin}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onPin()
+                  }}
                   style={{
                     background: 'none',
                     border: 'none',
@@ -592,6 +663,8 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
                     padding: '4px',
                     color: isPinned ? '#6366f1' : '#9ca3af',
                     borderRadius: '4px',
+                    transition: 'all 0.2s',
+                    backgroundColor: isPinned ? '#e0e7ff' : 'transparent',
                   }}
                   title={isPinned ? '取消固定' : '固定预览'}
                 >
