@@ -10,6 +10,8 @@ import { sidebarToggleListeners } from './sidebar/sidebarToggleListeners'
 import { setupSmartLensListener } from './smart-lens/fetchPreview'
 import { migrateSettings } from '../../lib/migrateSettings'
 
+console.log('[Background] Service Worker starting...')
+
 backgroundLog()
 
 // =========================== //
@@ -35,3 +37,5 @@ createContextMenuOnStorageChange()
 // Smart Lens Scripts
 // =========================== //
 setupSmartLensListener()
+
+console.log('[Background] Service Worker fully initialized')

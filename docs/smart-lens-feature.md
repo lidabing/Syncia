@@ -116,32 +116,76 @@ Smart Lens 会根据链接类型自动选择最佳的分析策略：
 
 ## 🏗️ 技术架构
 
+### 处理流程
+
 ```
 用户悬停链接 + 按 Space
         ↓
 Content Script (smart-lens/index.tsx)
-        ↓ 发送消息
+        ↓ 发送消息 (含页面上下文)
 Background Service Worker (fetchPreview.ts)
-        ↓ Fetch + 解析 Open Graph
-Content Script
-        ↓ 渲染
-PreviewCard 组件
+        ↓
+   ┌────┴────┐
+   ↓         ↓
+平台适配器   HTML 抓取
+(GitHub API) (通用 Fetch)
+   └────┬────┘
+        ↓
+   内容清洗 (contentCleaner)
+        ↓
+   AI 结构化分析 (aiAnalyzer)
+        ↓
+   返回 LinkPreviewData + AIAnalysisResult
+        ↓
+PreviewCard 组件 (Markdown 渲染)
 ```
+
+### Fetch → Clean → Analyze 流水线
+
+| 阶段 | 模块 | 职责 |
+|------|------|------|
+| **Fetch** | `platformAdapters.ts` | 平台专用 API 抓取 (GitHub/YouTube) |
+| **Clean** | `contentCleaner.ts` | Readability 风格内容清洗 |
+| **Analyze** | `aiAnalyzer.ts` | 结构化 JSON AI 分析 |
 
 ### 目录结构
 
 ```
 src/
-├── config/settings/smartLens.ts     # 类型定义和默认配置
+├── config/settings/smartLens.ts     # 类型定义 (AIAnalysisResult, LinkPreviewData)
 ├── components/SmartLens/
-│   ├── PreviewCard.tsx              # 预览卡片组件
+│   ├── PreviewCard.tsx              # 预览卡片组件 (Markdown 渲染)
 │   └── VisualCue.tsx                # 链接悬停检测
 ├── lib/smartLens/
-│   └── contentFetcher.ts            # OG 解析 & AI 摘要
+│   ├── contentFetcher.ts            # OG 解析 & 简单摘要 (降级方案)
+│   ├── contentCleaner.ts            # HTML 内容清洗器
+│   ├── platformAdapters.ts          # 平台专用适配器 (GitHub/YouTube)
+│   └── aiAnalyzer.ts                # 结构化 AI 分析引擎
 ├── pages/content/smart-lens/
 │   └── index.tsx                    # 主 Content Script
 └── pages/background/smart-lens/
-    └── fetchPreview.ts              # Background 处理器
+    └── fetchPreview.ts              # Background 处理器 (流水线入口)
+```
+
+### AI 分析结果结构
+
+```typescript
+interface AIAnalysisResult {
+  type: 'news' | 'tutorial' | 'documentation' | 'repository' | 'product' | 'discussion' | 'video' | 'social' | 'general'
+  confidence: number // 0-1 置信度
+  summary: string    // 一句话摘要
+  meta: {
+    keyPoints?: string[]      // 关键要点 (最多5个)
+    topic?: string            // 主题分类
+    sentiment?: 'positive' | 'negative' | 'neutral'
+    techStack?: string[]      // 技术栈
+    actionItems?: string[]    // 建议操作
+    relevance?: string        // 与当前页面关联
+    readingTime?: string      // 预估阅读时间
+    difficulty?: 'beginner' | 'intermediate' | 'advanced'
+    freshness?: 'breaking' | 'recent' | 'dated' | 'evergreen'
+  }
+}
 ```
 
 ## 🔧 开发指南
@@ -186,6 +230,19 @@ chrome://extensions/ → 扩展详情 → Service Worker
 | HTTP 链接警告 | HTTPS 页面请求 HTTP | 使用背景脚本代理 |
 
 ## 📋 更新日志
+
+### v1.1 (2025-12-04)
+- ✅ **Fetch → Clean → Analyze 三步流水线**
+- ✅ 结构化 AI 分析 (`AIAnalysisResult`)
+- ✅ 内容清洗模块 (Readability 风格)
+- ✅ 平台专用适配器 (GitHub API, YouTube)
+- ✅ 8 种内容类型智能识别
+- ✅ 丰富的元数据输出 (要点/技术栈/难度/时效性等)
+- ✅ Markdown 格式化渲染
+- ✅ 默认开启 Smart Lens
+- ✅ 默认模型更换为 deepseek-v3.1
+- 🔧 修复 YouTube 嵌入播放错误 (改用缩略图+点击)
+- 🔧 修复钉住模式不生效问题
 
 ### v1.0 (2025-12-03)
 - ✅ 基础预览功能

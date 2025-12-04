@@ -13,23 +13,39 @@ export async function fetchLinkPreview(
 ): Promise<LinkPreviewData | null> {
   try {
     if (!chrome.runtime?.id) {
-      console.warn('Extension context invalidated')
+      console.warn('[Smart Lens] Extension context invalidated')
       return null
     }
 
-    const response = await chrome.runtime.sendMessage({
-      action: 'smart-lens-fetch-preview',
-      url,
-    })
-    
-    if (chrome.runtime.lastError) {
-      console.warn('Runtime error:', chrome.runtime.lastError)
-      return null
-    }
+    console.log('[Smart Lens] Sending message to background for:', url)
+
+    // 使用 Promise 包装并添加超时
+    const response = await Promise.race([
+      new Promise<LinkPreviewData | null>((resolve) => {
+        chrome.runtime.sendMessage(
+          { action: 'smart-lens-fetch-preview', url },
+          (result) => {
+            if (chrome.runtime.lastError) {
+              console.warn('[Smart Lens] Runtime error:', chrome.runtime.lastError.message)
+              resolve(null)
+            } else {
+              console.log('[Smart Lens] Got response:', result ? 'data received' : 'null')
+              resolve(result)
+            }
+          }
+        )
+      }),
+      new Promise<null>((resolve) => {
+        setTimeout(() => {
+          console.warn('[Smart Lens] Message timeout after 15s')
+          resolve(null)
+        }, 15000) // 15秒超时
+      })
+    ])
     
     return response
   } catch (error) {
-    console.error('Failed to fetch link preview:', error)
+    console.error('[Smart Lens] Failed to fetch link preview:', error)
     return null
   }
 }

@@ -35,13 +35,16 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
   const getCardSize = () => {
     if (!data) return { width: 380, height: 'auto' }
     
+    // 如果有正文内容，使用更大的卡片
+    const hasTextContent = data.textContent && data.textContent.length > 100
+    
     switch (data.type) {
       case 'video':
         return { width: 480, height: 'auto' }
       case 'code':
-        return { width: 400, height: 'auto' }
-      case 'article':
         return { width: 420, height: 'auto' }
+      case 'article':
+        return { width: hasTextContent ? 450 : 420, height: 'auto' }
       default:
         return { width: 380, height: 'auto' }
     }
@@ -269,11 +272,15 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
   const renderArticlePreview = () => {
     if (!data) return null
 
+    // 计算是否有足够内容显示
+    const hasTextContent = data.textContent && data.textContent.length > 100
+    const hasAISummary = data.aiSummary && data.aiSummary.length > 0
+
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '450px' }}>
-        {/* 头图 */}
-        {data.image && (
-          <div style={{ width: '100%', height: '120px', overflow: 'hidden', flexShrink: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '500px' }}>
+        {/* 头图 - 只在没有正文内容时显示，节省空间 */}
+        {data.image && !hasTextContent && (
+          <div style={{ width: '100%', height: '100px', overflow: 'hidden', flexShrink: 0 }}>
             <img
               src={data.image}
               alt=""
@@ -288,7 +295,7 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
           {/* 标题 */}
           <h3 style={{
             margin: '0 0 10px 0',
-            fontSize: '16px',
+            fontSize: '15px',
             fontWeight: 600,
             color: '#111827',
             lineHeight: 1.4,
@@ -301,62 +308,77 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
             {data.title || '无标题'}
           </h3>
 
-          {/* AI 摘要 */}
-          {data.aiSummary && (
+          {/* AI 摘要 - 精简显示 */}
+          {hasAISummary && (
             <div style={{
-              padding: '10px 12px',
+              padding: '8px 10px',
               backgroundColor: '#f0f9ff',
-              borderRadius: '8px',
+              borderRadius: '6px',
               borderLeft: '3px solid #3b82f6',
               marginBottom: '10px',
               flexShrink: 0,
-              fontSize: '13px',
+              fontSize: '12px',
               color: '#1e40af',
               lineHeight: 1.5,
+              maxHeight: hasTextContent ? '80px' : '150px',
+              overflow: 'auto',
             }}>
-              <div style={{ fontSize: '11px', color: '#3b82f6', fontWeight: 500, marginBottom: '4px' }}>
+              <div style={{ fontSize: '10px', color: '#3b82f6', fontWeight: 500, marginBottom: '3px' }}>
                 ✨ AI 摘要
               </div>
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  p: ({node, ...props}) => <p style={{margin: '0 0 8px 0'}} {...props} />,
-                  ul: ({node, ...props}) => <ul style={{margin: '0 0 8px 0', paddingLeft: '20px'}} {...props} />,
-                  li: ({node, ...props}) => <li style={{marginBottom: '4px'}} {...props} />,
+                  p: ({node, ...props}) => <p style={{margin: '0 0 6px 0'}} {...props} />,
+                  ul: ({node, ...props}) => <ul style={{margin: '0 0 6px 0', paddingLeft: '16px'}} {...props} />,
+                  li: ({node, ...props}) => <li style={{marginBottom: '2px'}} {...props} />,
                 }}
               >
-                {data.aiSummary}
+                {data.aiSummary || ''}
               </ReactMarkdown>
             </div>
           )}
 
-          {/* 正文内容 - 可滚动 */}
-          {data.textContent && !data.aiSummary && (
+          {/* 主要文本内容 - 始终显示（如果有的话） */}
+          {hasTextContent && (
             <div style={{
               flex: 1,
               overflow: 'auto',
-              fontSize: '13px',
-              color: '#374151',
-              lineHeight: 1.7,
-              whiteSpace: 'pre-wrap',
-              minHeight: 0,
+              minHeight: '120px',
+              marginBottom: '10px',
             }}>
-              {data.textContent.slice(0, 800)}
-              {data.textContent.length > 800 && (
-                <span style={{ color: '#9ca3af' }}>...</span>
-              )}
+              <div style={{ 
+                fontSize: '11px', 
+                color: '#6b7280', 
+                fontWeight: 500, 
+                marginBottom: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}>
+                📄 正文预览
+              </div>
+              <div style={{
+                fontSize: '13px',
+                color: '#374151',
+                lineHeight: 1.7,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+              }}>
+                {formatTextContent(data.textContent || '', 1200)}
+              </div>
             </div>
           )}
 
-          {/* 如果没有正文，显示描述 */}
-          {!data.textContent && data.description && (
+          {/* 如果没有正文也没有 AI 摘要，显示描述 */}
+          {!hasTextContent && !hasAISummary && data.description && (
             <p style={{
               margin: 0,
               fontSize: '13px',
               color: '#6b7280',
               lineHeight: 1.6,
               display: '-webkit-box',
-              WebkitLineClamp: 4,
+              WebkitLineClamp: 6,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
             }}>
@@ -372,10 +394,11 @@ export const PreviewCard: React.FC<PreviewCardProps> = ({
             marginTop: 'auto',
             paddingTop: '10px',
             borderTop: '1px solid #f3f4f6',
-            fontSize: '12px',
+            fontSize: '11px',
             color: '#9ca3af',
             flexShrink: 0,
           }}>
+            {data.siteName && <span>🌐 {data.siteName}</span>}
             {data.readTime && <span>📖 {data.readTime}</span>}
             {data.author && <span>✍️ {data.author}</span>}
             {data.publishDate && <span>{formatDate(data.publishDate)}</span>}
@@ -843,6 +866,44 @@ function formatNumber(num: number): string {
     return `${(num / 1000).toFixed(1)}k`
   }
   return num.toString()
+}
+
+/**
+ * 格式化文本内容，清理多余空白并截断
+ */
+function formatTextContent(text: string, maxLength: number): React.ReactNode {
+  // 清理多余的空白行
+  let cleaned = text
+    .replace(/\n{3,}/g, '\n\n')  // 合并多个空行
+    .replace(/[ \t]+/g, ' ')     // 合并空格
+    .trim()
+  
+  // 截断
+  if (cleaned.length > maxLength) {
+    // 尝试在句子结束处截断
+    const truncated = cleaned.slice(0, maxLength)
+    const lastPeriod = Math.max(
+      truncated.lastIndexOf('。'),
+      truncated.lastIndexOf('.'),
+      truncated.lastIndexOf('！'),
+      truncated.lastIndexOf('？')
+    )
+    
+    if (lastPeriod > maxLength * 0.6) {
+      cleaned = truncated.slice(0, lastPeriod + 1)
+    } else {
+      cleaned = truncated
+    }
+    
+    return (
+      <>
+        {cleaned}
+        <span style={{ color: '#9ca3af', marginLeft: '4px' }}>... [点击查看全文]</span>
+      </>
+    )
+  }
+  
+  return cleaned
 }
 
 // Global styles
