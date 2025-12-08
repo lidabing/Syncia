@@ -1,108 +1,296 @@
 /**
  * Content Cleaner - 内容清洗模块
- * 将杂乱的 HTML 转换为纯净的文本，使用类 Readability 算法
+ * 使用 @mozilla/readability 提取文章主体内容，生成阅读模式格式
  */
+
+import { Readability } from '@mozilla/readability'
+
+/**
+ * 将 HTML 转换为阅读模式格式的纯文本
+ * 保留段落结构、标题层级、列表等
+ */
+function htmlToReadableText(html: string): string {
+  console.log('[ContentCleaner] htmlToReadableText input length:', html.length)
+  console.log('[ContentCleaner] htmlToReadableText input preview:', html.slice(0, 500))
+  
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  const result: string[] = []
+  
+  function processNode(node: Node, depth: number = 0): void {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent?.trim()
+      if (text) {
+        result.push(text)
+      }
+      return
+    }
+    
+    if (node.nodeType !== Node.ELEMENT_NODE) return
+    
+    const el = node as Element
+    const tagName = el.tagName.toLowerCase()
+    
+    // 跳过不需要的元素
+    if (['script', 'style', 'nav', 'footer', 'header', 'aside', 'noscript'].includes(tagName)) {
+      return
+    }
+    
+    // 处理不同标签
+    switch (tagName) {
+      case 'h1':
+        result.push('\n\n# ' + el.textContent?.trim())
+        break
+      case 'h2':
+        result.push('\n\n## ' + el.textContent?.trim())
+        break
+      case 'h3':
+        result.push('\n\n### ' + el.textContent?.trim())
+        break
+      case 'h4':
+      case 'h5':
+      case 'h6':
+        result.push('\n\n**' + el.textContent?.trim() + '**')
+        break
+      case 'p':
+        const pText = el.textContent?.trim()
+        if (pText && pText.length > 0) {
+          result.push('\n\n' + pText)
+        }
+        break
+      case 'br':
+        result.push('\n')
+        break
+      case 'li':
+        const liText = el.textContent?.trim()
+        if (liText) {
+          const prefix = el.parentElement?.tagName.toLowerCase() === 'ol' ? '1. ' : '• '
+          result.push('\n' + prefix + liText)
+        }
+        break
+      case 'blockquote':
+        const quoteText = el.textContent?.trim()
+        if (quoteText) {
+          result.push('\n\n> ' + quoteText.replace(/\n/g, '\n> '))
+        }
+        break
+      case 'pre':
+      case 'code':
+        const codeText = el.textContent?.trim()
+        if (codeText) {
+          result.push('\n\n```\n' + codeText + '\n```')
+        }
+        break
+      case 'strong':
+      case 'b':
+        result.push('**' + el.textContent?.trim() + '**')
+        break
+      case 'em':
+      case 'i':
+        result.push('*' + el.textContent?.trim() + '*')
+        break
+      case 'a':
+        const linkText = el.textContent?.trim()
+        if (linkText) {
+          result.push(linkText)
+        }
+        break
+      case 'img':
+        const alt = el.getAttribute('alt')
+        if (alt) {
+          result.push('[图片: ' + alt + ']')
+        }
+        break
+      case 'div':
+      case 'section':
+      case 'article':
+      case 'main':
+        // 递归处理容器元素的子节点
+        for (const child of Array.from(el.childNodes)) {
+          processNode(child, depth + 1)
+        }
+        break
+      case 'ul':
+      case 'ol':
+        result.push('\n')
+        for (const child of Array.from(el.childNodes)) {
+          processNode(child, depth + 1)
+        }
+        result.push('\n')
+        break
+      case 'table':
+        // 简化表格处理
+        const rows = el.querySelectorAll('tr')
+        result.push('\n')
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('td, th')
+          const rowText = Array.from(cells).map(c => c.textContent?.trim()).join(' | ')
+          if (rowText) {
+            result.push('\n| ' + rowText + ' |')
+          }
+        })
+        result.push('\n')
+        break
+      default:
+        // 其他元素递归处理
+        for (const child of Array.from(el.childNodes)) {
+          processNode(child, depth + 1)
+        }
+    }
+  }
+  
+  processNode(doc.body)
+  
+  // 清理结果
+  const finalResult = result.join('')
+    .replace(/\n{3,}/g, '\n\n')  // 最多两个换行
+    .replace(/^\n+/, '')         // 移除开头换行
+    .replace(/\n+$/, '')         // 移除结尾换行
+    .replace(/ {2,}/g, ' ')      // 压缩空格
+    .trim()
+  
+  console.log('[ContentCleaner] htmlToReadableText output length:', finalResult.length)
+  console.log('[ContentCleaner] htmlToReadableText output preview:', finalResult.slice(0, 500))
+  
+  return finalResult
+}
+
+/**
+ * 清理文本内容，移除 HTML 残留、属性片段等
+ */
+function cleanTextContent(text: string): string {
+  return text
+    // 移除 HTML 属性残留 (如 id="xxx" class="yyy" data-xxx="zzz")
+    .replace(/\b[a-z_-]+="[^"]*"/gi, ' ')
+    .replace(/\b[a-z_-]+='[^']*'/gi, ' ')
+    // 移除不完整的 HTML 标签片段 (如 <i style="background...)
+    .replace(/<\s*[a-z]+\s+[^>]*$/gim, ' ')
+    .replace(/<[^>]*$/g, ' ')
+    // 移除完整的 HTML 标签
+    .replace(/<[^>]+>/g, ' ')
+    // 移除 HTML 实体
+    .replace(/&[a-z]+;/gi, ' ')
+    .replace(/&#\d+;/g, ' ')
+    // 压缩空白
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/\t+/g, ' ')
+    .replace(/ {2,}/g, ' ')
+    .replace(/\n /g, '\n')
+    .trim()
+}
 
 /**
  * 清洗 HTML 并提取主要内容
  */
 export function cleanHtmlContent(html: string, url?: string): CleanedContent {
-  // 限制 HTML 长度，避免处理超大页面时卡死
-  const limitedHtml = html.length > 300000 ? html.slice(0, 300000) : html
+  // 限制 HTML 长度，避免处理超大页面
+  const limitedHtml = html.length > 200000 ? html.slice(0, 200000) : html
 
-  // 1. 移除脚本、样式、注释等（使用更高效的正则）
-  let cleaned = limitedHtml
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<noscript[^>]*>[\s\S]*?<\/noscript>/gi, '')
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '')
-  
-  // 2. 移除导航、页眉、页脚、侧边栏等非正文区域
-  cleaned = cleaned
-    .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
-    .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
-    .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
-    .replace(/<aside[^>]*>[\s\S]*?<\/aside>/gi, '')
-
-  // 3. 提取标题
-  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
-  const h1Match = cleaned.match(/<h1[^>]*>([^<]+)<\/h1>/i)
-  const title = h1Match?.[1]?.trim() || titleMatch?.[1]?.trim() || ''
-
-  // 检测是否是论坛/问答页面
+  // 检测是否是论坛网站
   const hostname = url ? new URL(url).hostname.toLowerCase() : ''
   const isForum = isForumSite(hostname)
 
-  // 4. 论坛页面特殊处理 - 提取问题和回复
+  // 论坛页面使用特殊处理
   if (isForum) {
-    return extractForumContent(cleaned, title, hostname)
+    const forumResult = extractForumContent(limitedHtml, hostname)
+    if (forumResult.content.length > 100) {
+      return forumResult
+    }
   }
 
-  // 5. 普通页面：尝试提取 article 或 main 标签内容
-  const articleMatch = cleaned.match(/<article[^>]*>([\s\S]*?)<\/article>/i)
-  const mainMatch = cleaned.match(/<main[^>]*>([\s\S]*?)<\/main>/i)
-  const contentDivMatch = cleaned.match(/<div[^>]*class=["'][^"']*(?:content|article|post|entry|text|body)[^"']*["'][^>]*>([\s\S]*?)<\/div>/i)
-  
-  let mainContent = articleMatch?.[1] || mainMatch?.[1] || contentDivMatch?.[1] || cleaned
+  // 使用 Readability 提取主体内容
+  try {
+    const doc = new DOMParser().parseFromString(limitedHtml, 'text/html')
+    
+    // 设置 document URL 以便 Readability 正确解析相对链接
+    if (url) {
+      const base = doc.createElement('base')
+      base.href = url
+      doc.head.appendChild(base)
+    }
 
-  // 6. 提取段落文本
+    const reader = new Readability(doc, {
+      charThreshold: 50,  // 最小字符阈值
+    })
+    
+    const article = reader.parse()
+
+    if (article && article.content && article.textContent && article.textContent.length > 100) {
+      console.log('[ContentCleaner] Readability success!')
+      console.log('[ContentCleaner] article.title:', article.title)
+      console.log('[ContentCleaner] article.content length:', article.content.length)
+      console.log('[ContentCleaner] article.textContent length:', article.textContent.length)
+      console.log('[ContentCleaner] article.content preview:', article.content.slice(0, 500))
+      
+      // 使用 HTML 内容转换成阅读模式格式
+      const readableText = htmlToReadableText(article.content)
+      console.log('[ContentCleaner] readableText length:', readableText.length)
+      
+      // 如果阅读模式转换失败，回退到纯文本清理
+      const finalText = readableText.length > 50 ? readableText : cleanTextContent(article.textContent)
+      console.log('[ContentCleaner] finalText (used):', finalText.slice(0, 500))
+
+      return {
+        title: article.title || extractTitle(limitedHtml),
+        content: finalText.slice(0, 8000),
+        paragraphCount: (finalText.match(/\n\n/g) || []).length + 1,
+        hasStructure: true,
+        excerpt: article.excerpt || undefined,
+        byline: article.byline || undefined,
+        siteName: article.siteName || undefined,
+      }
+    }
+  } catch (error) {
+    console.warn('[ContentCleaner] Readability failed:', error)
+  }
+
+  // Readability 失败时，使用简单回退方案
+  return fallbackExtract(limitedHtml, url)
+}
+
+/**
+ * 提取页面标题
+ */
+function extractTitle(html: string): string {
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
+  const h1Match = html.match(/<h1[^>]*>([^<]+)<\/h1>/i)
+  return stripHtmlTags(h1Match?.[1] || titleMatch?.[1] || '')
+}
+
+/**
+ * 简单回退提取方案
+ */
+function fallbackExtract(html: string, url?: string): CleanedContent {
+  // 移除脚本、样式等
+  let cleaned = html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+    .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
+    .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+    .replace(/<!--[\s\S]*?-->/g, '')
+
+  const title = extractTitle(html)
+
+  // 提取段落
   const paragraphs: string[] = []
-  const pMatches = mainContent.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)
+  const pMatches = cleaned.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)
   for (const match of pMatches) {
     const text = stripHtmlTags(match[1])
     if (text.length > 30) {
       paragraphs.push(text)
     }
+    if (paragraphs.length >= 20) break
   }
 
-  // 7. 提取列表项
-  const listItems: string[] = []
-  const liMatches = mainContent.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)
-  for (const match of liMatches) {
-    const text = stripHtmlTags(match[1])
-    if (text.length > 10 && text.length < 500) {
-      listItems.push(`• ${text}`)
-    }
-  }
-
-  // 8. 提取标题结构
-  const headings: { level: number; text: string }[] = []
-  const hMatches = mainContent.matchAll(/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi)
-  for (const match of hMatches) {
-    const text = stripHtmlTags(match[2])
-    if (text.length > 0) {
-      headings.push({ level: parseInt(match[1]), text })
-    }
-  }
-
-  // 9. 组装清洗后的内容
-  let textContent = ''
-  
-  if (paragraphs.length > 0) {
-    textContent += paragraphs.slice(0, 20).join('\n\n')
-  }
-
-  if (textContent.length < 500 && listItems.length > 0 && listItems.length < 50) {
-    if (textContent.length > 0) {
-      textContent += '\n\n'
-    }
-    textContent += listItems.slice(0, 15).join('\n')
-  }
-
-  if (textContent.trim().length < 100) {
-    textContent = stripHtmlTags(mainContent)
-  }
-
-  textContent = textContent
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
+  const content = paragraphs.length > 0 
+    ? paragraphs.join('\n\n')
+    : stripHtmlTags(cleaned).slice(0, 5000)
 
   return {
     title,
-    content: textContent.slice(0, 5000),
+    content: content.slice(0, 5000),
     paragraphCount: paragraphs.length,
-    hasStructure: headings.length > 0,
+    hasStructure: false,
   }
 }
 
@@ -111,7 +299,7 @@ export function cleanHtmlContent(html: string, url?: string): CleanedContent {
  */
 function isForumSite(hostname: string): boolean {
   const forumSites = [
-    'jisilu.cn',        // 集思录
+    'jisilu.cn',
     'stackoverflow.com',
     'reddit.com',
     'quora.com',
@@ -133,64 +321,63 @@ function isForumSite(hostname: string): boolean {
 /**
  * 提取论坛/问答页面内容
  */
-function extractForumContent(html: string, title: string, hostname: string): CleanedContent {
-  const replies: { author?: string; content: string; time?: string }[] = []
+function extractForumContent(html: string, hostname: string): CleanedContent {
+  const replies: { author?: string; content: string }[] = []
   let questionContent = ''
+  const title = extractTitle(html)
 
-  // 限制处理的 HTML 长度，避免性能问题
-  const limitedHtml = html.slice(0, 500000)
+  // 先尝试用 Readability 提取
+  try {
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+    const reader = new Readability(doc.cloneNode(true) as Document)
+    const article = reader.parse()
+    if (article?.textContent && article.textContent.length > 200) {
+      questionContent = article.textContent.slice(0, 2000)
+    }
+  } catch (e) {
+    // 忽略错误
+  }
 
   // 集思录特殊处理
   if (hostname.includes('jisilu.cn')) {
-    // 提取问题内容
-    const questionMatch = limitedHtml.match(/<div[^>]*class="[^"]*aw-question-detail-txt[^"]*"[^>]*>([^]*?)<\/div>/i)
-    if (questionMatch) {
-      questionContent = stripHtmlTags(questionMatch[1])
-    }
-
-    // 提取回复 - 使用更简单的模式
-    const replyBlocks = limitedHtml.split(/class="[^"]*aw-item[^"]*"/)
-    for (let i = 1; i < Math.min(replyBlocks.length, 20); i++) {
-      const block = replyBlocks[i].slice(0, 2000) // 限制每个块的大小
-      const content = stripHtmlTags(block)
-      if (content.length > 20 && content.length < 800) {
+    const blocks = html.split(/class="[^"]*aw-item[^"]*"/)
+    for (let i = 1; i < Math.min(blocks.length, 15); i++) {
+      const content = stripHtmlTags(blocks[i].slice(0, 1500))
+      if (content.length > 20 && content.length < 600) {
         replies.push({ content: content.slice(0, 400) })
       }
     }
   }
-
-  // 知乎特殊处理
+  // 知乎
   else if (hostname.includes('zhihu.com')) {
-    const blocks = limitedHtml.split(/class="[^"]*RichContent[^"]*"/)
+    const blocks = html.split(/class="[^"]*RichContent[^"]*"/)
     for (let i = 1; i < Math.min(blocks.length, 10); i++) {
-      const content = stripHtmlTags(blocks[i].slice(0, 3000))
+      const content = stripHtmlTags(blocks[i].slice(0, 2000))
       if (content.length > 50) {
-        replies.push({ content: content.slice(0, 600) })
+        replies.push({ content: content.slice(0, 500) })
       }
     }
   }
-
-  // V2EX 特殊处理
+  // V2EX
   else if (hostname.includes('v2ex.com')) {
-    const blocks = limitedHtml.split(/class="[^"]*reply_content[^"]*"/)
-    for (let i = 1; i < Math.min(blocks.length, 30); i++) {
+    const blocks = html.split(/class="[^"]*reply_content[^"]*"/)
+    for (let i = 1; i < Math.min(blocks.length, 20); i++) {
       const endIdx = blocks[i].indexOf('</div>')
-      const content = stripHtmlTags(blocks[i].slice(0, endIdx > 0 ? endIdx : 500))
+      const content = stripHtmlTags(blocks[i].slice(0, endIdx > 0 ? endIdx : 400))
       if (content.length > 5) {
         replies.push({ content })
       }
     }
   }
-  // 通用论坛处理
+  // 通用论坛
   else {
-    // 使用 split 代替复杂正则
     const patterns = ['comment', 'reply', 'answer', 'post-content']
     for (const pattern of patterns) {
-      const blocks = limitedHtml.split(new RegExp(`class="[^"]*${pattern}[^"]*"`, 'i'))
+      const blocks = html.split(new RegExp(`class="[^"]*${pattern}[^"]*"`, 'i'))
       if (blocks.length > 1) {
-        for (let i = 1; i < Math.min(blocks.length, 15); i++) {
-          const content = stripHtmlTags(blocks[i].slice(0, 1500))
-          if (content.length > 30 && content.length < 800) {
+        for (let i = 1; i < Math.min(blocks.length, 12); i++) {
+          const content = stripHtmlTags(blocks[i].slice(0, 1000))
+          if (content.length > 30 && content.length < 600) {
             replies.push({ content: content.slice(0, 400) })
           }
         }
@@ -199,56 +386,49 @@ function extractForumContent(html: string, title: string, hostname: string): Cle
     }
   }
 
-  // 如果没找到结构化回复，尝试提取所有段落
-  if (replies.length === 0) {
-    const pMatches = limitedHtml.matchAll(/<p[^>]*>([^<]{30,})<\/p>/gi)
-    for (const match of pMatches) {
-      const text = stripHtmlTags(match[1])
-      if (text.length > 30) {
-        replies.push({ content: text.slice(0, 500) })
-      }
-      if (replies.length >= 15) break
-    }
-  }
-
   // 组装内容
   let textContent = ''
 
-  if (questionContent) {
-    textContent += `📌 问题：\n${questionContent}\n\n`
-  }
+  if (questionContent && replies.length === 0) {
+    textContent = questionContent
+  } else {
+    if (questionContent) {
+      textContent += `📌 问题/主题：\n${questionContent.slice(0, 1000)}\n\n`
+    }
 
-  if (replies.length > 0) {
-    textContent += `💬 回复 (${replies.length}条)：\n\n`
-    replies.slice(0, 10).forEach((reply: { author?: string; content: string }, index: number) => {
-      if (reply.author) {
-        textContent += `【${reply.author}】\n`
-      } else {
-        textContent += `#${index + 1}\n`
+    if (replies.length > 0) {
+      textContent += `💬 回复 (${replies.length}条)：\n\n`
+      replies.slice(0, 8).forEach((reply, index) => {
+        textContent += `#${index + 1} ${reply.content}\n\n`
+      })
+      if (replies.length > 8) {
+        textContent += `... 还有 ${replies.length - 8} 条回复\n`
       }
-      textContent += `${reply.content}\n\n`
-    })
-
-    if (replies.length > 10) {
-      textContent += `... 还有 ${replies.length - 10} 条回复\n`
     }
   }
 
   return {
     title,
     content: textContent.trim().slice(0, 6000),
-    paragraphCount: replies.length,
-    hasStructure: true,
-    replies: replies.length,
+    paragraphCount: replies.length || 1,
+    hasStructure: replies.length > 0,
+    replies: replies.length || undefined,
   }
 }
 
 /**
- * 去除 HTML 标签并解码实体
+ * 去除 HTML 标签、属性残留并解码实体
  */
 function stripHtmlTags(html: string): string {
   return html
+    // 移除完整的 HTML 标签
     .replace(/<[^>]+>/g, ' ')
+    // 移除 HTML 属性残留 (通用模式: word="value" 或 word='value')
+    .replace(/\b[a-z_-]+="[^"]*"/gi, ' ')
+    .replace(/\b[a-z_-]+='[^']*'/gi, ' ')
+    // 移除不完整的标签片段
+    .replace(/<\s*[a-z]+\s+[^>]*$/gim, ' ')
+    // 解码 HTML 实体
     .replace(/&nbsp;/g, ' ')
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
@@ -259,6 +439,7 @@ function stripHtmlTags(html: string): string {
     .replace(/&mdash;/g, '—')
     .replace(/&ndash;/g, '–')
     .replace(/&#\d+;/g, '')
+    // 压缩空白
     .replace(/\s+/g, ' ')
     .trim()
 }
@@ -308,22 +489,7 @@ export function detectContentType(url: string, html: string): ContentType {
   }
 
   // 论坛/问答
-  if (
-    hostname.includes('jisilu.cn') ||
-    hostname.includes('stackoverflow.com') ||
-    hostname.includes('reddit.com') ||
-    hostname.includes('quora.com') ||
-    hostname.includes('zhihu.com') ||
-    hostname.includes('v2ex.com') ||
-    hostname.includes('segmentfault.com') ||
-    hostname.includes('juejin.cn') ||
-    hostname.includes('tieba.baidu.com') ||
-    hostname.includes('nga.cn') ||
-    hostname.includes('ngabbs.com') ||
-    hostname.includes('discuz') ||
-    hostname.includes('bbs.') ||
-    hostname.includes('forum.')
-  ) {
+  if (isForumSite(hostname)) {
     return 'forum'
   }
 
@@ -373,7 +539,6 @@ export function detectContentType(url: string, html: string): ContentType {
     return 'product'
   }
 
-  // 默认为文章
   return 'article'
 }
 
@@ -392,5 +557,8 @@ export interface CleanedContent {
   content: string
   paragraphCount: number
   hasStructure: boolean
-  replies?: number // 论坛回复数量
+  replies?: number
+  excerpt?: string
+  byline?: string
+  siteName?: string
 }

@@ -25,6 +25,56 @@ const SmartLens: React.FC = () => {
   const [isHoveringCard, setIsHoveringCard] = useState(false)
   const [extensionInvalid, setExtensionInvalid] = useState(false)
   const [currentPreviewUrl, setCurrentPreviewUrl] = useState<string | null>(null)
+  const [isOverSidebar, setIsOverSidebar] = useState(false)
+
+  // 监听鼠标是否在 sidebar 区域
+  useEffect(() => {
+    const setupSidebarListeners = () => {
+      const sidebarWrapper = document.getElementById('syncia_sidebar_wrapper')
+      if (!sidebarWrapper) return null
+
+      const handleSidebarEnter = () => {
+        console.log('[Smart Lens] Mouse entered sidebar')
+        setIsOverSidebar(true)
+      }
+      
+      const handleSidebarLeave = () => {
+        console.log('[Smart Lens] Mouse left sidebar')
+        setIsOverSidebar(false)
+      }
+
+      sidebarWrapper.addEventListener('mouseenter', handleSidebarEnter)
+      sidebarWrapper.addEventListener('mouseleave', handleSidebarLeave)
+
+      return () => {
+        sidebarWrapper.removeEventListener('mouseenter', handleSidebarEnter)
+        sidebarWrapper.removeEventListener('mouseleave', handleSidebarLeave)
+      }
+    }
+
+    // 尝试立即设置
+    let cleanup = setupSidebarListeners()
+    
+    // 如果 sidebar 还没加载，使用 MutationObserver 等待
+    if (!cleanup) {
+      const observer = new MutationObserver(() => {
+        const sidebarWrapper = document.getElementById('syncia_sidebar_wrapper')
+        if (sidebarWrapper) {
+          cleanup = setupSidebarListeners()
+          observer.disconnect()
+        }
+      })
+      
+      observer.observe(document.body, { childList: true, subtree: true })
+      
+      return () => {
+        observer.disconnect()
+        cleanup?.()
+      }
+    }
+
+    return cleanup
+  }, [])
 
   // Check if extension context is valid
   const checkExtensionContext = () => {
@@ -134,13 +184,15 @@ const SmartLens: React.FC = () => {
   const cursorPositionRef = React.useRef(cursorPosition)
   const showPreviewRef = React.useRef(showPreview)
   const currentPreviewUrlRef = React.useRef(currentPreviewUrl)
+  const isOverSidebarRef = React.useRef(isOverSidebar)
   
   React.useEffect(() => {
     hoveredLinkRef.current = hoveredLink
     cursorPositionRef.current = cursorPosition
     showPreviewRef.current = showPreview
     currentPreviewUrlRef.current = currentPreviewUrl
-  }, [hoveredLink, cursorPosition, showPreview, currentPreviewUrl])
+    isOverSidebarRef.current = isOverSidebar
+  }, [hoveredLink, cursorPosition, showPreview, currentPreviewUrl, isOverSidebar])
 
   // 触发预览的函数
   const triggerPreview = useCallback(() => {
@@ -176,6 +228,11 @@ const SmartLens: React.FC = () => {
       // 忽略键盘重复事件，防止连续触发
       if (e.repeat) return
       
+      // 如果鼠标在 sidebar 区域，不处理
+      if (isOverSidebarRef.current) {
+        return
+      }
+      
       const link = hoveredLinkRef.current
       console.log('[Smart Lens] Key down:', e.code, 'key:', e.key, 'hoveredLink:', link?.href || 'none', 'showPreview:', showPreviewRef.current)
       
@@ -185,6 +242,12 @@ const SmartLens: React.FC = () => {
         const tagName = activeElement?.tagName
         const isEditable = (activeElement as HTMLElement)?.isContentEditable
         console.log('[Smart Lens] Active element:', tagName, 'contentEditable:', isEditable)
+        
+        // 检查是否在 sidebar iframe 中
+        if (tagName === 'IFRAME') {
+          console.log('[Smart Lens] Focus in iframe, ignoring Space')
+          return
+        }
         
         if (tagName === 'INPUT' || tagName === 'TEXTAREA' || isEditable) {
           console.log('[Smart Lens] In input field, ignoring Space')
@@ -299,6 +362,8 @@ const SmartLens: React.FC = () => {
 
 // Initialize Smart Lens
 function initSmartLens() {
+  console.log('[Smart Lens] Initializing...')
+  
   // Don't initialize if we're inside an iframe (e.g., Smart Lens preview iframe)
   // This prevents nested preview triggering
   if (window !== window.top) {
@@ -317,6 +382,7 @@ function initSmartLens() {
     pointer-events: none;
   `
   document.body.appendChild(container)
+  console.log('[Smart Lens] Container created')
 
   // 添加样式让卡片可交互
   const style = document.createElement('style')

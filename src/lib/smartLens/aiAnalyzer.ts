@@ -23,6 +23,132 @@ const CONTENT_TYPE_MAP: Record<ContentType, InternalType> = {
 }
 
 /**
+ * 使用 AI 清理和格式化文本内容
+ * 移除 HTML 残留、乱码，返回干净的可读文本
+ */
+export async function cleanContentWithAI(
+  rawContent: string,
+  apiKey: string,
+  baseUrl: string | null
+): Promise<string> {
+  try {
+    // 如果内容已经很干净，直接返回
+    if (!needsAICleaning(rawContent)) {
+      return rawContent
+    }
+
+    const response = await fetch(`${baseUrl || 'https://api.openai.com'}/v1/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'deepseek-v3.1',
+        messages: [
+          { 
+            role: 'system', 
+            content: `你是一个文本清理助手。用户会给你一段可能包含HTML残留、乱码或格式混乱的文本。
+请执行以下清理：
+1. 移除所有HTML标签、CSS代码、JavaScript代码
+2. 移除乱码和无意义的符号序列
+3. 保留有意义的中英文内容
+4. 适当分段，使文本易于阅读
+5. 只返回清理后的纯文本，不要添加任何解释
+
+如果内容是论坛帖子，保持回复的结构。
+如果内容是文章，保持标题和段落结构。` 
+          },
+          { role: 'user', content: `请清理以下文本：\n\n${rawContent.slice(0, 3000)}` },
+        ],
+        max_tokens: 1000,
+        temperature: 0.1,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const cleanedContent = data.choices[0]?.message?.content?.trim()
+    
+    return cleanedContent || rawContent
+  } catch (error) {
+    console.error('[AI Cleaner] Failed:', error)
+    return rawContent
+  }
+}
+
+/**
+ * 检测内容是否是加密/乱码内容（不应该显示）
+ */
+export function isGarbageContent(content: string): boolean {
+  if (!content || content.length < 50) return true
+  
+  // 检测 WAF/加密标记 - 更宽松的匹配
+  if (/_waf_|waf_bd|"_waf|_waf"/i.test(content)) {
+    console.log('[Smart Lens] Detected WAF encrypted content')
+    return true
+  }
+  
+  // 检测 JSON 格式的加密内容
+  if (/^\s*\{.*"_?\w+_?\w*":\s*"[A-Za-z0-9+/=]{20,}"/.test(content)) {
+    console.log('[Smart Lens] Detected JSON encrypted content')
+    return true
+  }
+  
+  // 检测 Base64 风格的乱码（大量随机字符+数字+特殊符号）
+  const base64Pattern = /[A-Za-z0-9+/=]{50,}/
+  if (base64Pattern.test(content)) {
+    // 如果大部分内容都是 base64 风格
+    const matches = content.match(/[A-Za-z0-9+/=]{20,}/g) || []
+    const totalMatchLength = matches.reduce((sum, m) => sum + m.length, 0)
+    if (totalMatchLength > content.length * 0.3) {
+      console.log('[Smart Lens] Detected Base64 garbage content')
+      return true
+    }
+  }
+  
+  // 检测中文占比过低（对于中文网站）
+  const chineseChars = (content.match(/[\u4e00-\u9fff]/g) || []).length
+  const alphanumeric = (content.match(/[a-zA-Z0-9]/g) || []).length
+  // 如果字母数字远多于中文，且没有意义的英文单词，可能是乱码
+  if (alphanumeric > 100 && chineseChars < 10) {
+    // 检查是否包含常见英文单词
+    const hasEnglishWords = /\b(the|is|are|was|were|have|has|will|would|can|could|this|that|with|from|for|and|but|not)\b/i.test(content)
+    if (!hasEnglishWords) {
+      console.log('[Smart Lens] Detected low Chinese ratio garbage')
+      return true
+    }
+  }
+  
+  // 检测大量连续非可读字符
+  if (/[^\w\s\u4e00-\u9fff，。！？、；：""''（）【】《》—…·\n]{30,}/.test(content)) {
+    console.log('[Smart Lens] Detected long non-readable sequence')
+    return true
+  }
+  
+  return false
+}
+
+/**
+ * 检测内容是否需要 AI 清理
+ */
+function needsAICleaning(content: string): boolean {
+  // 检测 HTML 标签残留
+  if (/<[a-z][\s\S]*>/i.test(content)) return true
+  // 检测 CSS/JS 代码
+  if (/\{[\s\S]*:\s*[\s\S]*\}/.test(content)) return true
+  // 检测大量连续特殊字符
+  if (/[^\w\s\u4e00-\u9fff]{10,}/.test(content)) return true
+  // 检测 HTML 实体
+  if (/&[a-z]+;|&#\d+;/i.test(content)) return true
+  
+  return false
+}
+
+/**
  * 生成结构化 AI 分析
  */
 export async function generateStructuredAnalysis(

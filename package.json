@@ -28,6 +28,7 @@
     "@langchain/community": "^0.0.48",
     "@langchain/core": "^0.1.57",
     "@langchain/openai": "^0.0.28",
+    "@mozilla/readability": "^0.6.0",
     "@radix-ui/react-dialog": "^1.0.3",
     "@radix-ui/react-dropdown-menu": "^2.0.4",
     "@radix-ui/react-select": "^2.0.0",

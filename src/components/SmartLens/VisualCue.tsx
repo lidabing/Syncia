@@ -69,6 +69,16 @@ export const useSmartLensDetection = (settings: SmartLensSettings) => {
       setCursorPosition({ x: e.clientX, y: e.clientY })
 
       const target = e.target as HTMLElement
+      
+      // 忽略 Syncia sidebar 相关元素上的事件
+      if (target.closest('#syncia_sidebar_wrapper') || 
+          target.closest('#syncia_floating_button') ||
+          target.id === 'syncia_sidebar' ||
+          target.tagName === 'IFRAME') {
+        // 不重置状态，保持之前的 hoveredLink
+        return
+      }
+      
       const link = target.closest('a[href]') as HTMLAnchorElement | null
 
       if (link && link.href && !link.href.startsWith('javascript:')) {

@@ -37,9 +37,9 @@ export async function fetchLinkPreview(
       }),
       new Promise<null>((resolve) => {
         setTimeout(() => {
-          console.warn('[Smart Lens] Message timeout after 15s')
+          console.warn('[Smart Lens] Message timeout after 10s')
           resolve(null)
-        }, 15000) // 15秒超时
+        }, 10000) // 10秒超时（缩短以更快显示失败）
       })
     ])
     

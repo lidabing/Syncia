@@ -869,9 +869,34 @@ function formatNumber(num: number): string {
 }
 
 /**
+ * 检测文本是否是乱码/加密内容
+ */
+function isGarbageText(text: string): boolean {
+  if (!text || text.length < 20) return false
+  
+  // 检测 WAF/加密标记
+  if (/_waf_|waf_bd|"_waf|_waf"/i.test(text)) return true
+  
+  // 检测 JSON 格式的加密内容
+  if (/^\s*\{.*"_?\w+_?\w*":\s*"[A-Za-z0-9+/=]{20,}"/.test(text)) return true
+  
+  // 检测大量 Base64 风格字符
+  const matches = text.match(/[A-Za-z0-9+/=]{30,}/g) || []
+  const totalMatchLength = matches.reduce((sum, m) => sum + m.length, 0)
+  if (totalMatchLength > text.length * 0.4) return true
+  
+  return false
+}
+
+/**
  * 格式化文本内容，清理多余空白并截断
  */
 function formatTextContent(text: string, maxLength: number): React.ReactNode {
+  // 先检查是否是乱码
+  if (isGarbageText(text)) {
+    return null
+  }
+  
   // 清理多余的空白行
   let cleaned = text
     .replace(/\n{3,}/g, '\n\n')  // 合并多个空行
