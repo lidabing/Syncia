@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Header from '../Layout/Header';
 import GeneralSettings from './Sections/GeneralSettings';
 import QuickMenuSettings from './Sections/QuickMenuSettings';
@@ -10,13 +11,14 @@ import Tabs from './Tabs';
 
 const Settings = () => {
   useThemeSync();
+  const { t } = useTranslation();
 
   const tabs = [
-    { id: 'general', label: 'General', component: <GeneralSettings /> },
-    { id: 'chat', label: 'Chat', component: <ChatSettings /> },
-    { id: 'smart-lens', label: 'Smart Lens', component: <SmartLensSettings /> },
-    { id: 'quick-menu', label: 'Quick Menu', component: <QuickMenuSettings /> },
-    { id: 'prompts', label: 'Prompts', component: <PromptSettings /> },
+    { id: 'general', label: t('tabs.general'), component: <GeneralSettings /> },
+    { id: 'chat', label: t('tabs.chat'), component: <ChatSettings /> },
+    { id: 'smart-lens', label: t('tabs.smartLens'), component: <SmartLensSettings /> },
+    { id: 'quick-menu', label: t('tabs.quickMenu'), component: <QuickMenuSettings /> },
+    { id: 'prompts', label: t('tabs.prompts'), component: <PromptSettings /> },
   ];
 
   return (
@@ -24,9 +26,9 @@ const Settings = () => {
       <div className="cdx-container cdx-mx-auto cdx-px-6 cdx-py-12 cdx-max-w-4xl">
         <Header />
         <div className="cdx-mt-12">
-          <h1 className="cdx-text-3xl cdx-font-bold cdx-text-neutral-800 dark:cdx-text-neutral-200">Settings</h1>
+          <h1 className="cdx-text-3xl cdx-font-bold cdx-text-neutral-800 dark:cdx-text-neutral-200">{t('settings.title')}</h1>
           <p className="cdx-mt-2 cdx-text-neutral-500 dark:cdx-text-neutral-400">
-            Customize your Syncia experience.
+            {t('settings.subtitle')}
           </p>
         </div>
         
@@ -36,7 +38,7 @@ const Settings = () => {
         
         {/* Footer */}
         <footer className="cdx-mt-16 cdx-text-center cdx-text-sm cdx-text-neutral-400">
-          <p>Made with ❤️ by Syncia Team</p>
+          <p>{t('settings.footer')}</p>
         </footer>
       </div>
     </div>

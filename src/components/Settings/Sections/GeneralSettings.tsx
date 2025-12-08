@@ -1,11 +1,12 @@
 import type React from 'react'
+import { useTranslation } from 'react-i18next'
 import SectionHeading from '../Elements/SectionHeading'
 import FieldWrapper from '../Elements/FieldWrapper'
 import { useSettings } from '../../../hooks/useSettings'
 import { ThemeOptions } from '../../../config/settings'
 import * as Switch from '@radix-ui/react-switch'
-import { capitalizeText } from '../../../lib/capitalizeText'
-import { HiOutlineMoon, HiOutlineSun, HiOutlineDesktopComputer, HiOutlineCog } from 'react-icons/hi'
+import { changeLanguage } from '../../../locales/i18n'
+import { HiOutlineMoon, HiOutlineSun, HiOutlineDesktopComputer, HiOutlineCog, HiOutlineGlobeAlt } from 'react-icons/hi'
 
 const themeIcons = {
   [ThemeOptions.LIGHT]: HiOutlineSun,
@@ -15,6 +16,7 @@ const themeIcons = {
 
 const GeneralSettings = () => {
   const [settings, setSettings] = useSettings()
+  const { t, i18n } = useTranslation()
   const generalSettings = settings.general
 
   const handleThemeChange = (theme: ThemeOptions) => {
@@ -27,13 +29,53 @@ const GeneralSettings = () => {
     })
   }
 
+  const handleLanguageChange = (lang: string) => {
+    changeLanguage(lang)
+  }
+
+  const themeLabels: Record<ThemeOptions, string> = {
+    [ThemeOptions.LIGHT]: t('general.themeLight'),
+    [ThemeOptions.DARK]: t('general.themeDark'),
+    [ThemeOptions.SYSTEM]: t('general.themeSystem'),
+  }
+
   return (
     <div className="settings-card">
-      <SectionHeading title="General Settings" icon={<HiOutlineCog />} />
+      <SectionHeading title={t('general.title')} icon={<HiOutlineCog />} />
 
       <FieldWrapper
-        title="Theme Mode"
-        description="Choose your preferred theme"
+        title={t('general.language')}
+        description={t('general.languageDesc')}
+        row
+      >
+        <div className="cdx-flex cdx-gap-2">
+          {[
+            { code: 'en', label: 'English', icon: '🇺🇸' },
+            { code: 'zh', label: '中文', icon: '🇨🇳' },
+          ].map((lang) => {
+            const isActive = i18n.language === lang.code
+            return (
+              <button
+                key={lang.code}
+                type="button"
+                onClick={() => handleLanguageChange(lang.code)}
+                className={`cdx-flex cdx-items-center cdx-gap-2 cdx-px-4 cdx-py-2.5 cdx-rounded-xl cdx-text-sm cdx-font-medium cdx-transition-all cdx-duration-200 ${
+                  isActive
+                    ? 'cdx-bg-blue-500 cdx-text-white cdx-shadow-md cdx-shadow-blue-500/25'
+                    : 'cdx-bg-neutral-100 dark:cdx-bg-neutral-700 cdx-text-neutral-600 dark:cdx-text-neutral-300 hover:cdx-bg-neutral-200 dark:hover:cdx-bg-neutral-600'
+                }`}
+              >
+                <span>{lang.icon}</span>
+                {lang.label}
+              </button>
+            )
+          })}
+        </div>
+      </FieldWrapper>
+
+      <FieldWrapper
+        title={t('general.theme')}
+        description={t('general.themeDesc')}
       >
         <div className="cdx-flex cdx-gap-2">
           {Object.values(ThemeOptions).map((theme) => {
@@ -51,7 +93,7 @@ const GeneralSettings = () => {
                 }`}
               >
                 <Icon className="cdx-text-lg" />
-                {capitalizeText(theme)}
+                {themeLabels[theme]}
               </button>
             )
           })}
@@ -59,8 +101,8 @@ const GeneralSettings = () => {
       </FieldWrapper>
       
       <FieldWrapper
-        title="Webpage Context"
-        description="Let AI answer questions based on the content of the current webpage"
+        title={t('general.webpageContext')}
+        description={t('general.webpageContextDesc')}
         row
       >
         <Switch.Root

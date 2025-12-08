@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { HiOutlineRefresh, HiOutlineExclamation, HiOutlineTemplate } from 'react-icons/hi'
 import { usePrompts } from '../../../hooks/usePrompts'
 import { defaultPrompts } from '../../../config/prompts/default'
@@ -9,6 +10,7 @@ import { useState } from 'react'
 const PromptSettings = () => {
   const [, setPrompts] = usePrompts()
   const [showConfirm, setShowConfirm] = useState(false)
+  const { t } = useTranslation()
 
   const handleRestore = () => {
     setPrompts(defaultPrompts)
@@ -18,14 +20,14 @@ const PromptSettings = () => {
   return (
     <div className="settings-card">
       <SectionHeading 
-        title="Prompt Management" 
+        title={t('prompts.title')} 
         icon={<HiOutlineTemplate />}
-        description="Drag to sort, edit or add custom prompts"
+        description={t('prompts.description')}
       />
 
       <FieldWrapper
-        title="Customize Prompts"
-        description="Drag to reorder, click to edit, or add new prompts"
+        title={t('prompts.customize')}
+        description={t('prompts.customizeDesc')}
       >
         <QuickMenuCustomize />
       </FieldWrapper>
@@ -34,10 +36,10 @@ const PromptSettings = () => {
         <div className="cdx-flex cdx-items-start cdx-justify-between cdx-gap-4">
           <div>
             <h4 className="cdx-text-sm cdx-font-medium cdx-text-neutral-700 dark:cdx-text-neutral-200">
-              Restore Default Prompts
+              {t('prompts.restore')}
             </h4>
             <p className="cdx-text-xs cdx-text-neutral-500 dark:cdx-text-neutral-400 cdx-mt-1">
-              Warning: This action is irreversible
+              {t('prompts.restoreWarning')}
             </p>
           </div>
           {!showConfirm ? (
@@ -47,7 +49,7 @@ const PromptSettings = () => {
               onClick={() => setShowConfirm(true)}
             >
               <HiOutlineRefresh />
-              Restore
+              {t('prompts.restoreBtn')}
             </button>
           ) : (
             <div className="cdx-flex cdx-items-center cdx-gap-2">
@@ -56,7 +58,7 @@ const PromptSettings = () => {
                 className="btn-secondary"
                 onClick={() => setShowConfirm(false)}
               >
-                Cancel
+                {t('prompts.cancel')}
               </button>
               <button
                 type="button"
@@ -64,7 +66,7 @@ const PromptSettings = () => {
                 onClick={handleRestore}
               >
                 <HiOutlineExclamation />
-                Confirm Restore
+                {t('prompts.confirmRestore')}
               </button>
             </div>
           )}

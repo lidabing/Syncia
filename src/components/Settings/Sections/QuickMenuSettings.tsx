@@ -1,5 +1,6 @@
 import * as Switch from '@radix-ui/react-switch'
 import type React from 'react'
+import { useTranslation } from 'react-i18next'
 import TextareaAutosize from 'react-textarea-autosize'
 import { useSettings } from '../../../hooks/useSettings'
 import FieldWrapper from '../Elements/FieldWrapper'
@@ -8,6 +9,7 @@ import { HiOutlineMenu } from 'react-icons/hi'
 
 const QuickMenuSettings = () => {
   const [settings, setSettings] = useSettings()
+  const { t } = useTranslation()
 
   const quickMenuSettings = settings.quickMenu
 
@@ -40,14 +42,14 @@ const QuickMenuSettings = () => {
   return (
     <div className="settings-card">
       <SectionHeading 
-        title="Quick Menu" 
+        title={t('quickMenu.title')} 
         icon={<HiOutlineMenu />}
-        description="Quickly call AI after selecting text"
+        description={t('quickMenu.description')}
       />
 
       <FieldWrapper
-        title="Enable Quick Menu"
-        description="Show floating menu when text is selected"
+        title={t('quickMenu.enable')}
+        description={t('quickMenu.enableDesc')}
         row={true}
       >
         <Switch.Root
@@ -60,12 +62,12 @@ const QuickMenuSettings = () => {
       </FieldWrapper>
 
       <FieldWrapper
-        title="Excluded Sites"
-        description="Don't show the quick menu on these sites (comma-separated, wildcards supported)"
+        title={t('quickMenu.excludedSites')}
+        description={t('quickMenu.excludedSitesDesc')}
       >
         <TextareaAutosize
           className="input cdx-font-mono cdx-text-sm"
-          placeholder="e.g., google.com, youtube.com, *.example.com"
+          placeholder={t('quickMenu.excludedSitesPlaceholder')}
           minRows={2}
           value={quickMenuSettings.excludedSites.join(', ')}
           onChange={handleExcludeSitesChange}
