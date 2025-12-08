@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'
-import { HiOutlineCheck, HiOutlineKey } from 'react-icons/hi'
+import { HiOutlineCheck, HiOutlineKey, HiOutlineChat } from 'react-icons/hi'
 import { Mode } from '../../../config/settings'
 import { useChatModels } from '../../../hooks/useChatModels'
 import { useSettings } from '../../../hooks/useSettings'
@@ -67,13 +67,13 @@ const ChatSettings = () => {
   return (
     <div className="settings-card">
       <SectionHeading 
-        title="聊天设置" 
-        icon="chat"
-        description="配置 AI 模型和 API"
+        title="Chat Settings" 
+        icon={<HiOutlineChat />}
+        description="Configure AI models and API"
       />
       <FieldWrapper
-        title="OpenAI API 密钥"
-        description="从 platform.openai.com 获取"
+        title="OpenAI API Key"
+        description="Get it from platform.openai.com"
         onSubmit={handleOpenAiKeySubmit}
       >
         <div className="cdx-flex cdx-gap-2 cdx-items-center">
@@ -104,13 +104,13 @@ const ChatSettings = () => {
           </div>
           <button type="submit" className="btn">
             <HiOutlineCheck />
-            保存
+            Save
           </button>
         </div>
       </FieldWrapper>
       <FieldWrapper
-        title="自定义 API 地址"
-        description="用于 Ollama 或其他兼容 OpenAI 的服务"
+        title="Custom API Endpoint"
+        description="For Ollama or other OpenAI compatible services"
         onSubmit={handleOpenAiKeySubmit}
       >
         <div className="cdx-flex cdx-gap-2 cdx-items-center">
@@ -123,13 +123,13 @@ const ChatSettings = () => {
           />
           <button type="submit" className="btn">
             <HiOutlineCheck />
-            保存
+            Save
           </button>
         </div>
       </FieldWrapper>
       <FieldWrapper
-        title="模型"
-        description="选择 AI 模型"
+        title="Model"
+        description="Choose the AI model"
         row={true}
       >
         <select
@@ -145,8 +145,8 @@ const ChatSettings = () => {
         </select>
       </FieldWrapper>
       <FieldWrapper
-        title="创意度"
-        description="创意模式生成更多样化的回复"
+        title="Creativity"
+        description="Creative mode generates more diverse responses"
         row={true}
       >
         <select

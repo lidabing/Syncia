@@ -1,4 +1,4 @@
-import { HiOutlineRefresh, HiOutlineExclamation } from 'react-icons/hi'
+import { HiOutlineRefresh, HiOutlineExclamation, HiOutlineTemplate } from 'react-icons/hi'
 import { usePrompts } from '../../../hooks/usePrompts'
 import { defaultPrompts } from '../../../config/prompts/default'
 import FieldWrapper from '../Elements/FieldWrapper'
@@ -18,14 +18,14 @@ const PromptSettings = () => {
   return (
     <div className="settings-card">
       <SectionHeading 
-        title="提示词管理" 
-        icon="prompts"
-        description="拖拽排序、编辑或添加自定义提示词"
+        title="Prompt Management" 
+        icon={<HiOutlineTemplate />}
+        description="Drag to sort, edit or add custom prompts"
       />
 
       <FieldWrapper
-        title="自定义提示词"
-        description="拖拽调整顺序，点击编辑或添加新提示词"
+        title="Customize Prompts"
+        description="Drag to reorder, click to edit, or add new prompts"
       >
         <QuickMenuCustomize />
       </FieldWrapper>
@@ -34,10 +34,10 @@ const PromptSettings = () => {
         <div className="cdx-flex cdx-items-start cdx-justify-between cdx-gap-4">
           <div>
             <h4 className="cdx-text-sm cdx-font-medium cdx-text-neutral-700 dark:cdx-text-neutral-200">
-              恢复默认提示词
+              Restore Default Prompts
             </h4>
             <p className="cdx-text-xs cdx-text-neutral-500 dark:cdx-text-neutral-400 cdx-mt-1">
-              警告：此操作不可撤销
+              Warning: This action is irreversible
             </p>
           </div>
           {!showConfirm ? (
@@ -47,7 +47,7 @@ const PromptSettings = () => {
               onClick={() => setShowConfirm(true)}
             >
               <HiOutlineRefresh />
-              恢复
+              Restore
             </button>
           ) : (
             <div className="cdx-flex cdx-items-center cdx-gap-2">
@@ -56,7 +56,7 @@ const PromptSettings = () => {
                 className="btn-secondary"
                 onClick={() => setShowConfirm(false)}
               >
-                取消
+                Cancel
               </button>
               <button
                 type="button"
@@ -64,7 +64,7 @@ const PromptSettings = () => {
                 onClick={handleRestore}
               >
                 <HiOutlineExclamation />
-                确认恢复
+                Confirm Restore
               </button>
             </div>
           )}

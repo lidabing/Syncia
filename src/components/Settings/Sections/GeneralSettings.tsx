@@ -5,7 +5,7 @@ import { useSettings } from '../../../hooks/useSettings'
 import { ThemeOptions } from '../../../config/settings'
 import * as Switch from '@radix-ui/react-switch'
 import { capitalizeText } from '../../../lib/capitalizeText'
-import { HiOutlineMoon, HiOutlineSun, HiOutlineDesktopComputer } from 'react-icons/hi'
+import { HiOutlineMoon, HiOutlineSun, HiOutlineDesktopComputer, HiOutlineCog } from 'react-icons/hi'
 
 const themeIcons = {
   [ThemeOptions.LIGHT]: HiOutlineSun,
@@ -29,11 +29,11 @@ const GeneralSettings = () => {
 
   return (
     <div className="settings-card">
-      <SectionHeading title="通用设置" icon="settings" />
+      <SectionHeading title="General Settings" icon={<HiOutlineCog />} />
 
       <FieldWrapper
-        title="主题模式"
-        description="选择你喜欢的外观主题"
+        title="Theme Mode"
+        description="Choose your preferred theme"
       >
         <div className="cdx-flex cdx-gap-2">
           {Object.values(ThemeOptions).map((theme) => {
@@ -59,8 +59,8 @@ const GeneralSettings = () => {
       </FieldWrapper>
       
       <FieldWrapper
-        title="网页上下文"
-        description="让 AI 根据当前网页内容回答问题"
+        title="Webpage Context"
+        description="Let AI answer questions based on the content of the current webpage"
         row
       >
         <Switch.Root

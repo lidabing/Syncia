@@ -8,12 +8,12 @@ import { useSettings } from '../../../hooks/useSettings'
 import FieldWrapper from '../Elements/FieldWrapper'
 import SectionHeading from '../Elements/SectionHeading'
 import { DEFAULT_SMART_LENS_SETTINGS } from '../../../config/settings/smartLens'
-import { HiOutlineLightBulb } from 'react-icons/hi'
+import { HiOutlineLightBulb, HiOutlineEye } from 'react-icons/hi'
 
 export const SmartLensSettings = () => {
   const [settings, setSettings] = useSettings()
 
-  // 使用默认值以防 smartLens 未定义
+  // Use default values in case smartLens is undefined
   const smartLens = settings.smartLens || DEFAULT_SMART_LENS_SETTINGS
 
   const updateSmartLens = (key: string, value: boolean | string | number | string[]) => {
@@ -29,14 +29,14 @@ export const SmartLensSettings = () => {
   return (
     <div className="settings-card">
       <SectionHeading 
-        title="智能预览透镜" 
-        icon="lens"
-        description="悬停链接时即时预览内容"
+        title="Smart Lens" 
+        icon={<HiOutlineEye />}
+        description="Instant content previews on link hover"
       />
 
       <FieldWrapper 
-        title="启用 Smart Lens" 
-        description="鼠标悬停链接显示预览卡片"
+        title="Enable Smart Lens" 
+        description="Show preview card on link hover"
         row
       >
         <Switch.Root
@@ -50,12 +50,12 @@ export const SmartLensSettings = () => {
 
       {smartLens?.enabled && (
         <>
-          <FieldWrapper title="触发模式" description="选择如何触发预览">
+          <FieldWrapper title="Trigger Mode" description="Choose how to trigger the preview">
             <div className="cdx-grid cdx-grid-cols-1 cdx-gap-2">
               {[
-                { value: 'space', label: '悬停 + Space', desc: '类似 macOS Quick Look', recommended: true },
-                { value: 'hover', label: '自动悬停', desc: '带延迟自动显示' },
-                { value: 'shift-hover', label: '悬停 + Shift', desc: '按住 Shift 触发' },
+                { value: 'space', label: 'Hover + Space', desc: 'Like macOS Quick Look', recommended: true },
+                { value: 'hover', label: 'Automatic Hover', desc: 'Show automatically with a delay' },
+                { value: 'shift-hover', label: 'Hover + Shift', desc: 'Trigger by holding Shift' },
               ].map((mode) => (
                 <label
                   key={mode.value}
@@ -89,7 +89,7 @@ export const SmartLensSettings = () => {
                       </span>
                       {mode.recommended && (
                         <span className="cdx-text-xs cdx-px-1.5 cdx-py-0.5 cdx-rounded cdx-bg-purple-100 dark:cdx-bg-purple-900/50 cdx-text-purple-600 dark:cdx-text-purple-400">
-                          推荐
+                          Recommended
                         </span>
                       )}
                     </div>
@@ -101,7 +101,7 @@ export const SmartLensSettings = () => {
           </FieldWrapper>
 
           {smartLens.triggerMode === 'hover' && (
-            <FieldWrapper title="悬停延迟" description="显示预览前的等待时间">
+            <FieldWrapper title="Hover Delay" description="Wait time before showing the preview">
               <div className="cdx-flex cdx-items-center cdx-gap-4">
                 <input
                   type="range"
@@ -119,18 +119,18 @@ export const SmartLensSettings = () => {
             </FieldWrapper>
           )}
 
-          <FieldWrapper title="默认预览模式" description="选择默认显示方式" row>
+          <FieldWrapper title="Default Preview Mode" description="Choose the default display style" row>
             <select
               value={smartLens.defaultPreviewMode || 'iframe'}
               onChange={(e) => updateSmartLens('defaultPreviewMode', e.target.value)}
               className="input cdx-w-40"
             >
-              <option value="iframe">🖥️ 完整预览</option>
-              <option value="metadata">📄 信息摘要</option>
+              <option value="iframe">🖥️ Full Preview</option>
+              <option value="metadata">📄 Info Summary</option>
             </select>
           </FieldWrapper>
 
-          <FieldWrapper title="显示视觉暗示" description="链接旁显示预览图标" row>
+          <FieldWrapper title="Show Visual Cue" description="Display preview icon next to links" row>
             <Switch.Root
               checked={smartLens.showVisualCue}
               onCheckedChange={(checked: boolean) => updateSmartLens('showVisualCue', checked)}
@@ -140,7 +140,7 @@ export const SmartLensSettings = () => {
             </Switch.Root>
           </FieldWrapper>
 
-          <FieldWrapper title="AI 智能摘要" description="使用 AI 生成内容摘要" row>
+          <FieldWrapper title="AI Summary" description="Generate content summaries using AI" row>
             <Switch.Root
               checked={smartLens.enableAISummary}
               onCheckedChange={(checked: boolean) => updateSmartLens('enableAISummary', checked)}
@@ -150,7 +150,7 @@ export const SmartLensSettings = () => {
             </Switch.Root>
           </FieldWrapper>
 
-          <FieldWrapper title="钉住功能" description="将预览固定在屏幕上" row>
+          <FieldWrapper title="Pin Feature" description="Pin previews to the screen" row>
             <Switch.Root
               checked={smartLens.enablePinMode}
               onCheckedChange={(checked: boolean) => updateSmartLens('enablePinMode', checked)}
@@ -160,7 +160,7 @@ export const SmartLensSettings = () => {
             </Switch.Root>
           </FieldWrapper>
 
-          <FieldWrapper title="排除域名" description="这些网站不显示预览">
+          <FieldWrapper title="Excluded Domains" description="Don't show previews on these sites">
             <textarea
               value={smartLens.excludedDomains.join('\n')}
               onChange={(e) =>
@@ -180,12 +180,12 @@ export const SmartLensSettings = () => {
               <HiOutlineLightBulb className="cdx-text-purple-500 cdx-text-lg cdx-mt-0.5" />
               <div>
                 <h4 className="cdx-text-sm cdx-font-medium cdx-text-purple-900 dark:cdx-text-purple-100">
-                  使用技巧
+                  Tips
                 </h4>
                 <ul className="cdx-text-xs cdx-text-purple-700 dark:cdx-text-purple-300 cdx-mt-2 cdx-space-y-1">
-                  <li>• 推荐使用 Space 键模式，避免误触</li>
-                  <li>• 支持文章、视频、GitHub 仓库等内容</li>
-                  <li>• AI 摘要会消耗额外 API 调用</li>
+                  <li>• Recommended to use Space key mode to avoid accidental triggers</li>
+                  <li>• Supports articles, videos, GitHub repositories, etc.</li>
+                  <li>• AI summaries will consume additional API calls</li>
                 </ul>
               </div>
             </div>

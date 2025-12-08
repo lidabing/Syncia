@@ -4,6 +4,7 @@ import TextareaAutosize from 'react-textarea-autosize'
 import { useSettings } from '../../../hooks/useSettings'
 import FieldWrapper from '../Elements/FieldWrapper'
 import SectionHeading from '../Elements/SectionHeading'
+import { HiOutlineMenu } from 'react-icons/hi'
 
 const QuickMenuSettings = () => {
   const [settings, setSettings] = useSettings()
@@ -39,14 +40,14 @@ const QuickMenuSettings = () => {
   return (
     <div className="settings-card">
       <SectionHeading 
-        title="快捷菜单" 
-        icon="menu"
-        description="选中文本后快速调用 AI"
+        title="Quick Menu" 
+        icon={<HiOutlineMenu />}
+        description="Quickly call AI after selecting text"
       />
 
       <FieldWrapper
-        title="启用快捷菜单"
-        description="选中文本时显示悬浮菜单"
+        title="Enable Quick Menu"
+        description="Show floating menu when text is selected"
         row={true}
       >
         <Switch.Root
@@ -59,12 +60,12 @@ const QuickMenuSettings = () => {
       </FieldWrapper>
 
       <FieldWrapper
-        title="排除网站"
-        description="这些网站不显示快捷菜单（用逗号分隔，支持通配符）"
+        title="Excluded Sites"
+        description="Don't show the quick menu on these sites (comma-separated, wildcards supported)"
       >
         <TextareaAutosize
           className="input cdx-font-mono cdx-text-sm"
-          placeholder="例如：google.com, youtube.com, *.example.com"
+          placeholder="e.g., google.com, youtube.com, *.example.com"
           minRows={2}
           value={quickMenuSettings.excludedSites.join(', ')}
           onChange={handleExcludeSitesChange}
