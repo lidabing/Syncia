@@ -15,6 +15,13 @@ const Header = ({ clearMessages, onSelectSuggestion }: HeaderProps) => {
   const { t } = useLanguage()
   const pageVision = usePageVision()
   
+  console.log('[Header] pageVision state:', { 
+    enabled: pageVision.settings.enabled,
+    isAnalyzing: pageVision.isAnalyzing,
+    hasResult: !!pageVision.result,
+    hasError: !!pageVision.error
+  })
+  
   const onToggle = () => {
     chrome.runtime.sendMessage({ action: 'close-sidebar' })
   }
@@ -40,7 +47,10 @@ const Header = ({ clearMessages, onSelectSuggestion }: HeaderProps) => {
           {pageVision.settings.enabled && (
             <button
               type="button"
-              onClick={() => pageVision.analyzeCurrentPage()}
+              onClick={() => {
+                console.log('[Header] Camera button clicked, triggering pageVision.analyzeCurrentPage()')
+                pageVision.analyzeCurrentPage()
+              }}
               disabled={pageVision.isAnalyzing}
               title="智能识别页面"
               className={`cdx-p-2 cdx-rounded-lg cdx-transition-colors ${

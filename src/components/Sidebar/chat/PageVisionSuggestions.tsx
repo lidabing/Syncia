@@ -77,9 +77,21 @@ const PageVisionSuggestions: React.FC<PageVisionSuggestionsProps> = ({ onSelectA
   
   const [isExpanded, setIsExpanded] = useState(true)
   const [showDetails, setShowDetails] = useState(false)
+  const [showSuggestions, setShowSuggestions] = useState(false)
+
+  console.log('[PageVisionSuggestions] Rendered with:', { 
+    enabled: settings.enabled, 
+    isAnalyzing, 
+    hasResult: !!result, 
+    hasError: !!error,
+    hasScreenshot: !!currentScreenshot,
+    isExpanded,
+    showSuggestions
+  })
 
   // 如果功能未启用，不渲染
   if (!settings.enabled) {
+    console.log('[PageVisionSuggestions] Feature disabled, not rendering')
     return null
   }
 
@@ -204,7 +216,6 @@ const PageVisionSuggestions: React.FC<PageVisionSuggestionsProps> = ({ onSelectA
             {/* 展开详情 */}
             {showDetails && (
               <div className="cdx-mt-2 cdx-pt-2 cdx-border-t cdx-border-neutral-200 dark:cdx-border-neutral-700">
-
                 <p className="cdx-text-xs cdx-text-neutral-500 dark:cdx-text-neutral-400 cdx-mb-2">
                   {result.reasoning}
                 </p>
@@ -223,17 +234,31 @@ const PageVisionSuggestions: React.FC<PageVisionSuggestionsProps> = ({ onSelectA
               </div>
             )}
             
-            <button
-              type="button"
-              onClick={() => setShowDetails(!showDetails)}
-              className="cdx-mt-1 cdx-text-xs cdx-text-neutral-400 hover:cdx-text-neutral-600 dark:hover:cdx-text-neutral-300 cdx-flex cdx-items-center cdx-gap-0.5"
-            >
-              {showDetails ? (
-                <>收起 <HiOutlineChevronUp className="cdx-w-3 cdx-h-3" /></>
-              ) : (
-                <>详情 <HiOutlineChevronDown className="cdx-w-3 cdx-h-3" /></>
-              )}
-            </button>
+            <div className="cdx-mt-2 cdx-flex cdx-items-center cdx-gap-2">
+              <button
+                type="button"
+                onClick={() => setShowDetails(!showDetails)}
+                className="cdx-text-xs cdx-text-neutral-400 hover:cdx-text-neutral-600 dark:hover:cdx-text-neutral-300 cdx-flex cdx-items-center cdx-gap-0.5"
+              >
+                {showDetails ? (
+                  <>收起详情 <HiOutlineChevronUp className="cdx-w-3 cdx-h-3" /></>
+                ) : (
+                  <>查看详情 <HiOutlineChevronDown className="cdx-w-3 cdx-h-3" /></>
+                )}
+              </button>
+              <span className="cdx-text-neutral-300 dark:cdx-text-neutral-600">|</span>
+              <button
+                type="button"
+                onClick={() => setShowSuggestions(!showSuggestions)}
+                className="cdx-text-xs cdx-text-purple-500 hover:cdx-text-purple-600 dark:hover:cdx-text-purple-400 cdx-flex cdx-items-center cdx-gap-0.5 cdx-font-medium"
+              >
+                {showSuggestions ? (
+                  <>收起推荐 <HiOutlineChevronUp className="cdx-w-3 cdx-h-3" /></>
+                ) : (
+                  <>查看推荐 ({primaryActions.length + secondaryActions.length}) <HiOutlineChevronDown className="cdx-w-3 cdx-h-3" /></>
+                )}
+              </button>
+            </div>
           </div>
           
           {/* 刷新按钮 */}
@@ -248,8 +273,11 @@ const PageVisionSuggestions: React.FC<PageVisionSuggestionsProps> = ({ onSelectA
           </button>
         </div>
 
-        {/* 主要操作 */}
-        {primaryActions.length > 0 && (
+        {/* 推荐操作 - 只有点击展开才显示 */}
+        {showSuggestions && (
+          <div className="cdx-flex cdx-flex-col cdx-gap-3">
+            {/* 主要操作 */}
+            {primaryActions.length > 0 && (
           <div className="cdx-grid cdx-grid-cols-2 cdx-gap-2">
             {primaryActions.map((action) => (
               <button
@@ -265,19 +293,21 @@ const PageVisionSuggestions: React.FC<PageVisionSuggestionsProps> = ({ onSelectA
           </div>
         )}
 
-        {/* 次要操作 */}
-        {secondaryActions.length > 0 && (
-          <div className="cdx-flex cdx-flex-wrap cdx-gap-2">
-            {secondaryActions.slice(0, 4).map((action) => (
-              <button
-                key={action.id}
-                type="button"
-                onClick={() => handleActionClick(action)}
-                className="cdx-px-3 cdx-py-1.5 cdx-rounded-lg cdx-bg-neutral-100 dark:cdx-bg-neutral-800 hover:cdx-bg-neutral-200 dark:hover:cdx-bg-neutral-700 cdx-text-neutral-700 dark:cdx-text-neutral-300 cdx-text-sm cdx-transition-colors"
-              >
-                {action.label}
-              </button>
-            ))}
+            {/* 次要操作 */}
+            {secondaryActions.length > 0 && (
+              <div className="cdx-flex cdx-flex-wrap cdx-gap-2">
+                {secondaryActions.slice(0, 4).map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    onClick={() => handleActionClick(action)}
+                    className="cdx-px-3 cdx-py-1.5 cdx-rounded-lg cdx-bg-neutral-100 dark:cdx-bg-neutral-800 hover:cdx-bg-neutral-200 dark:hover:cdx-bg-neutral-700 cdx-text-neutral-700 dark:cdx-text-neutral-300 cdx-text-sm cdx-transition-colors"
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
