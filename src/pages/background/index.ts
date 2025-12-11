@@ -8,6 +8,7 @@ import { captureScreenListener } from './sidebar/captureScreenListener'
 import { sendSidebarShortcut } from './sidebar/sendSidebarShortcut'
 import { sidebarToggleListeners } from './sidebar/sidebarToggleListeners'
 import { setupSmartLensListener } from './smart-lens/fetchPreview'
+import { setupPageVisionListener } from './page-vision/analyzePageVision'
 import { migrateSettings } from '../../lib/migrateSettings'
 
 console.log('[Background] Service Worker starting...')
@@ -37,5 +38,10 @@ createContextMenuOnStorageChange()
 // Smart Lens Scripts
 // =========================== //
 setupSmartLensListener()
+
+// =========================== //
+// Page Vision Scripts
+// =========================== //
+setupPageVisionListener()
 
 console.log('[Background] Service Worker fully initialized')

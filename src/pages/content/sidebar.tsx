@@ -346,4 +346,89 @@ window.addEventListener('message', async (event) => {
       '*',
     )
   }
+
+  // ACTION: get-page-info ===================================
+  // 获取完整的页面信息（用于 Page Vision 功能）
+  if (action === 'get-page-info') {
+    const pageInfo = {
+      title: document.title,
+      url: window.location.href,
+      content: document.body.innerText.slice(0, 5000), // 限制长度
+      meta: {
+        description: document.querySelector('meta[name="description"]')?.getAttribute('content') || '',
+        keywords: document.querySelector('meta[name="keywords"]')?.getAttribute('content') || '',
+        ogTitle: document.querySelector('meta[property="og:title"]')?.getAttribute('content') || '',
+        ogDescription: document.querySelector('meta[property="og:description"]')?.getAttribute('content') || '',
+      },
+    }
+    
+    iframe.contentWindow?.postMessage(
+      {
+        action: 'page-info-response',
+        payload: pageInfo,
+      },
+      '*',
+    )
+  }
+
+  // ACTION: request-screenshot ==============================
+  // 为 Page Vision 请求截图
+  if (action === 'request-screenshot') {
+    try {
+      // 暂时隐藏 sidebar 以获取干净的截图
+      const wasVisible = wrapper.style.display !== 'none'
+      wrapper.style.display = 'none'
+      
+      // 请求 background 捕获截图
+      chrome.runtime.sendMessage(
+        { action: 'page-vision-capture-screenshot' },
+        (response) => {
+          // 恢复 sidebar 显示
+          if (wasVisible) {
+            wrapper.style.display = 'flex'
+          }
+          
+          if (response?.screenshot) {
+            iframe.contentWindow?.postMessage(
+              {
+                action: 'screenshot-response',
+                payload: { screenshot: response.screenshot },
+              },
+              '*',
+            )
+          } else {
+            iframe.contentWindow?.postMessage(
+              {
+                action: 'screenshot-response',
+                payload: { screenshot: null, error: response?.error || 'Screenshot failed' },
+              },
+              '*',
+            )
+          }
+        }
+      )
+    } catch (error) {
+      console.error('[Syncia] Screenshot request failed:', error)
+      iframe.contentWindow?.postMessage(
+        {
+          action: 'screenshot-response',
+          payload: { screenshot: null, error: 'Screenshot request failed' },
+        },
+        '*',
+      )
+    }
+  }
+
+  // ACTION: execute-page-vision-action ======================
+  // 执行 Page Vision 推荐的操作
+  if (action === 'execute-page-vision-action') {
+    // 将操作转发回 sidebar 处理
+    iframe.contentWindow?.postMessage(
+      {
+        action: 'page-vision-action-execute',
+        payload: event.data.payload,
+      },
+      '*',
+    )
+  }
 })

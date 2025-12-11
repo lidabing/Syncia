@@ -96,7 +96,9 @@ window.addEventListener('message', (event) => {
 {
   quickMenu: { enabled, items, excludedSites },
   chat: { openAIKey, model, mode, openAiBaseUrl },  // mode = temperature (0-1.5)
-  general: { theme, webpageContext }
+  general: { theme, webpageContext },
+  smartLens: { enabled, triggerMode, hoverDelay, ... },
+  pageVision: { enabled, useScreenshot, compressImage, ... }  // AI page recognition
 }
 ```
 
@@ -140,5 +142,27 @@ const llm = new ChatOpenAI({
 4. **Content script timing**: Quick menu checks settings via `chrome.storage.sync.get` before init - race conditions possible on slow networks
 5. **Context menu IDs**: Generated via `object-hash` - changing prompt text changes ID, breaks user customizations
 
+## Page Vision (AI Page Recognition)
+
+Multimodal AI feature that analyzes page screenshots to infer user intent:
+
+**Architecture**:
+- `src/config/settings/pageVision.ts` - Types and action templates
+- `src/lib/pageVision/visionAnalyzer.ts` - AI analysis logic
+- `src/pages/background/page-vision/analyzePageVision.ts` - Background handler
+- `src/hooks/usePageVision.ts` - React hook
+- `src/components/Sidebar/chat/PageVisionSuggestions.tsx` - UI component
+
+**Workflow**:
+1. User clicks "智能识别页面" button
+2. Content script requests screenshot via `chrome.tabs.captureVisibleTab`
+3. Screenshot + page metadata sent to multimodal AI (GPT-4o, etc.)
+4. AI returns structured JSON with page category, user intent, and action suggestions
+5. UI renders action buttons that trigger chat queries
+
+**Page Categories**: ecommerce, coding, article, documentation, social, video, dashboard, form, search, general
+
+**Action Templates**: Predefined per category in `ACTION_TEMPLATES` - customize by editing `pageVision.ts`
+
 ---
-*Last updated: 2025-11-23. For questions on specific subsystems (e.g., screenshot capture, chat history persistence), ask for targeted guidance.*
+*Last updated: 2025-12-11. For questions on specific subsystems (e.g., screenshot capture, chat history persistence, page vision), ask for targeted guidance.*

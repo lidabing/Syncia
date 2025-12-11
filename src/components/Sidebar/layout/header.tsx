@@ -2,6 +2,7 @@ import { BsRobot } from 'react-icons/bs'
 import { HiOutlineCog, HiX } from 'react-icons/hi'
 import { RiAddCircleLine } from 'react-icons/ri'
 import PageSuggestions from '../chat/PageSuggestions'
+import PageVisionSuggestions from '../chat/PageVisionSuggestions'
 import { useLanguage } from '../../../hooks/useLanguage'
 
 interface HeaderProps {
@@ -62,6 +63,9 @@ const Header = ({ clearMessages, onSelectSuggestion }: HeaderProps) => {
           </button>
         </div>
       </header>
+      {/* Page Vision - AI 页面智能识别 */}
+      {onSelectSuggestion && <PageVisionSuggestions onSelectAction={onSelectSuggestion} />}
+      {/* 原有的文本建议 */}
       {onSelectSuggestion && <PageSuggestions onSelectSuggestion={onSelectSuggestion} />}
     </>
   )

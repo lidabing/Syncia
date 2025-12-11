@@ -1,6 +1,8 @@
 import { defaultPrompts } from '../prompts/default'
 import type { SmartLensSettings } from './smartLens'
 import { DEFAULT_SMART_LENS_SETTINGS } from './smartLens'
+import type { PageVisionSettings } from './pageVision'
+import { DEFAULT_PAGE_VISION_SETTINGS } from './pageVision'
 
 export enum ThemeOptions {
   LIGHT = 'light',
@@ -32,6 +34,7 @@ export type Settings = {
     webpageContext: boolean
   }
   smartLens: SmartLensSettings
+  pageVision: PageVisionSettings
 }
 
 export const defaultSettings: Settings = {
@@ -51,4 +54,5 @@ export const defaultSettings: Settings = {
     webpageContext: false,
   },
   smartLens: DEFAULT_SMART_LENS_SETTINGS,
+  pageVision: DEFAULT_PAGE_VISION_SETTINGS,
 }

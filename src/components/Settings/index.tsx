@@ -4,6 +4,7 @@ import GeneralSettings from './Sections/GeneralSettings';
 import QuickMenuSettings from './Sections/QuickMenuSettings';
 import ChatSettings from './Sections/ChatSettings';
 import { SmartLensSettings } from './Sections/SmartLensSettings';
+import { PageVisionSettings } from './Sections/PageVisionSettings';
 import useThemeSync from '../../hooks/useThemeSync';
 import PromptSettings from './Sections/PromptSettings';
 import Tabs from './Tabs';
@@ -16,6 +17,7 @@ const Settings = () => {
   const tabs = [
     { id: 'general', label: t.settings.tabs.general, component: <GeneralSettings /> },
     { id: 'chat', label: t.settings.tabs.chat, component: <ChatSettings /> },
+    { id: 'page-vision', label: '智能识别', component: <PageVisionSettings /> },
     { id: 'smart-lens', label: t.settings.tabs.smartLens, component: <SmartLensSettings /> },
     { id: 'quick-menu', label: t.settings.tabs.quickMenu, component: <QuickMenuSettings /> },
     { id: 'prompts', label: t.settings.tabs.prompts, component: <PromptSettings /> },

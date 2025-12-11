@@ -14,7 +14,8 @@ Syncia is a Chrome extension that enables users to chat with ChatGPT by opening 
 - 📚 Answer questions in context with text from webpage.
 - 👁️ Screenshot any region and query GPT 4 Vision
 - 🔍 **Smart Lens**: Hover over any link and press `Space` to preview content with AI-powered summaries (Articles, GitHub repos, Products, Videos).
-- 🦙 Supports local models with Ollama
+- � **Page Vision**: AI-powered page recognition that analyzes screenshots to infer user intent and provide smart action suggestions.
+- �🦙 Supports local models with Ollama
 - 🔐 Secure and fully Free and open source forever. (Please consider giving this project a star 🌟 and contributing 💖 to support the project.)
 
 ## 🐳 Installation
@@ -47,6 +48,23 @@ Hover over any link and press `Space` (or `Shift` depending on settings) to open
 - **GitHub**: See repo stats and AI code analysis.
 - **Videos**: Watch YouTube/Bilibili videos directly in the card.
 - **Products**: View price, rating, and AI buying guides.
+
+### Page Vision (AI Page Recognition)
+
+Click the "智能识别页面" button in the sidebar to analyze the current page with AI vision capabilities.
+
+- **Screenshot Analysis**: Captures and analyzes page screenshot using multimodal AI (GPT-4o, Claude 3.5 Sonnet, etc.)
+- **Page Classification**: Automatically identifies page type (e-commerce, coding, article, video, etc.)
+- **Intent Inference**: Predicts what you might want to do based on page content
+- **Smart Actions**: Provides context-aware action buttons tailored to the page type
+
+| Page Type | Example Actions |
+|-----------|----------------|
+| E-commerce | Analyze pros/cons, Compare prices, Summarize reviews |
+| Coding | Explain code, Fix bugs, Generate tests |
+| Article | One-line summary, Key takeaways, Fact check |
+| Video | Video summary, Timestamp navigation |
+| Form | Translate fields, Fill suggestions, Currency convert |
 
 #### REVIEW SELECTION
 
