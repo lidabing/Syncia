@@ -374,26 +374,14 @@ window.addEventListener('message', async (event) => {
 
   // ACTION: request-screenshot ==============================
   // 为 Page Vision 请求截图
+  // 注意：chrome.tabs.captureVisibleTab 不会捕获扩展 UI（iframe），无需隐藏 sidebar
   if (action === 'request-screenshot') {
-    // 暂时隐藏 sidebar 以获取干净的截图
-    const wasVisible = wrapper.style.display !== 'none'
-    wrapper.style.display = 'none'
-    
     // 使用 Promise 包装，避免 async callback 问题
     const handleScreenshotCapture = async () => {
       try {
-        // 等待 DOM 重绘，确保 sidebar 隐藏生效
-        await new Promise(resolve => requestAnimationFrame(resolve))
-        await new Promise(resolve => setTimeout(resolve, 50)) // 额外等待 50ms 确保渲染完成
-        
         console.log('[Syncia] Sending screenshot capture request to background...')
         const response = await chrome.runtime.sendMessage({ action: 'page-vision-capture-screenshot' })
         console.log('[Syncia] Received response from background:', response)
-        
-        // 恢复 sidebar 显示
-        if (wasVisible) {
-          wrapper.style.display = 'flex'
-        }
         
         if (!response || response.error) {
           console.error('[Syncia] Screenshot capture failed:', response?.error || 'No response from background')
@@ -460,10 +448,6 @@ window.addEventListener('message', async (event) => {
         }
       } catch (error) {
         console.error('[Syncia] Screenshot capture error:', error)
-        // 恢复 sidebar 显示
-        if (wasVisible) {
-          wrapper.style.display = 'flex'
-        }
         iframe.contentWindow?.postMessage(
           {
             action: 'screenshot-response',
