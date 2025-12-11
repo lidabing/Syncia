@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'
 import { HiOutlineCheck, HiOutlineKey, HiOutlineChat } from 'react-icons/hi'
 import { Mode } from '../../../config/settings'
@@ -14,7 +13,6 @@ const ChatSettings = () => {
   const [settings, setSettings] = useSettings()
   const [showPassword, setShowPassword] = useState(false)
   const { models, setActiveChatModel } = useChatModels()
-  const { t } = useTranslation()
   const OpenAiApiKeyInputRef = React.useRef<HTMLInputElement>(null)
   const OpenAiBaseUrlInputRef = React.useRef<HTMLInputElement>(null)
 
@@ -69,13 +67,13 @@ const ChatSettings = () => {
   return (
     <div className="settings-card">
       <SectionHeading 
-        title={t('chat.title')} 
+        title="Chat Settings" 
         icon={<HiOutlineChat />}
-        description={t('chat.description')}
+        description="Configure AI models and API"
       />
       <FieldWrapper
-        title={t('chat.apiKey')}
-        description={t('chat.apiKeyDesc')}
+        title="OpenAI API Key"
+        description="Get it from platform.openai.com"
         onSubmit={handleOpenAiKeySubmit}
       >
         <div className="cdx-flex cdx-gap-2 cdx-items-center">
@@ -87,7 +85,7 @@ const ChatSettings = () => {
               required
               ref={OpenAiApiKeyInputRef}
               name="openAiApiKey"
-              placeholder={t('chat.apiKeyPlaceholder')}
+              placeholder="sk-xxxxxxxxxxxxxxxx"
               defaultValue={chatSettings.openAIKey || ''}
               type={showPassword ? 'text' : 'password'}
               className="input cdx-pl-9 cdx-pr-10"
@@ -106,13 +104,13 @@ const ChatSettings = () => {
           </div>
           <button type="submit" className="btn">
             <HiOutlineCheck />
-            {t('chat.save')}
+            Save
           </button>
         </div>
       </FieldWrapper>
       <FieldWrapper
-        title={t('chat.customEndpoint')}
-        description={t('chat.customEndpointDesc')}
+        title="Custom API Endpoint"
+        description="For Ollama or other OpenAI compatible services"
         onSubmit={handleOpenAiKeySubmit}
       >
         <div className="cdx-flex cdx-gap-2 cdx-items-center">
@@ -120,18 +118,18 @@ const ChatSettings = () => {
             ref={OpenAiBaseUrlInputRef}
             name="openAiBaseUrl"
             defaultValue={chatSettings.openAiBaseUrl || ''}
-            placeholder={t('chat.customEndpointPlaceholder')}
+            placeholder="https://api.openai.com/v1"
             className="input cdx-w-full cdx-font-mono cdx-text-sm"
           />
           <button type="submit" className="btn">
             <HiOutlineCheck />
-            {t('chat.save')}
+            Save
           </button>
         </div>
       </FieldWrapper>
       <FieldWrapper
-        title={t('chat.model')}
-        description={t('chat.modelDesc')}
+        title="Model"
+        description="Choose the AI model"
         row={true}
       >
         <select
@@ -147,8 +145,8 @@ const ChatSettings = () => {
         </select>
       </FieldWrapper>
       <FieldWrapper
-        title={t('chat.creativity')}
-        description={t('chat.creativityDesc')}
+        title="Creativity"
+        description="Creative mode generates more diverse responses"
         row={true}
       >
         <select

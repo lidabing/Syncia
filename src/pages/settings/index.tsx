@@ -2,7 +2,6 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import Settings from '../../components/Settings'
 import { DndContext } from '@dnd-kit/core'
-import '../../locales/i18n'
 
 function init() {
   const rootContainer = document.querySelector('#__root')
