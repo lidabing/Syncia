@@ -51,6 +51,8 @@ function cacheAnalysis(url: string, result: PageVisionResult): void {
 
 /**
  * 捕获当前标签页截图
+ * @param windowId - 窗口 ID（不是 tab ID！）
+ * @param settings - Page Vision 设置
  */
 async function captureTabScreenshot(windowId: number, settings: PageVisionSettings): Promise<string | null> {
   try {
@@ -92,11 +94,43 @@ export function setupPageVisionListener() {
     if (message.action === 'page-vision-capture-screenshot') {
       console.log('[PageVision] Received screenshot capture request from tab:', sender.tab?.id)
       
-      const windowId = sender.tab?.windowId
+      // 优先使用 sender.tab.windowId，如果不存在则查询当前活动标签页
+      let windowId = sender.tab?.windowId
       
       if (!windowId) {
-        console.error('[PageVision] No window ID available, sender:', sender)
-        sendResponse({ error: 'No window ID' })
+        console.log('[PageVision] No windowId from sender, querying active tab...')
+        // 异步处理，查询当前活动标签页
+        chrome.tabs.query({ active: true, currentWindow: true })
+          .then(async (tabs) => {
+            if (!tabs[0]?.windowId) {
+              console.error('[PageVision] No active tab found')
+              sendResponse({ error: 'No active window' })
+              return
+            }
+            
+            console.log('[PageVision] Using active tab windowId:', tabs[0].windowId)
+            const screenshot = await captureTabScreenshot(tabs[0].windowId, message.settings || DEFAULT_PAGE_VISION_SETTINGS)
+            
+            if (screenshot) {
+              try {
+                console.log('[PageVision] Storing screenshot in chrome.storage.local...')
+                await chrome.storage.local.set({ 'temp_page_vision_screenshot': screenshot })
+                console.log('[PageVision] Screenshot stored successfully')
+                sendResponse({ success: true, stored: true })
+              } catch (e) {
+                console.error('[PageVision] Storage error:', e)
+                sendResponse({ error: 'Storage failed: ' + String(e) })
+              }
+            } else {
+              console.error('[PageVision] Screenshot is null, capture failed')
+              sendResponse({ error: 'Capture failed' })
+            }
+          })
+          .catch((error) => {
+            console.error('[PageVision] Query tabs error:', error)
+            sendResponse({ error: error?.message || 'Failed to query tabs' })
+          })
+        
         return true
       }
       
@@ -204,8 +238,22 @@ async function handleAnalyzeRequest(
   let screenshotToUse = screenshot
   
   // 如果没有提供截图但设置要求使用截图，尝试捕获
-  if (!screenshotToUse && settings.useScreenshot && sender.tab?.id) {
-    screenshotToUse = await captureTabScreenshot(sender.tab.id, settings)
+  if (!screenshotToUse && settings.useScreenshot) {
+    // 优先使用 sender.tab.windowId，如果不存在则查询当前活动标签页
+    let windowId = sender.tab?.windowId
+    
+    if (!windowId) {
+      console.log('[PageVision] No windowId in sender, querying active tab for screenshot...')
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true })
+      windowId = tabs[0]?.windowId
+    }
+    
+    if (windowId) {
+      console.log('[PageVision] Attempting to capture screenshot with windowId:', windowId)
+      screenshotToUse = await captureTabScreenshot(windowId, settings)
+    } else {
+      console.warn('[PageVision] No windowId available, skipping screenshot capture')
+    }
   }
   
   const result = await analyzePageWithVision(

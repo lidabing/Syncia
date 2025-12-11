@@ -43,6 +43,11 @@ export default defineManifest(async (env) => ({
     'activeTab',
     'clipboardWrite',
   ],
+  host_permissions: [
+    'http://*/*',
+    'https://*/*',
+    '<all_urls>',
+  ],
   background: {
     service_worker: 'src/pages/background/index.ts',
   },

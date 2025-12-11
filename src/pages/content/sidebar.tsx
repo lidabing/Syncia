@@ -9,10 +9,10 @@ contentScriptLog('Sidebar')
 const wrapper = document.createElement('div')
 wrapper.id = 'syncia_sidebar_wrapper'
 wrapper.style.position = 'fixed'
-wrapper.style.top = '80px'
+wrapper.style.top = '20px'
 wrapper.style.right = '50px'
 wrapper.style.width = '450px'
-wrapper.style.height = '650px'
+wrapper.style.height = 'calc(100vh - 40px)'
 wrapper.style.minWidth = '350px'
 wrapper.style.minHeight = '500px'
 wrapper.style.zIndex = '9000000000000000000'
@@ -382,6 +382,10 @@ window.addEventListener('message', async (event) => {
     // 使用 Promise 包装，避免 async callback 问题
     const handleScreenshotCapture = async () => {
       try {
+        // 等待 DOM 重绘，确保 sidebar 隐藏生效
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        await new Promise(resolve => setTimeout(resolve, 50)) // 额外等待 50ms 确保渲染完成
+        
         console.log('[Syncia] Sending screenshot capture request to background...')
         const response = await chrome.runtime.sendMessage({ action: 'page-vision-capture-screenshot' })
         console.log('[Syncia] Received response from background:', response)
@@ -416,13 +420,16 @@ window.addEventListener('message', async (event) => {
             await chrome.storage.local.remove('temp_page_vision_screenshot')
           } catch (e) {
             console.error('[Syncia] Failed to retrieve screenshot from storage:', e)
+            // 即使存储失败也继续，可能有直接返回的 screenshot
           }
         }
 
         if (screenshotData) {
           try {
+            console.log('[Syncia] Compressing screenshot...')
             // 压缩截图以减少消息大小 (Content Script -> Iframe)
             const compressed = await compressImage(screenshotData, 1024, 0.7)
+            console.log('[Syncia] Screenshot compressed:', compressed ? `${compressed.length} chars` : 'failed')
             
             iframe.contentWindow?.postMessage(
               {
@@ -432,7 +439,8 @@ window.addEventListener('message', async (event) => {
               '*',
             )
           } catch (error) {
-            console.error('[Syncia] Failed to compress screenshot:', error)
+            console.error('[Syncia] Failed to compress screenshot, using original:', error)
+            // 压缩失败时使用原始截图
             iframe.contentWindow?.postMessage(
               {
                 action: 'screenshot-response',

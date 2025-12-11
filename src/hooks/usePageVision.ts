@@ -149,13 +149,22 @@ export function usePageVision(options: UsePageVisionOptions = {}): UsePageVision
       let screenshot: string | null = null
       
       console.log('[usePageVision] Requesting screenshot...')
+      const screenshotStartTime = Date.now()
       screenshot = await requestScreenshot()
-      console.log('[usePageVision] Screenshot received:', !!screenshot, screenshot ? `${screenshot.length} chars` : 'null')
+      const screenshotDuration = Date.now() - screenshotStartTime
+      console.log('[usePageVision] Screenshot received:', {
+        success: !!screenshot,
+        size: screenshot ? `${screenshot.length} chars` : 'null',
+        duration: `${screenshotDuration}ms`,
+        preview: screenshot ? screenshot.substring(0, 50) + '...' : 'none'
+      })
       setCurrentScreenshot(screenshot)
       
       // 如果截图失败，警告但继续分析
       if (!screenshot) {
         console.warn('[usePageVision] Screenshot capture failed or timed out, proceeding with text-only analysis')
+      } else {
+        console.log('[usePageVision] Screenshot capture successful, will use vision analysis')
       }
       
       // 发送分析请求到 background
