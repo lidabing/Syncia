@@ -3,6 +3,8 @@ import { getScreenshotImage } from '../../lib/getScreenshotImage'
 import { contentScriptLog } from '../../logs'
 import { compressImage } from '../../lib/pageVision/visionAnalyzer'
 
+import { getYouTubeSubtitles, getBilibiliSubtitles } from './videoHelper'
+
 contentScriptLog('Sidebar')
 
 // 创建外层容器包装器
@@ -272,7 +274,7 @@ window.addEventListener('popstate', () => {
  * The page content is sent back to the sidebar by posting a message with the action 'get-page-content'.
  */
 window.addEventListener('message', async (event) => {
-  const { action, _payload } = event.data as { action: string; _payload: any }
+  const { action, payload: _payload } = event.data as { action: string; payload: any }
 
   // ACTION: start-drag ====================================
   if (action === 'start-drag') {
@@ -473,5 +475,36 @@ window.addEventListener('message', async (event) => {
       },
       '*',
     )
+  }
+
+  // ACTION: get-video-subtitles =============================
+  if (action === 'get-video-subtitles') {
+    // _payload is destructured from event.data.payload
+    const { provider } = _payload || {}
+    try {
+      let subtitles = []
+      if (provider === 'youtube') {
+        subtitles = await getYouTubeSubtitles()
+      } else if (provider === 'bilibili') {
+        subtitles = await getBilibiliSubtitles()
+      }
+      
+      iframe.contentWindow?.postMessage(
+        {
+          action: 'get-video-subtitles-response',
+          payload: { subtitles },
+        },
+        '*',
+      )
+    } catch (error) {
+      console.error('[Syncia] Failed to get subtitles:', error)
+      iframe.contentWindow?.postMessage(
+        {
+          action: 'get-video-subtitles-response',
+          payload: { error: String(error) },
+        },
+        '*',
+      )
+    }
   }
 })

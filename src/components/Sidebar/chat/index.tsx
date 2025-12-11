@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback } from 'react'
 import ChatList from './ChatList'
 import { SidebarInput } from './ChatInput'
+import VideoContextBar from './VideoContextBar'
 import { useMessageDraft } from '../../../hooks/useMessageDraft'
 import { ChatRole } from '../../../hooks/useCurrentChat'
 import type { Settings } from '../../../config/settings'
@@ -57,6 +58,16 @@ const Chat = ({ settings, chatCompletion }: ChatProps) => {
     }
   }, [handleSubmitQuery])
 
+  const handleSubtitlesFetched = (text: string) => {
+    const prefix = "Here are the subtitles for the video:\n\n";
+    setMessageDraftText(messageDraft.text + (messageDraft.text ? "\n\n" : "") + prefix + text);
+  }
+
+  const handleSummarizeVideo = (text: string) => {
+    const prompt = "Please summarize the following video subtitles:\n\n" + text;
+    handleSubmitQuery({ text: prompt, files: [] });
+  }
+
   const handleRegenerate = (timestamp: number) => {
     // timestamp is from the AI message
     const aiMessageIndex = messages.findIndex((m) => m.timestamp === timestamp)
@@ -109,6 +120,10 @@ const Chat = ({ settings, chatCompletion }: ChatProps) => {
 
   return (
     <>
+      <VideoContextBar 
+        onSubtitlesFetched={handleSubtitlesFetched}
+        onSummarize={handleSummarizeVideo}
+      />
       <ChatList
         messages={messages}
         removeMessagePair={removeMessagePair}
