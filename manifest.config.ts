@@ -68,9 +68,7 @@ export default defineManifest(async (env) => ({
   web_accessible_resources: [
     {
       resources: [
-        'src/pages/sidebar/index.html',
         'images/robot.png',
-        'src/pages/settings/index.html',
       ],
       matches: ['http://*/*', 'https://*/*'],
     },
