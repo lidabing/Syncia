@@ -5,6 +5,7 @@
 import React from 'react'
 import * as Switch from '@radix-ui/react-switch'
 import { useSettings } from '../../../hooks/useSettings'
+import { useLanguage } from '../../../hooks/useLanguage'
 import FieldWrapper from '../Elements/FieldWrapper'
 import SectionHeading from '../Elements/SectionHeading'
 import { DEFAULT_SMART_LENS_SETTINGS } from '../../../config/settings/smartLens'
@@ -12,6 +13,7 @@ import { HiOutlineLightBulb, HiOutlineEye } from 'react-icons/hi'
 
 export const SmartLensSettings = () => {
   const [settings, setSettings] = useSettings()
+  const { t } = useLanguage()
 
   // Use default values in case smartLens is undefined
   const smartLens = settings.smartLens || DEFAULT_SMART_LENS_SETTINGS
@@ -29,14 +31,14 @@ export const SmartLensSettings = () => {
   return (
     <div className="settings-card">
       <SectionHeading 
-        title="Smart Lens" 
+        title={t.settings.smartLens.title}
         icon={<HiOutlineEye />}
-        description="Instant content previews on link hover"
+        description={t.settings.smartLens.description}
       />
 
       <FieldWrapper 
-        title="Enable Smart Lens" 
-        description="Show preview card on link hover"
+        title={t.settings.smartLens.enable.title}
+        description={t.settings.smartLens.enable.description}
         row
       >
         <Switch.Root
@@ -50,12 +52,12 @@ export const SmartLensSettings = () => {
 
       {smartLens?.enabled && (
         <>
-          <FieldWrapper title="Trigger Mode" description="Choose how to trigger the preview">
+          <FieldWrapper title={t.settings.smartLens.triggerMode.title} description={t.settings.smartLens.triggerMode.description}>
             <div className="cdx-grid cdx-grid-cols-1 cdx-gap-2">
               {[
-                { value: 'space', label: 'Hover + Space', desc: 'Like macOS Quick Look', recommended: true },
-                { value: 'hover', label: 'Automatic Hover', desc: 'Show automatically with a delay' },
-                { value: 'shift-hover', label: 'Hover + Shift', desc: 'Trigger by holding Shift' },
+                { value: 'space', label: t.settings.smartLens.triggerMode.modes.space.label, desc: t.settings.smartLens.triggerMode.modes.space.desc, recommended: true },
+                { value: 'hover', label: t.settings.smartLens.triggerMode.modes.hover.label, desc: t.settings.smartLens.triggerMode.modes.hover.desc },
+                { value: 'shift-hover', label: t.settings.smartLens.triggerMode.modes.shiftHover.label, desc: t.settings.smartLens.triggerMode.modes.shiftHover.desc },
               ].map((mode) => (
                 <label
                   key={mode.value}
@@ -89,7 +91,7 @@ export const SmartLensSettings = () => {
                       </span>
                       {mode.recommended && (
                         <span className="cdx-text-xs cdx-px-1.5 cdx-py-0.5 cdx-rounded cdx-bg-purple-100 dark:cdx-bg-purple-900/50 cdx-text-purple-600 dark:cdx-text-purple-400">
-                          Recommended
+                          {t.common.recommended}
                         </span>
                       )}
                     </div>
@@ -101,7 +103,7 @@ export const SmartLensSettings = () => {
           </FieldWrapper>
 
           {smartLens.triggerMode === 'hover' && (
-            <FieldWrapper title="Hover Delay" description="Wait time before showing the preview">
+            <FieldWrapper title={t.settings.smartLens.hoverDelay.title} description={t.settings.smartLens.hoverDelay.description}>
               <div className="cdx-flex cdx-items-center cdx-gap-4">
                 <input
                   type="range"
@@ -119,18 +121,18 @@ export const SmartLensSettings = () => {
             </FieldWrapper>
           )}
 
-          <FieldWrapper title="Default Preview Mode" description="Choose the default display style" row>
+          <FieldWrapper title={t.settings.smartLens.defaultPreviewMode.title} description={t.settings.smartLens.defaultPreviewMode.description} row>
             <select
               value={smartLens.defaultPreviewMode || 'iframe'}
               onChange={(e) => updateSmartLens('defaultPreviewMode', e.target.value)}
               className="input cdx-w-40"
             >
-              <option value="iframe">🖥️ Full Preview</option>
-              <option value="metadata">📄 Info Summary</option>
+              <option value="iframe">{t.settings.smartLens.defaultPreviewMode.modes.iframe}</option>
+              <option value="metadata">{t.settings.smartLens.defaultPreviewMode.modes.metadata}</option>
             </select>
           </FieldWrapper>
 
-          <FieldWrapper title="Show Visual Cue" description="Display preview icon next to links" row>
+          <FieldWrapper title={t.settings.smartLens.showVisualCue.title} description={t.settings.smartLens.showVisualCue.description} row>
             <Switch.Root
               checked={smartLens.showVisualCue}
               onCheckedChange={(checked: boolean) => updateSmartLens('showVisualCue', checked)}
@@ -140,7 +142,7 @@ export const SmartLensSettings = () => {
             </Switch.Root>
           </FieldWrapper>
 
-          <FieldWrapper title="AI Summary" description="Generate content summaries using AI" row>
+          <FieldWrapper title={t.settings.smartLens.enableAI.title} description={t.settings.smartLens.enableAI.description} row>
             <Switch.Root
               checked={smartLens.enableAISummary}
               onCheckedChange={(checked: boolean) => updateSmartLens('enableAISummary', checked)}
@@ -150,7 +152,7 @@ export const SmartLensSettings = () => {
             </Switch.Root>
           </FieldWrapper>
 
-          <FieldWrapper title="Pin Feature" description="Pin previews to the screen" row>
+          <FieldWrapper title={t.settings.smartLens.enablePinMode.title} description={t.settings.smartLens.enablePinMode.description} row>
             <Switch.Root
               checked={smartLens.enablePinMode}
               onCheckedChange={(checked: boolean) => updateSmartLens('enablePinMode', checked)}
@@ -160,7 +162,7 @@ export const SmartLensSettings = () => {
             </Switch.Root>
           </FieldWrapper>
 
-          <FieldWrapper title="Excluded Domains" description="Don't show previews on these sites">
+          <FieldWrapper title={t.settings.smartLens.excludedDomains.title} description={t.settings.smartLens.excludedDomains.description}>
             <textarea
               value={smartLens.excludedDomains.join('\n')}
               onChange={(e) =>
@@ -169,7 +171,7 @@ export const SmartLensSettings = () => {
                   e.target.value.split('\n').filter((d) => d.trim())
                 )
               }
-              placeholder="example.com&#10;localhost"
+              placeholder={t.settings.smartLens.excludedDomains.placeholder}
               className="input cdx-font-mono cdx-text-sm cdx-resize-none"
               rows={3}
             />
@@ -180,12 +182,12 @@ export const SmartLensSettings = () => {
               <HiOutlineLightBulb className="cdx-text-purple-500 cdx-text-lg cdx-mt-0.5" />
               <div>
                 <h4 className="cdx-text-sm cdx-font-medium cdx-text-purple-900 dark:cdx-text-purple-100">
-                  Tips
+                  {t.settings.smartLens.tips.title}
                 </h4>
                 <ul className="cdx-text-xs cdx-text-purple-700 dark:cdx-text-purple-300 cdx-mt-2 cdx-space-y-1">
-                  <li>• Recommended to use Space key mode to avoid accidental triggers</li>
-                  <li>• Supports articles, videos, GitHub repositories, etc.</li>
-                  <li>• AI summaries will consume additional API calls</li>
+                  <li>• {t.settings.smartLens.tips.tip1}</li>
+                  <li>• {t.settings.smartLens.tips.tip2}</li>
+                  <li>• {t.settings.smartLens.tips.tip3}</li>
                 </ul>
               </div>
             </div>
@@ -195,3 +197,4 @@ export const SmartLensSettings = () => {
     </div>
   )
 }
+

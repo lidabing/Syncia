@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { HiPencilAlt } from 'react-icons/hi'
 import TextareaAutosize from 'react-textarea-autosize'
 import { type Prompt, usePrompts } from '../../../hooks/usePrompts'
+import { useLanguage } from '../../../hooks/useLanguage'
 import DialogPortal from '../../Layout/DialogPortal'
 
 export const EditPromptButton = ({
@@ -12,6 +13,7 @@ export const EditPromptButton = ({
   const [open, setOpen] = useState(false)
   const [, setPrompts] = usePrompts()
   const formRef = useRef<HTMLFormElement>(null)
+  const { t } = useLanguage()
 
   const handleEdit = () => {
     if (!formRef.current || !formRef.current.reportValidity()) return
@@ -47,34 +49,32 @@ export const EditPromptButton = ({
           className="cdx-flex cdx-items-center cdx-gap-2 cdx-rounded-sm cdx-px-1 cdx-bg-blue-300/50 dark:cdx-bg-blue-500/50"
           type="button"
         >
-          <HiPencilAlt /> 编辑
+          <HiPencilAlt /> {t.settings.prompts.edit}
         </button>
       </Dialog.Trigger>
       <DialogPortal
-        title={isLeafNode ? '编辑提示词' : '编辑分类'}
+        title={isLeafNode ? t.settings.prompts.editPrompt : t.settings.prompts.editCategory}
         primaryAction={handleEdit}
         secondaryAction={() => setOpen(false)}
-        primaryText="保存"
-        secondaryText="取消"
+        primaryText={t.settings.prompts.save}
+        secondaryText={t.settings.prompts.cancel}
       >
         <form className="cdx-flex cdx-flex-col cdx-gap-2" ref={formRef}>
-          <label htmlFor="promptName">名称</label>
+          <label htmlFor="promptName">{t.settings.prompts.promptName}</label>
           <input
             name="promptName"
             className="input"
             type="text"
             required
             defaultValue={item.name}
-            placeholder="输入名称"
           />
           {isLeafNode && (
             <>
-              <label htmlFor="prompt">提示词</label>
+              <label htmlFor="prompt">{t.settings.prompts.promptContent}</label>
               <TextareaAutosize
                 name="prompt"
                 className="input"
                 required
-                placeholder="输入提示词"
                 minRows={2}
                 maxRows={15}
                 defaultValue={item.prompt}

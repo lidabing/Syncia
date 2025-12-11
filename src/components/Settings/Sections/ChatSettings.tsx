@@ -4,15 +4,17 @@ import { HiOutlineCheck, HiOutlineKey, HiOutlineChat } from 'react-icons/hi'
 import { Mode } from '../../../config/settings'
 import { useChatModels } from '../../../hooks/useChatModels'
 import { useSettings } from '../../../hooks/useSettings'
-import { capitalizeText } from '../../../lib/capitalizeText'
-import { validateApiKey } from '../../../lib/validApiKey'
+import { useLanguage } from '../../../hooks/useLanguage'
 import FieldWrapper from '../Elements/FieldWrapper'
 import SectionHeading from '../Elements/SectionHeading'
+
+import { validateApiKey } from '../../../lib/validApiKey'
 
 const ChatSettings = () => {
   const [settings, setSettings] = useSettings()
   const [showPassword, setShowPassword] = useState(false)
   const { models, setActiveChatModel } = useChatModels()
+  const { t } = useLanguage()
   const OpenAiApiKeyInputRef = React.useRef<HTMLInputElement>(null)
   const OpenAiBaseUrlInputRef = React.useRef<HTMLInputElement>(null)
 
@@ -67,13 +69,13 @@ const ChatSettings = () => {
   return (
     <div className="settings-card">
       <SectionHeading 
-        title="Chat Settings" 
+        title={t.settings.chat.title}
         icon={<HiOutlineChat />}
-        description="Configure AI models and API"
+        description={t.settings.chat.description}
       />
       <FieldWrapper
-        title="OpenAI API Key"
-        description="Get it from platform.openai.com"
+        title={t.settings.chat.apiKey.title}
+        description={t.settings.chat.apiKey.description}
         onSubmit={handleOpenAiKeySubmit}
       >
         <div className="cdx-flex cdx-gap-2 cdx-items-center">
@@ -85,7 +87,7 @@ const ChatSettings = () => {
               required
               ref={OpenAiApiKeyInputRef}
               name="openAiApiKey"
-              placeholder="sk-xxxxxxxxxxxxxxxx"
+              placeholder={t.settings.chat.apiKey.placeholder}
               defaultValue={chatSettings.openAIKey || ''}
               type={showPassword ? 'text' : 'password'}
               className="input cdx-pl-9 cdx-pr-10"
@@ -104,13 +106,13 @@ const ChatSettings = () => {
           </div>
           <button type="submit" className="btn">
             <HiOutlineCheck />
-            Save
+            {t.common.save}
           </button>
         </div>
       </FieldWrapper>
       <FieldWrapper
-        title="Custom API Endpoint"
-        description="For Ollama or other OpenAI compatible services"
+        title={t.settings.chat.baseUrl.title}
+        description={t.settings.chat.baseUrl.description}
         onSubmit={handleOpenAiKeySubmit}
       >
         <div className="cdx-flex cdx-gap-2 cdx-items-center">
@@ -118,18 +120,18 @@ const ChatSettings = () => {
             ref={OpenAiBaseUrlInputRef}
             name="openAiBaseUrl"
             defaultValue={chatSettings.openAiBaseUrl || ''}
-            placeholder="https://api.openai.com/v1"
+            placeholder={t.settings.chat.baseUrl.placeholder}
             className="input cdx-w-full cdx-font-mono cdx-text-sm"
           />
           <button type="submit" className="btn">
             <HiOutlineCheck />
-            Save
+            {t.common.save}
           </button>
         </div>
       </FieldWrapper>
       <FieldWrapper
-        title="Model"
-        description="Choose the AI model"
+        title={t.settings.chat.model.title}
+        description={t.settings.chat.model.description}
         row={true}
       >
         <select
@@ -145,8 +147,8 @@ const ChatSettings = () => {
         </select>
       </FieldWrapper>
       <FieldWrapper
-        title="Creativity"
-        description="Creative mode generates more diverse responses"
+        title={t.settings.chat.creativity.title}
+        description={t.settings.chat.creativity.description}
         row={true}
       >
         <select
@@ -162,13 +164,10 @@ const ChatSettings = () => {
           }}
           className="input cdx-w-36"
         >
-          {Object.entries(Mode)
-            .filter(([, v]) => !Number.isNaN(Number(v)))
-            .map(([key, value]) => (
-              <option key={key} value={value}>
-                {capitalizeText(key.replace('_', ' ').toLowerCase())}
-              </option>
-            ))}
+          <option value={Mode.HIGHLY_PRECISE}>{t.settings.chat.creativity.modes.highlyPrecise}</option>
+          <option value={Mode.PRECISE}>{t.settings.chat.creativity.modes.precise}</option>
+          <option value={Mode.BALANCED}>{t.settings.chat.creativity.modes.balanced}</option>
+          <option value={Mode.CREATIVE}>{t.settings.chat.creativity.modes.creative}</option>
         </select>
       </FieldWrapper>
     </div>

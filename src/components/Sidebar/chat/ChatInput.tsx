@@ -6,6 +6,7 @@ import { HiHand } from 'react-icons/hi'
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi'
 import ChatHistory from './ChatHistory'
 import { useChatHistory } from '../../../hooks/useChatHistory'
+import { useLanguage } from '../../../hooks/useLanguage'
 import WebPageContentToggle from './WebPageContentToggle'
 import ImageCaptureButton from './ImageCaptureButton'
 import {
@@ -52,6 +53,7 @@ export function SidebarInput({
   const [isExpanded, setIsExpanded] = useState(false)
   const [delayedLoading, setDelayedLoading] = useState(false)
   const { history } = useChatHistory()
+  const { t } = useLanguage()
 
   useEffect(() => {
     const handleLoadingTimeout = setTimeout(() => {
@@ -86,7 +88,7 @@ export function SidebarInput({
       type="button"
       disabled={loading || !messageDraft.text.trim()}
       onClick={handleSubmit}
-      title="发送"
+      title={t.common.send}
       className="cdx-flex cdx-items-center cdx-justify-center disabled:cdx-opacity-30 disabled:cdx-cursor-not-allowed cdx-bg-gradient-to-r cdx-from-blue-500 cdx-to-indigo-600 hover:cdx-from-blue-600 hover:cdx-to-indigo-700 cdx-text-white cdx-w-8 cdx-h-8 cdx-rounded-lg cdx-transition-all cdx-shadow-sm"
     >
       <IoSend size={16} />
@@ -97,7 +99,7 @@ export function SidebarInput({
     <button
       type="button"
       onClick={cancelRequest}
-      title="停止"
+      title={t.common.stop}
       className="cdx-flex cdx-items-center cdx-justify-center cdx-bg-red-500 hover:cdx-bg-red-600 cdx-text-white cdx-w-8 cdx-h-8 cdx-rounded-lg cdx-transition-colors cdx-shadow-sm"
     >
       <HiHand size={16} />
@@ -147,7 +149,7 @@ export function SidebarInput({
           minRows={2}
           maxRows={6}
           maxLength={MAX_MESSAGE_LENGTH}
-          placeholder="输入你的问题..."
+          placeholder={t.chat.placeholder}
           value={messageDraft.text}
           disabled={loading}
           className="cdx-w-full cdx-px-4 cdx-py-3 cdx-pr-14 focus:!cdx-outline-none placeholder:cdx-text-neutral-400 dark:placeholder:cdx-text-neutral-500 cdx-text-[14px] cdx-resize-none cdx-bg-transparent !cdx-border-none dark:cdx-text-neutral-100 cdx-text-neutral-900 cdx-leading-relaxed"

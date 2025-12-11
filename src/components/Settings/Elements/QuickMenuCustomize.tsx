@@ -7,6 +7,7 @@ import {
 import React from 'react'
 import { IoMove } from 'react-icons/io5'
 import { type Prompt, usePrompts } from '../../../hooks/usePrompts'
+import { useLanguage } from '../../../hooks/useLanguage'
 import { AddItemButton } from './AddItemButton'
 import { DeletePromptButton } from './DeletePromptButton'
 import { EditPromptButton } from './EditPromptButton'
@@ -24,6 +25,7 @@ const selectPromptItems = (items?: TreeItems<Prompt>): Prompt[] | undefined =>
 
 const QuickMenuCustomize = () => {
   const [prompts, setPrompts] = usePrompts()
+  const { t } = useLanguage()
 
   // 确保 prompts 是数组
   const safePrompts = Array.isArray(prompts) ? prompts : []
@@ -43,7 +45,7 @@ const QuickMenuCustomize = () => {
           <AddItemButton isCategory={false} />
         </div>
         <div className="cdx-text-sm cdx-text-neutral-400 cdx-text-center cdx-mt-3">
-          分类用于组织你的提示词。创建新分类或提示词后，它们将出现在列表末尾。你可以拖放它们以按你的意愿重新排序。
+          {t.settings.prompts.categoryHint}
         </div>
       </div>
     </div>

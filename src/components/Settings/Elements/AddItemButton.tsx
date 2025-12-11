@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { HiDocumentText, HiFolder } from 'react-icons/hi'
 import TextareaAutosize from 'react-textarea-autosize'
 import { type Prompt, usePrompts } from '../../../hooks/usePrompts'
+import { useLanguage } from '../../../hooks/useLanguage'
 import DialogPortal from '../../Layout/DialogPortal'
 import { getUUID } from '../../../lib/getUUID'
 
@@ -10,6 +11,7 @@ export const AddItemButton = ({ isCategory }: { isCategory: boolean }) => {
   const [open, setOpen] = useState(false)
   const [prompts, setPrompts] = usePrompts()
   const formRef = useRef<HTMLFormElement>(null)
+  const { t } = useLanguage()
 
   const handleAdd = () => {
     if (!formRef.current || !formRef.current.reportValidity()) return
@@ -42,39 +44,37 @@ export const AddItemButton = ({ isCategory }: { isCategory: boolean }) => {
             type="button"
           >
             <HiFolder />
-            <span>添加分类</span>
+            <span>{t.settings.prompts.addCategory}</span>
           </button>
         ) : (
           <button className="btn !cdx-py-1 cdx-text-sm" type="button">
             <HiDocumentText />
-            <span>添加提示词</span>
+            <span>{t.settings.prompts.addPrompt}</span>
           </button>
         )}
       </Dialog.Trigger>
       <DialogPortal
-        title={isCategory ? '添加新分类' : '添加新提示词'}
+        title={isCategory ? t.settings.prompts.addNewCategory : t.settings.prompts.addNewPrompt}
         primaryAction={handleAdd}
         secondaryAction={() => setOpen(false)}
-        primaryText="保存"
-        secondaryText="取消"
+        primaryText={t.settings.prompts.save}
+        secondaryText={t.settings.prompts.cancel}
       >
         <form className="cdx-flex cdx-flex-col cdx-gap-2" ref={formRef}>
-          <label htmlFor="promptName">名称</label>
+          <label htmlFor="promptName">{t.settings.prompts.promptName}</label>
           <input
             name="promptName"
             className="input"
             type="text"
             required
-            placeholder="输入名称"
           />
           {!isCategory && (
             <>
-              <label htmlFor="prompt">提示词</label>
+              <label htmlFor="prompt">{t.settings.prompts.promptContent}</label>
               <TextareaAutosize
                 name="prompt"
                 className="input"
                 required
-                placeholder="输入提示词"
                 minRows={2}
                 maxRows={15}
               />

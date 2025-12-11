@@ -2,6 +2,7 @@ import { BsRobot } from 'react-icons/bs'
 import { HiOutlineCog, HiX } from 'react-icons/hi'
 import { RiAddCircleLine } from 'react-icons/ri'
 import PageSuggestions from '../chat/PageSuggestions'
+import { useLanguage } from '../../../hooks/useLanguage'
 
 interface HeaderProps {
   clearMessages?: () => void
@@ -9,6 +10,8 @@ interface HeaderProps {
 }
 
 const Header = ({ clearMessages, onSelectSuggestion }: HeaderProps) => {
+  const { t } = useLanguage()
+  
   const onToggle = () => {
     chrome.runtime.sendMessage({ action: 'close-sidebar' })
   }
@@ -24,7 +27,7 @@ const Header = ({ clearMessages, onSelectSuggestion }: HeaderProps) => {
             <BsRobot className="cdx-text-white" size={14} />
           </div>
           <h1 className="cdx-text-[15px] cdx-font-semibold cdx-m-0 cdx-text-neutral-900 dark:cdx-text-white cdx-tracking-tight">
-            千羽助手
+            {t.header.title}
           </h1>
         </div>
 
@@ -34,7 +37,7 @@ const Header = ({ clearMessages, onSelectSuggestion }: HeaderProps) => {
             <button
               type="button"
               onClick={clearMessages}
-              title="新建对话"
+              title={t.header.newChat}
               className="cdx-p-2 cdx-rounded-lg cdx-text-neutral-500 dark:cdx-text-neutral-400 hover:cdx-text-blue-600 dark:hover:cdx-text-blue-400 hover:cdx-bg-neutral-100 dark:hover:cdx-bg-neutral-800 cdx-transition-colors"
             >
               <RiAddCircleLine size={18} />
@@ -43,7 +46,7 @@ const Header = ({ clearMessages, onSelectSuggestion }: HeaderProps) => {
           <a
             target="_blank"
             rel="noreferrer"
-            title="设置"
+            title={t.header.settings}
             className="cdx-p-2 cdx-rounded-lg cdx-text-neutral-500 dark:cdx-text-neutral-400 hover:cdx-text-neutral-700 dark:hover:cdx-text-neutral-200 hover:cdx-bg-neutral-100 dark:hover:cdx-bg-neutral-800 cdx-transition-colors"
             href={settingsPage}
           >
@@ -51,7 +54,7 @@ const Header = ({ clearMessages, onSelectSuggestion }: HeaderProps) => {
           </a>
           <button
             type="button"
-            title="关闭"
+            title={t.header.close}
             className="cdx-p-2 cdx-rounded-lg cdx-text-neutral-500 dark:cdx-text-neutral-400 hover:cdx-text-red-500 dark:hover:cdx-text-red-400 hover:cdx-bg-neutral-100 dark:hover:cdx-bg-neutral-800 cdx-transition-colors"
             onClick={onToggle}
           >

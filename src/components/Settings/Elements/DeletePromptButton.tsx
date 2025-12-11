@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { type Prompt, usePrompts } from '../../../hooks/usePrompts'
+import { useLanguage } from '../../../hooks/useLanguage'
 import * as Dialog from '@radix-ui/react-dialog'
 import { HiTrash } from 'react-icons/hi'
 import DialogPortal from '../../Layout/DialogPortal'
@@ -7,6 +8,7 @@ import DialogPortal from '../../Layout/DialogPortal'
 export const DeletePromptButton = ({ id }: { id: string }) => {
   const [open, setOpen] = useState(false)
   const [prompts, setPrompts] = usePrompts()
+  const { t } = useLanguage()
 
   const handleDelete = () => {
     const removeItem = (items: Prompt[], id: string): Prompt[] => {
@@ -33,15 +35,16 @@ export const DeletePromptButton = ({ id }: { id: string }) => {
         </button>
       </Dialog.Trigger>
       <DialogPortal
-        title="删除提示词？"
+        title={t.settings.prompts.deletePrompt}
         primaryAction={() => {
           handleDelete()
           setOpen(false)
         }}
         secondaryAction={() => setOpen(false)}
-        primaryText="删除"
+        primaryText={t.settings.prompts.delete}
+        secondaryText={t.settings.prompts.cancel}
       >
-        你即将删除此提示词。此操作无法撤销。
+        {t.settings.prompts.deleteConfirm}
       </DialogPortal>
     </Dialog.Root>
   )
