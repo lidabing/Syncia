@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import Auth from './auth'
 import Chat from './chat'
+import PageVisionView from './pageVision'
 import Header from './layout/header'
 import { useSettings } from '../../hooks/useSettings'
 import useThemeSync from '../../hooks/useThemeSync'
@@ -7,9 +9,14 @@ import { useChatCompletion } from '../../hooks/useChatCompletion'
 import { SYSTEM_PROMPT } from '../../config/prompts'
 import type { Settings } from '../../config/settings'
 
+// Tab 类型
+type SidebarTab = 'chat' | 'pageVision'
+
 // This component contains the hooks and state for the chat view.
 // It's only rendered when the user has provided an API key and model.
 const ChatView = ({ settings }: { settings: Settings }) => {
+  const [activeTab, setActiveTab] = useState<SidebarTab>('chat')
+  
   const chatCompletion = useChatCompletion({
     model: settings.chat.model!,
     apiKey: settings.chat.openAIKey!,
@@ -19,6 +26,9 @@ const ChatView = ({ settings }: { settings: Settings }) => {
   })
 
   const handleSelectSuggestion = async (suggestion: string) => {
+    // 切换到聊天 Tab
+    setActiveTab('chat')
+    
     // 获取当前页面内容作为上下文
     let context: string | undefined
     if (settings.general.webpageContext) {
@@ -54,8 +64,14 @@ const ChatView = ({ settings }: { settings: Settings }) => {
       <Header 
         clearMessages={chatCompletion.clearMessages} 
         onSelectSuggestion={handleSelectSuggestion}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
-      <Chat settings={settings} chatCompletion={chatCompletion} />
+      {activeTab === 'chat' ? (
+        <Chat settings={settings} chatCompletion={chatCompletion} />
+      ) : (
+        <PageVisionView onSelectAction={handleSelectSuggestion} />
+      )}
     </>
   )
 }
