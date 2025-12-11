@@ -1,9 +1,10 @@
 import { BsRobot } from 'react-icons/bs'
-import { HiOutlineCog, HiX } from 'react-icons/hi'
+import { HiOutlineCog, HiX, HiOutlineCamera } from 'react-icons/hi'
 import { RiAddCircleLine } from 'react-icons/ri'
 import PageSuggestions from '../chat/PageSuggestions'
 import PageVisionSuggestions from '../chat/PageVisionSuggestions'
 import { useLanguage } from '../../../hooks/useLanguage'
+import { usePageVision } from '../../../hooks/usePageVision'
 
 interface HeaderProps {
   clearMessages?: () => void
@@ -12,6 +13,7 @@ interface HeaderProps {
 
 const Header = ({ clearMessages, onSelectSuggestion }: HeaderProps) => {
   const { t } = useLanguage()
+  const pageVision = usePageVision()
   
   const onToggle = () => {
     chrome.runtime.sendMessage({ action: 'close-sidebar' })
@@ -34,6 +36,23 @@ const Header = ({ clearMessages, onSelectSuggestion }: HeaderProps) => {
 
         {/* Action Buttons */}
         <div className="cdx-flex cdx-gap-0.5 cdx-items-center">
+          {/* Page Vision Trigger */}
+          {pageVision.settings.enabled && (
+            <button
+              type="button"
+              onClick={() => pageVision.analyzeCurrentPage()}
+              disabled={pageVision.isAnalyzing}
+              title="智能识别页面"
+              className={`cdx-p-2 cdx-rounded-lg cdx-transition-colors ${
+                pageVision.isAnalyzing 
+                  ? 'cdx-text-purple-500 cdx-bg-purple-50 dark:cdx-bg-purple-900/20' 
+                  : 'cdx-text-neutral-500 dark:cdx-text-neutral-400 hover:cdx-text-purple-600 dark:hover:cdx-text-purple-400 hover:cdx-bg-neutral-100 dark:hover:cdx-bg-neutral-800'
+              }`}
+            >
+              <HiOutlineCamera size={18} className={pageVision.isAnalyzing ? 'cdx-animate-pulse' : ''} />
+            </button>
+          )}
+
           {clearMessages && (
             <button
               type="button"
@@ -64,7 +83,9 @@ const Header = ({ clearMessages, onSelectSuggestion }: HeaderProps) => {
         </div>
       </header>
       {/* Page Vision - AI 页面智能识别 */}
-      {onSelectSuggestion && <PageVisionSuggestions onSelectAction={onSelectSuggestion} />}
+      {onSelectSuggestion && (pageVision.isAnalyzing || pageVision.result || pageVision.error) && (
+        <PageVisionSuggestions onSelectAction={onSelectSuggestion} pageVision={pageVision} />
+      )}
       {/* 原有的文本建议 */}
       {onSelectSuggestion && <PageSuggestions onSelectSuggestion={onSelectSuggestion} />}
     </>

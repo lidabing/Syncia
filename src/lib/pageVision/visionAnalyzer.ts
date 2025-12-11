@@ -221,6 +221,23 @@ function getDefaultActions(category: PageCategory): SuggestedAction[] {
 }
 
 /**
+ * 检测模型是否支持视觉/多模态
+ */
+function isVisionCapableModel(model: string): boolean {
+  const visionModels = [
+    'gpt-4o', 'gpt-4o-mini', 'gpt-4-vision', 'gpt-4-turbo',
+    'claude-3', 'claude-3.5', 'claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku',
+    'gemini-1.5', 'gemini-pro-vision', 'gemini-2',
+    'qwen-vl', 'qwen2-vl',
+    'glm-4v',
+    'deepseek-vl',
+  ]
+  
+  const modelLower = model.toLowerCase()
+  return visionModels.some(vm => modelLower.includes(vm.toLowerCase()))
+}
+
+/**
  * 使用多模态 AI 分析页面
  */
 export async function analyzePageWithVision(
@@ -232,35 +249,56 @@ export async function analyzePageWithVision(
   model: string,
   additionalContext?: string
 ): Promise<PageVisionResult> {
+  // 检查模型是否支持视觉
+  const supportsVision = isVisionCapableModel(model)
+  const useScreenshot = screenshot && supportsVision
+  
   console.log('[PageVision] Starting analysis...', {
     hasScreenshot: !!screenshot,
+    supportsVision,
+    useScreenshot,
+    model,
     pageTitle,
     url: pageUrl,
   })
+
+  if (screenshot && !supportsVision) {
+    console.warn(`[PageVision] Model "${model}" does not support vision. Falling back to text-only analysis.`)
+    console.warn('[PageVision] Consider using a vision-capable model like gpt-4o, claude-3.5-sonnet, etc.')
+  }
 
   const startTime = Date.now()
 
   try {
     const systemPrompt = buildVisionSystemPrompt()
-    const userPrompt = buildVisionUserPrompt(pageTitle, pageUrl, !!screenshot, additionalContext)
+    const userPrompt = buildVisionUserPrompt(pageTitle, pageUrl, !!useScreenshot, additionalContext)
 
     // 构建消息内容
-    const userContent: any[] = [{ type: 'text', text: userPrompt }]
+    let userContent: any
     
-    if (screenshot) {
-      // 确保 screenshot 是正确的 data URL 格式
+    if (useScreenshot) {
+      // 多模态格式：数组包含文本和图片
       const imageUrl = screenshot.startsWith('data:') 
         ? screenshot 
         : `data:image/jpeg;base64,${screenshot}`
       
-      userContent.push({
-        type: 'image_url',
-        image_url: { 
-          url: imageUrl,
-          detail: 'low'  // 使用低细节模式以节省 token
-        },
-      })
+      userContent = [
+        { type: 'text', text: userPrompt },
+        {
+          type: 'image_url',
+          image_url: { 
+            url: imageUrl,
+            detail: 'low'  // 使用低细节模式以节省 token
+          },
+        }
+      ]
+    } else {
+      // 纯文本格式：直接使用字符串
+      userContent = userPrompt
     }
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 60000) // 60s timeout
 
     const response = await fetch(`${baseUrl || 'https://api.openai.com'}/v1/chat/completions`, {
       method: 'POST',
@@ -277,7 +315,9 @@ export async function analyzePageWithVision(
         max_tokens: 1000,
         temperature: 0.3,
       }),
+      signal: controller.signal,
     })
+    clearTimeout(timeoutId)
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -308,9 +348,12 @@ export async function analyzePageWithVision(
       metadata: {
         ...parsed.metadata,
         sensitiveContent: detectSensitiveContent(pageTitle, pageUrl),
+        visionModelUsed: supportsVision,
+        modelName: model,
       },
       timestamp: Date.now(),
-      screenshotUsed: !!screenshot,
+      screenshotUsed: !!useScreenshot,  // 仅当模型支持且有截图时为 true
+      screenshotUrl: screenshot || undefined,
     }
 
     console.log('[PageVision] Analysis complete in', Date.now() - startTime, 'ms')

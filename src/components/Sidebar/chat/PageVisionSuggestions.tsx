@@ -26,7 +26,7 @@ import {
   FiGlobe,
   FiBook,
 } from 'react-icons/fi'
-import { usePageVision } from '../../../hooks/usePageVision'
+import { usePageVision, UsePageVisionReturn } from '../../../hooks/usePageVision'
 import type { PageCategory, SuggestedAction } from '../../../config/settings/pageVision'
 import { useLanguage } from '../../../hooks/useLanguage'
 
@@ -60,18 +60,20 @@ const CATEGORY_LABELS: Record<PageCategory, string> = {
 
 interface PageVisionSuggestionsProps {
   onSelectAction: (query: string) => void
+  pageVision: UsePageVisionReturn
 }
 
-const PageVisionSuggestions: React.FC<PageVisionSuggestionsProps> = ({ onSelectAction }) => {
+const PageVisionSuggestions: React.FC<PageVisionSuggestionsProps> = ({ onSelectAction, pageVision }) => {
   const { t } = useLanguage()
   const { 
     result, 
     isAnalyzing, 
     error, 
     hasAnalyzed,
+    currentScreenshot,
     analyzeCurrentPage, 
     settings 
-  } = usePageVision()
+  } = pageVision
   
   const [isExpanded, setIsExpanded] = useState(true)
   const [showDetails, setShowDetails] = useState(false)
@@ -92,31 +94,18 @@ const PageVisionSuggestions: React.FC<PageVisionSuggestionsProps> = ({ onSelectA
     analyzeCurrentPage(true)
   }
 
-  // 开始分析按钮
-  const renderAnalyzeButton = () => (
-    <button
-      type="button"
-      onClick={() => analyzeCurrentPage()}
-      disabled={isAnalyzing}
-      className="cdx-w-full cdx-flex cdx-items-center cdx-justify-center cdx-gap-2 cdx-px-4 cdx-py-3 cdx-rounded-xl cdx-bg-gradient-to-r cdx-from-purple-500 cdx-to-indigo-600 hover:cdx-from-purple-600 hover:cdx-to-indigo-700 cdx-text-white cdx-font-medium cdx-transition-all cdx-shadow-md hover:cdx-shadow-lg disabled:cdx-opacity-50 disabled:cdx-cursor-not-allowed"
-    >
-      {isAnalyzing ? (
-        <>
-          <div className="cdx-animate-spin cdx-w-4 cdx-h-4 cdx-border-2 cdx-border-white cdx-border-t-transparent cdx-rounded-full" />
-          <span>分析页面中...</span>
-        </>
-      ) : (
-        <>
-          <HiOutlineCamera className="cdx-w-5 cdx-h-5" />
-          <span>智能识别页面</span>
-        </>
-      )}
-    </button>
-  )
-
   // 加载状态
   const renderLoading = () => (
     <div className="cdx-flex cdx-flex-col cdx-items-center cdx-justify-center cdx-py-6 cdx-gap-3">
+      {currentScreenshot && (
+        <div className="cdx-w-full cdx-mb-2 cdx-rounded-lg cdx-overflow-hidden cdx-border cdx-border-neutral-200 dark:cdx-border-neutral-700 cdx-opacity-50">
+           <img 
+             src={currentScreenshot.startsWith('data:') ? currentScreenshot : `data:image/jpeg;base64,${currentScreenshot}`} 
+             alt="Analyzing Screenshot" 
+             className="cdx-w-full cdx-h-auto cdx-object-cover cdx-max-h-48"
+           />
+        </div>
+      )}
       <div className="cdx-relative">
         <div className="cdx-w-12 cdx-h-12 cdx-border-4 cdx-border-purple-200 dark:cdx-border-purple-900 cdx-rounded-full cdx-animate-pulse" />
         <div className="cdx-absolute cdx-inset-0 cdx-flex cdx-items-center cdx-justify-center">
@@ -135,6 +124,15 @@ const PageVisionSuggestions: React.FC<PageVisionSuggestionsProps> = ({ onSelectA
   // 错误状态
   const renderError = () => (
     <div className="cdx-flex cdx-flex-col cdx-items-center cdx-py-4 cdx-gap-2">
+      {currentScreenshot && (
+        <div className="cdx-w-full cdx-mb-2 cdx-rounded-lg cdx-overflow-hidden cdx-border cdx-border-neutral-200 dark:cdx-border-neutral-700 cdx-opacity-50">
+           <img 
+             src={currentScreenshot.startsWith('data:') ? currentScreenshot : `data:image/jpeg;base64,${currentScreenshot}`} 
+             alt="Failed Screenshot" 
+             className="cdx-w-full cdx-h-auto cdx-object-cover cdx-max-h-48"
+           />
+        </div>
+      )}
       <HiOutlineExclamation className="cdx-w-8 cdx-h-8 cdx-text-amber-500" />
       <p className="cdx-text-sm cdx-text-neutral-500 dark:cdx-text-neutral-400">
         分析失败
@@ -177,14 +175,36 @@ const PageVisionSuggestions: React.FC<PageVisionSuggestionsProps> = ({ onSelectA
                   ⚠️ 敏感
                 </span>
               )}
+              {/* 显示是否使用了视觉分析 */}
+              {result.metadata?.visionModelUsed === false && (
+                <span className="cdx-text-xs cdx-px-2 cdx-py-0.5 cdx-rounded-full cdx-bg-orange-100 dark:cdx-bg-orange-900/30 cdx-text-orange-600 dark:cdx-text-orange-400" title="当前模型不支持图片分析，建议使用 GPT-4o 等视觉模型">
+                  📝 纯文本
+                </span>
+              )}
             </div>
             <p className="cdx-text-sm cdx-text-neutral-700 dark:cdx-text-neutral-300 cdx-line-clamp-2">
               {result.pageSummary}
             </p>
             
+            {/* Screenshot Preview - 直接显示在主界面 */}
+            {(result.screenshotUrl || currentScreenshot) && (
+              <div className="cdx-mt-2 cdx-rounded-lg cdx-overflow-hidden cdx-border cdx-border-neutral-200 dark:cdx-border-neutral-700">
+                <img 
+                  src={
+                    (result.screenshotUrl || currentScreenshot || '').startsWith('data:') 
+                      ? (result.screenshotUrl || currentScreenshot || '') 
+                      : `data:image/jpeg;base64,${result.screenshotUrl || currentScreenshot || ''}`
+                  } 
+                  alt="Page Screenshot" 
+                  className="cdx-w-full cdx-h-auto cdx-object-cover cdx-max-h-40"
+                />
+              </div>
+            )}
+            
             {/* 展开详情 */}
             {showDetails && (
               <div className="cdx-mt-2 cdx-pt-2 cdx-border-t cdx-border-neutral-200 dark:cdx-border-neutral-700">
+
                 <p className="cdx-text-xs cdx-text-neutral-500 dark:cdx-text-neutral-400 cdx-mb-2">
                   {result.reasoning}
                 </p>
@@ -299,9 +319,7 @@ const PageVisionSuggestions: React.FC<PageVisionSuggestionsProps> = ({ onSelectA
             renderError()
           ) : result ? (
             renderResult()
-          ) : (
-            renderAnalyzeButton()
-          )}
+          ) : null}
         </div>
       )}
     </div>

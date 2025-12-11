@@ -1,6 +1,7 @@
 import type { Settings } from '../../config/settings'
 import { getScreenshotImage } from '../../lib/getScreenshotImage'
 import { contentScriptLog } from '../../logs'
+import { compressImage } from '../../lib/pageVision/visionAnalyzer'
 
 contentScriptLog('Sidebar')
 
@@ -374,49 +375,99 @@ window.addEventListener('message', async (event) => {
   // ACTION: request-screenshot ==============================
   // 为 Page Vision 请求截图
   if (action === 'request-screenshot') {
-    try {
-      // 暂时隐藏 sidebar 以获取干净的截图
-      const wasVisible = wrapper.style.display !== 'none'
-      wrapper.style.display = 'none'
-      
-      // 请求 background 捕获截图
-      chrome.runtime.sendMessage(
-        { action: 'page-vision-capture-screenshot' },
-        (response) => {
-          // 恢复 sidebar 显示
-          if (wasVisible) {
-            wrapper.style.display = 'flex'
-          }
-          
-          if (response?.screenshot) {
-            iframe.contentWindow?.postMessage(
-              {
-                action: 'screenshot-response',
-                payload: { screenshot: response.screenshot },
-              },
-              '*',
-            )
-          } else {
-            iframe.contentWindow?.postMessage(
-              {
-                action: 'screenshot-response',
-                payload: { screenshot: null, error: response?.error || 'Screenshot failed' },
-              },
-              '*',
-            )
+    // 暂时隐藏 sidebar 以获取干净的截图
+    const wasVisible = wrapper.style.display !== 'none'
+    wrapper.style.display = 'none'
+    
+    // 使用 Promise 包装，避免 async callback 问题
+    const handleScreenshotCapture = async () => {
+      try {
+        console.log('[Syncia] Sending screenshot capture request to background...')
+        const response = await chrome.runtime.sendMessage({ action: 'page-vision-capture-screenshot' })
+        console.log('[Syncia] Received response from background:', response)
+        
+        // 恢复 sidebar 显示
+        if (wasVisible) {
+          wrapper.style.display = 'flex'
+        }
+        
+        if (!response || response.error) {
+          console.error('[Syncia] Screenshot capture failed:', response?.error || 'No response from background')
+          iframe.contentWindow?.postMessage(
+            {
+              action: 'screenshot-response',
+              payload: { screenshot: null, error: response?.error || 'Screenshot failed' },
+            },
+            '*',
+          )
+          return
+        }
+
+        let screenshotData = response?.screenshot
+
+        // 如果是通过 storage 传输的
+        if (response?.stored) {
+          try {
+            console.log('[Syncia] Retrieving screenshot from storage...')
+            const data = await chrome.storage.local.get('temp_page_vision_screenshot')
+            screenshotData = data.temp_page_vision_screenshot
+            console.log('[Syncia] Screenshot retrieved from storage:', screenshotData ? `${screenshotData.length} chars` : 'null')
+            // 清理
+            await chrome.storage.local.remove('temp_page_vision_screenshot')
+          } catch (e) {
+            console.error('[Syncia] Failed to retrieve screenshot from storage:', e)
           }
         }
-      )
-    } catch (error) {
-      console.error('[Syncia] Screenshot request failed:', error)
-      iframe.contentWindow?.postMessage(
-        {
-          action: 'screenshot-response',
-          payload: { screenshot: null, error: 'Screenshot request failed' },
-        },
-        '*',
-      )
+
+        if (screenshotData) {
+          try {
+            // 压缩截图以减少消息大小 (Content Script -> Iframe)
+            const compressed = await compressImage(screenshotData, 1024, 0.7)
+            
+            iframe.contentWindow?.postMessage(
+              {
+                action: 'screenshot-response',
+                payload: { screenshot: compressed },
+              },
+              '*',
+            )
+          } catch (error) {
+            console.error('[Syncia] Failed to compress screenshot:', error)
+            iframe.contentWindow?.postMessage(
+              {
+                action: 'screenshot-response',
+                payload: { screenshot: screenshotData },
+              },
+              '*',
+            )
+          }
+        } else {
+          iframe.contentWindow?.postMessage(
+            {
+              action: 'screenshot-response',
+              payload: { screenshot: null, error: 'No screenshot data' },
+            },
+            '*',
+          )
+        }
+      } catch (error) {
+        console.error('[Syncia] Screenshot capture error:', error)
+        // 恢复 sidebar 显示
+        if (wasVisible) {
+          wrapper.style.display = 'flex'
+        }
+        iframe.contentWindow?.postMessage(
+          {
+            action: 'screenshot-response',
+            payload: { screenshot: null, error: String(error) },
+          },
+          '*',
+        )
+      }
     }
+    
+    handleScreenshotCapture()
+    return
   }
 
   // ACTION: execute-page-vision-action ======================

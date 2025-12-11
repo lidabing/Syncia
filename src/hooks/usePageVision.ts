@@ -13,17 +13,19 @@ import type {
 } from '../config/settings/pageVision'
 import { DEFAULT_PAGE_VISION_SETTINGS } from '../config/settings/pageVision'
 import { useSettings } from './useSettings'
+import { compressImage } from '../lib/pageVision/visionAnalyzer'
 
 interface UsePageVisionOptions {
   autoAnalyze?: boolean  // 是否自动分析
 }
 
-interface UsePageVisionReturn {
+export interface UsePageVisionReturn {
   // 状态
   result: PageVisionResult | null
   isAnalyzing: boolean
   error: Error | null
   hasAnalyzed: boolean
+  currentScreenshot: string | null
   
   // 操作
   analyzeCurrentPage: (forceRefresh?: boolean) => Promise<void>
@@ -46,6 +48,7 @@ export function usePageVision(options: UsePageVisionOptions = {}): UsePageVision
   const [error, setError] = useState<Error | null>(null)
   const [hasAnalyzed, setHasAnalyzed] = useState(false)
   const [currentUrl, setCurrentUrl] = useState('')
+  const [currentScreenshot, setCurrentScreenshot] = useState<string | null>(null)
   
   const analysisRef = useRef(false)
   
@@ -100,7 +103,7 @@ export function usePageVision(options: UsePageVisionOptions = {}): UsePageVision
       setTimeout(() => {
         window.removeEventListener('message', handleResponse)
         resolve(null)
-      }, 5000)
+      }, 15000) // 增加超时时间到 15s
     })
   }, [])
 
@@ -141,12 +144,18 @@ export function usePageVision(options: UsePageVisionOptions = {}): UsePageVision
         }
       }
       
-      // 请求截图
+      // 请求截图 - 始终尝试获取截图
+      console.log('[usePageVision] Screenshot settings:', { useScreenshot: pageVisionSettings.useScreenshot })
       let screenshot: string | null = null
-      if (pageVisionSettings.useScreenshot) {
-        console.log('[usePageVision] Requesting screenshot...')
-        screenshot = await requestScreenshot()
-        console.log('[usePageVision] Screenshot received:', !!screenshot)
+      
+      console.log('[usePageVision] Requesting screenshot...')
+      screenshot = await requestScreenshot()
+      console.log('[usePageVision] Screenshot received:', !!screenshot, screenshot ? `${screenshot.length} chars` : 'null')
+      setCurrentScreenshot(screenshot)
+      
+      // 如果截图失败，警告但继续分析
+      if (!screenshot) {
+        console.warn('[usePageVision] Screenshot capture failed or timed out, proceeding with text-only analysis')
       }
       
       // 发送分析请求到 background
@@ -247,6 +256,7 @@ export function usePageVision(options: UsePageVisionOptions = {}): UsePageVision
     isAnalyzing,
     error,
     hasAnalyzed,
+    currentScreenshot,
     analyzeCurrentPage,
     executeAction,
     clearResult,

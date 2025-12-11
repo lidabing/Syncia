@@ -55,9 +55,12 @@ export interface PageVisionResult {
     hasForm?: boolean             // 是否有表单
     hasVideo?: boolean            // 是否有视频
     sensitiveContent?: boolean    // 是否检测到敏感内容
+    visionModelUsed?: boolean     // 模型是否支持视觉
+    modelName?: string            // 使用的模型名称
   }
   timestamp: number               // 分析时间戳
-  screenshotUsed: boolean         // 是否使用了截图
+  screenshotUsed: boolean         // 是否使用了截图（模型支持且有截图）
+  screenshotUrl?: string          // 截图数据 (Base64)
 }
 
 // 页面视觉设置
